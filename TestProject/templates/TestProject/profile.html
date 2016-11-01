@@ -1,10 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Ntcns пользователя</title>
-</head>
-<body>
+{% extends 'TestProject/base.html' %}
+{% block title %}Личный кабинет{% endblock %}
+{% block content %}
     {{ TestUser }}
-</body>
-</html>
+    <h1><a href="{% url 'auth_logout' %}">выйти</a>.<br/><br/></h1>
+{% endblock %}
