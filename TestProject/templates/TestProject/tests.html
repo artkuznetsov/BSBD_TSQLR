@@ -1,0 +1,13 @@
+{% extends 'TestProject/base.html' %}
+
+{% block title %} Тестирование SQL запросов {% endblock %}
+
+{% block content %}
+
+    {% for test in tests %}
+        {{test}}
+    {% endfor %}
+{% endblock %}
+    
+
+   
