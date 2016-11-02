@@ -1,0 +1,157 @@
+h1 {
+color: #483D8B;
+font-family: "Freestyle Script";
+}
+h2 {
+color: #1C1C1C;
+  text-align: center;
+
+}
+h3 {
+color: #551A8B;
+text-align: left;
+
+ 
+}
+article figure {
+
+
+
+}
+article figure img {
+width: 20%;
+padding: 0px 50px;
+
+}
+article {
+
+}
+body {
+font-family: Verdana;
+
+}
+.site-nav {
+background-color: PaleVioletRed;
+list-style: none;
+padding: 0;
+
+border: 1px solid MediumVioletRed;
+}
+
+.site-nav .site-nav-item {
+border-bottom: 1px solid MediumVioletRed;
+padding: 5px;
+}
+
+.site-nav .site-nav-item:last-child {
+border-bottom: 0;
+}
+
+.site-nav .site-nav-item a {
+color: white;
+text-decoration: none;
+}
+
+.site-nav .site-nav-item a:hover {
+text-decoration: underline;
+}
+input[type="text"],
+input[type="email"] {
+border: 1px solid blue;
+}
+.main-container {
+
+margin: auto;
+text-align: center;
+}
+
+.site-menu,
+.main-content,
+.sidebar {
+float: left;
+margin: auto;
+
+}
+
+.site-menu,
+.sidebar {
+width: 20%;
+padding: 130px 35px;
+}
+
+.main-content {
+width: 50%;
+padding : 0px 100px; 
+}
+
+.site-menu {
+
+}
+
+.sidebar {
+
+}
+@media screen and (width: 150px) {
+.site-menu {
+font-size: 12px;
+}
+.main-content h1 {
+font-size: 21px; 
+}
+}
+
+.knopka01 {
+
+  display: inline-block;
+  width: 100px;
+  height: 50px;
+  line-height: 50px;
+  font-size: 20px;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: 0 1px rgba(255,255,255,.2), 0 -1px rgba(0,0,0,.8);
+  outline: none;
+  border: none;
+  border-radius: 100px;
+  background: rgb(28,107,114) radial-gradient(150% 100% at 50% 5px, rgba(255,255,255,.2), rgba(0,0,0,0));
+  box-shadow: inset rgba(0,0,0,.6) 0 -2px 5px, inset rgba(252,255,255,.7) 0 2px 5px, rgba(0,0,0,.8) 0 2px 5px -1px;
+  color: rgb(0,79,86);
+  user-select: none;
+} 
+.knopka01:hover {
+  color: rgb(0,59,66);
+  cursor: pointer;
+}
+.knopka01:active {
+  padding-bottom: 1px;
+  box-shadow:
+   inset rgba(0,0,0,1) 0 1px 3px,
+   inset rgba(0,0,0,.6) 0 -2px 5px,
+   inset rgba(252,255,255,.7) 0 2px 5px,
+   0 1px rgba(255,255,255,.08);
+  color: rgb(128,207,214);
+}
+
+
+
+.an {
+  width: 100px;
+  height: 100px;
+  background-color: white
+}
+
+a.btnStartTest {
+  font-weight: 700;
+  color: white;
+  text-decoration: none;
+  padding: .8em 1em calc(.8em + 3px);
+  border-radius: 3px;
+  background: rgb(64,199,129);
+  box-shadow: 0 -3px rgb(53,167,110) inset;
+  transition: 0.2s;
+}
+a.btnStartTest:hover { background: rgb(53, 167, 110); }
+a.btnStartTest:active {
+  background: rgb(33,147,90);
+  box-shadow: 0 3px rgb(33,147,90) inset;
+}

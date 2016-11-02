@@ -1,6 +1,47 @@
 {% extends 'TestProject/base.html' %}
+{% load staticfiles %}
 {% block title %}Личный кабинет{% endblock %}
+var empty = []
 {% block content %}
-    {{ TestUser }}
+    <head>
+        <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    </head>
+    <body>
+        <form>
+        <div>
+
+           <div class="main-content">
+        <article>
+        <header>
+            <h1>Приветствую,{{ user }}</h1>
+                <img src={% static 'images/line.jpg' %}>
+        </header>
+
+            {% if TestUser == empty %}
+                <div class="UserDontHaveTests">
+                    <h2>Сейчас нет тестов, которые вы можете пройти</h2>
+                </div>
+            {% else  %}
+                {% for test in TestUser %}
+                    <h2>Вам доступен тест</h2>
+                    <img src={% static 'images/pencil.jpg' %} align="left">
+                    <h3>{{ test }}</h3>
+                    <a href="#" class="btnStartTest">Начать</a>
+                     <div class="an"></div>
+                {% endfor %}
+              {% endif %}
+            </article>
+            </div>
+
+
+    <aside class="sidebar">
+        <div>
+            <h2>История</h2>
+        </div>
+    </aside>
+</div>
+</form>
+</body>
     <h1><a href="{% url 'auth_logout' %}">выйти</a>.<br/><br/></h1>
+    <input type="button" class="knopka01" value="ВЫХОД">
 {% endblock %}

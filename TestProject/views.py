@@ -1,7 +1,7 @@
 #from django.http import HttpResponse
 #from django.shortcuts import render_to_response
 from .forms import *
-from .models import *
+from .models import models
 from django.http import *
 from django.shortcuts import *
 from django.contrib.auth.models import User
@@ -43,9 +43,7 @@ def TestsUser(request):
 	for i in UserTest:
 		mass.append(Test.objects.get(id = i.Test_id))
 	
-	return render(request, "TestProject/profile.html",
+	return render(request,"TestProject/profile.html",
                   {
                       "TestUser": mass
                   })
-
-					
