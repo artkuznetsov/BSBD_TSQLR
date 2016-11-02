@@ -39,6 +39,8 @@ class Test(models.Model):
 	def __str__(self):
 		return self.Name
 
+	def get_time(self):
+		return self.Time.__str__()
 class TestPerson(models.Model):
 	Person = models.ForeignKey('auth.user')
 	Test = models.ForeignKey(Test)

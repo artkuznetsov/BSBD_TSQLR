@@ -26,6 +26,8 @@ var empty = []
                     <h2>Вам доступен тест</h2>
                     <img src={% static 'images/pencil.jpg' %} align="left">
                     <h3>{{ test }}</h3>
+                    <h8 class="test_time">Длительность теста: {{ test.get_time }} минут</h8>
+                    <p></p>
                     <a href="#" class="btnStartTest">Начать</a>
                      <div class="an"></div>
                 {% endfor %}
@@ -37,6 +39,39 @@ var empty = []
     <aside class="sidebar">
         <div>
             <h2>История</h2>
+                {% block history_table %}
+                    <table class="simple-little-table" cellspacing='0'>
+                        <tr>
+                            <th>Название теста </th>
+                            <th>Выполнен</th>
+                            <th>Оценка</th>
+                        </tr><!-- Table Header -->
+
+                        <tr>
+                            <td>Where</td>
+                            <td>100%</td>
+                            <td>5</td>
+                        </tr><!-- Table Row -->
+
+                        <tr>
+                            <td>SubRequests</td>
+                            <td>100%</td>
+                            <td>4</td>
+                        </tr><!-- Darker Table Row -->
+
+                        <tr>
+                            <td>StoredProcedures</td>
+                            <td>20%</td>
+                            <td>2</td>
+                        </tr>
+
+                        <tr>
+                            <td>Итог(ср)</td>
+                            <td>80%</td>
+                            <td>4</td>
+                        </tr>
+                    </table>
+                {% endblock %}
         </div>
     </aside>
 </div>
