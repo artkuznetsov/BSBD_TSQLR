@@ -7,6 +7,16 @@ class Category(models.Model):
 	def __str__(self):
 		return self.NameClass
 
+class Group(models.Model):
+	NameGroup = models.CharField(max_length = 10)
+	Person = models.ManyToManyField('auth.user')
+	def __str__(self):
+		return self.NameGroup
+
+#class GroupPerson(models.Model):
+	#Group = models.ForeignKey('Group')
+	#Person = models.ForeignKey('auth.user')
+
 class Quest(models.Model):
 	NameQuest = models.CharField(max_length = 20)
 	QuestText = models.TextField()
