@@ -9,7 +9,7 @@ class Category(models.Model):
 
 class Group(models.Model):
 	NameGroup = models.CharField(max_length = 10)
-	Person = models.ManyToManyField('auth.user')
+	Person = models.ManyToManyField('auth.User')
 	def __str__(self):
 		return self.NameGroup
 
@@ -34,6 +34,7 @@ class Person(models.Model):
 	def __str__(self):
 		return self.FirstName
 """
+
 class ConnectDateBase(models.Model):
 	NameConnection = models.CharField(max_length = 10)
 	ConnectionString = models.TextField()
@@ -45,14 +46,14 @@ class Test(models.Model):
 	DateActivate = models.DateTimeField()
 	Time = models.IntegerField()
 	Quest = models.ManyToManyField('Quest')
-	TestPerson = models.ManyToManyField('auth.user', through = 'TestPerson')
+	TestPerson = models.ManyToManyField('auth.User', through = 'TestPerson')
 	def __str__(self):
 		return self.Name
 
 	def get_time(self):
 		return self.Time.__str__()
 class TestPerson(models.Model):
-	Person = models.ForeignKey('auth.user')
+	Person = models.ForeignKey('auth.User')
 	Test = models.ForeignKey(Test)
 	Mark = models.IntegerField()
 	StartTest = models.DateTimeField()

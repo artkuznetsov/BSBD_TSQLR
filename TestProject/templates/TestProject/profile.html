@@ -1,7 +1,7 @@
 {% extends 'TestProject/base.html' %}
 {% load staticfiles %}
 {% block title %}Личный кабинет{% endblock %}
-var empty = []
+empty = []
 {% block content %}
     <head>
         <link rel="stylesheet" href="{% static 'css/profile.css' %}">
@@ -17,7 +17,7 @@ var empty = []
                 <img src={% static 'images/line.jpg' %}>
         </header>
 
-            {% if TestUser == empty %}
+            {% if not TestUser %}
                 <div class="UserDontHaveTests">
                     <h2>Сейчас нет тестов, которые вы можете пройти</h2>
                 </div>
@@ -78,6 +78,9 @@ var empty = []
 </form>
 </body>
     <a href="{% url 'auth_logout' %}" class="btnExit">ВЫХОД</a>
+    {% if user.is_superuser %}
+        <br><br><br><a href="/admin/">Войти в панель администратора</a></br></br></br>
+    {% endif %}
 {#    <h1><a href="{% url 'auth_logout' %}">выйти</a>.<br/><br/></h1>#}
 {#    <input type="button" class="knopka01" value="ВЫХОД" >#}
 {% endblock %}
