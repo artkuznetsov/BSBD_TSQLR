@@ -7,5 +7,5 @@ from . import views
 urlpatterns = [
   url(r'^$', TestProject.views.home),
   #url(r'^users/(?P<LoginUser>[^/]+)/profile$', views.TestsUser, name='TestUser'),
-  url(r'^tests/$', views.PrimerTests, name='PrimerTests'),
+  url(r'^tests/$', views.AddUsers, name='AddUsers'),
 ]

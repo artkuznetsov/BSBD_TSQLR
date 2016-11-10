@@ -4,9 +4,15 @@
 
 {% block content %}
 
-    {% for test in tests %}
-        {{test}}
-    {% endfor %}
+    <form name = "" method = "POST" >
+ -            {% csrf_token %}
+ -            <i>Group:</i><br>
+ -            <input type = "text" name = "Group" value = "{{ Group }}" size = 55><br>
+ -            <i>Spisok:</i><br>
+ -            <p><textarea name = "users"></textarea>> </p>
+ -            
+ -            <br><input type="submit" value="Зарегистрировать">
+ -            <input type="reset" value="Очистить">
 {% endblock %}
     
 

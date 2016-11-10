@@ -4,7 +4,8 @@ from .forms import *
 from .models import models
 from django.http import *
 from django.shortcuts import *
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, UserManager
+
 from django.contrib.auth.decorators import login_required
 
 
@@ -47,3 +48,28 @@ def TestsUser(request):
                   {
                       "TestUser": mass
                   })
+
+def AddUsers(request):
+	if (request.method == "POST"):
+		Group = request.POST['Group']
+		users = request.POST['users']
+		users = users.split('\n')
+		count = 0
+		for i in users:
+
+			user = i.split(' ')
+			
+			person =User.objects.create_user(
+				username = Group + str(count),
+				email =None,
+				password = 'Qwerty123'+ str(count),
+				last_name = user[0],
+				first_name = user[1]
+			)
+			count+=1
+			person.save()
+		return HttpResponseRedirect("/TestProject/")
+	else:
+		return render(request, "TestProject/tests.html")
+
+

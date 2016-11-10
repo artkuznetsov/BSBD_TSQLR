@@ -7,8 +7,8 @@ from .forms import *
 	
 
 
-admin.site.register(Group)
-admin.site.register(Quest)
+
+admin.site.register(Task)
 admin.site.register(Category)
 admin.site.register(Test)
 admin.site.register(TestPerson)
