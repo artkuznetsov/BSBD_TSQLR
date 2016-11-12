@@ -1,17 +1,23 @@
 from django.db import models
 from django.utils import timezone
 
+from django.contrib.auth.models import AbstractUser
 
+class MyUser(AbstractUser):
+	GP = models.ForeignKey('GP', blank = True, null = True)
+
+	def __str__(self):
+		return self.username
+
+
+class GP(models.Model):
+	NameGP = models.CharField(max_length = 10)
+	def __str__(self):
+		return self.NameGP	
 class Category(models.Model):
 	Name = models.CharField(max_length = 20)
 	def __str__(self):
 		return self.NameClass
-
-class Students(models.Model):
-	NameGroup = models.CharField(max_length = 10)
-	Person = models.ForeignKey('auth.User')
-	def __str__(self):
-		return self.NameGroup
 
 
 
@@ -37,7 +43,7 @@ class Test(models.Model):
 	DateActivate = models.DateTimeField()
 	Time = models.IntegerField()
 	Task = models.ManyToManyField('Task', through = 'TestTask')
-	TestPerson = models.ManyToManyField('auth.User', through = 'TestPerson')
+	TestPerson = models.ManyToManyField('MyUser', through = 'TestPerson')
 	Variants = models.IntegerField()
 	def __str__(self):
 		return self.Name
@@ -51,9 +57,9 @@ class TestConnectDataBase(models.Model):
 
 
 class TestPerson(models.Model):
-	Person = models.ForeignKey('auth.User')
+	Person = models.ForeignKey('MyUser')
 	Test = models.ForeignKey(Test)
-	Mark = models.IntegerField(blank = True)
+	Mark = models.IntegerField(blank = True, null = True)
 	StartTest = models.DateTimeField()
 
 

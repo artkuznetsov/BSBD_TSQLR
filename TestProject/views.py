@@ -4,7 +4,7 @@ from .forms import *
 from .models import models
 from django.http import *
 from django.shortcuts import *
-from django.contrib.auth.models import User, UserManager
+#from django.contrib.auth.models import User, Group
 
 from django.contrib.auth.decorators import login_required
 
@@ -38,7 +38,7 @@ def PrimerTests(HttpRequest):
 
 @login_required(login_url='/accounts/login/')
 def TestsUser(request):
-	user = User.objects.get(id = request.user.id)
+	user = MyUser.objects.get(id = request.user.id)
 	UserTest = TestPerson.objects.filter(Person = user)
 	mass = []
 	for i in UserTest:
@@ -51,7 +51,9 @@ def TestsUser(request):
 
 def AddUsers(request):
 	if (request.method == "POST"):
-		Group = request.POST['Group']
+		Groups = request.POST['Group']
+		group = GP(NameGP = Groups)
+		group.save()
 		users = request.POST['users']
 		users = users.split('\n')
 		count = 0
@@ -59,15 +61,17 @@ def AddUsers(request):
 
 			user = i.split(' ')
 			
-			person =User.objects.create_user(
-				username = Group + str(count),
+			person =MyUser.objects.create_user(
+				username = Groups + str(count),
 				email =None,
 				password = 'Qwerty123'+ str(count),
 				last_name = user[0],
-				first_name = user[1]
+				first_name = user[1],
+				GP = group
 			)
 			count+=1
 			person.save()
+			#User_group = user_groups(user_id = person.id,group_id = group.id)
 		return HttpResponseRedirect("/TestProject/")
 	else:
 		return render(request, "TestProject/tests.html")

@@ -39,6 +39,7 @@ ALLOWED_HOSTS = []
 #EMAIL_USE_TLS = False
 #DEFAULT_FROM_EMAIL = 'info@google.ru'
 
+AUTH_USER_MODEL = 'TestProject.MyUser'
 
 INSTALLED_APPS = [
     'jet.dashboard',
