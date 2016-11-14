@@ -5,7 +5,7 @@ from .models import models
 from django.http import *
 from django.shortcuts import *
 #from django.contrib.auth.models import User, Group
-
+import random
 from django.contrib.auth.decorators import login_required
 
 
@@ -71,9 +71,41 @@ def AddUsers(request):
 			)
 			count+=1
 			person.save()
-			#User_group = user_groups(user_id = person.id,group_id = group.id)
-		return HttpResponseRedirect("/TestProject/")
+		return redirect("/TestProject/")
 	else:
 		return render(request, "TestProject/tests.html")
 
 
+def CreateTest(request):
+	if (request.method == "POST"):
+		form = TestForm(request.POST)
+		task = Task.objects.all()
+		taskId = []
+		for i in task:
+			taskId.append(i.id)
+		
+		i = 0
+		if form.is_valid():
+			test = Test(
+				Name = form.cleaned_data['Name'],
+				DateActivate =form.cleaned_data['DateActivate'],
+				Time = form.cleaned_data['Time'],
+				Variants = form.cleaned_data['Variants']
+			)
+			test.save()
+			connectdatabase = TestConnectDataBase(Test = test, ConnectDataBase = form.cleaned_data['ConnectDataBase'])
+			connectdatabase.save()
+			for i in range(test.Variants):
+				tasks = []
+				count = 0
+				while count!=10:
+					RandomId = random.choice(taskId)
+					Check = RandomId in tasks
+					if Check == False:
+						tasks.append(RandomId)
+						test_task = TestTask.objects.create(Test = test, Task = task.get(id = RandomId),Variant=i+1)
+						count+=1
+			return redirect("/")
+	else:
+		form = TestForm()
+		return render(request, 'TestProject/create_test.html', {'form':form})

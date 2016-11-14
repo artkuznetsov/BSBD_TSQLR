@@ -7,7 +7,7 @@ from .forms import *
 	
 
 
-
+admin.site.register(ConnectDataBase)
 admin.site.register(Task)
 admin.site.register(Category)
 admin.site.register(Test)

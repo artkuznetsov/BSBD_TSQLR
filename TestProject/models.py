@@ -17,7 +17,7 @@ class GP(models.Model):
 class Category(models.Model):
 	Name = models.CharField(max_length = 20)
 	def __str__(self):
-		return self.NameClass
+		return self.Name
 
 
 
@@ -28,7 +28,7 @@ class Task(models.Model):
 	Category = models.ForeignKey('Category')
 	Weight = models.IntegerField()
 	def __str__(self):
-		return self.NameQuest
+		return self.NameTask
 
 
 
