@@ -9,4 +9,5 @@ urlpatterns = [
   #url(r'^users/(?P<LoginUser>[^/]+)/profile$', views.TestsUser, name='TestUser'),
   url(r'^tests/$', views.AddUsers, name='AddUsers'),
   url(r'create_test/$', views.CreateTest, name = 'create_test'),
+  url(r'^generate_users/$',views.AddUsers,name='AddUsers'),
 ]

@@ -1,17 +1,18 @@
-{% extends 'TestProject/base.html' %}
-
-{% block title %} Тестирование SQL запросов {% endblock %}
+{% extends "admin/base.html" %}
+{% block title %} Генерация пользователей {% endblock %}
+{% block content_title %}Генерация пользователей{% endblock %}
 
 {% block content %}
+    {% block object-tools %}{% endblock %}
 
-    <form name = "" method = "POST" >
+    <form name = "add_user" method = "POST" >
  -            {% csrf_token %}
  -            <i>Group:</i><br>
  -            <input type = "text" name = "Group" value = "{{ Group }}" size = 55><br>
  -            <i>Spisok:</i><br>
  -            <p><textarea name = "users"></textarea>> </p>
- -            
- -            <br><input type="submit" value="Зарегистрировать">
+ -
+ -            <br><a href="../admin"><input type="submit" value="Зарегистрировать"></a>
  -            <input type="reset" value="Очистить">
 {% endblock %}
     

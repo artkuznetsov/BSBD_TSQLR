@@ -1,6 +1,6 @@
 from .models import *
 from django import forms
-from django.forms.widgets import SelectDateWidget
+#from django.forms.widgets import SelectDateWidget
 from django.forms import ModelForm
 
 class TestForm(forms.Form):
@@ -19,25 +19,20 @@ class TestForm(forms.Form):
 		)
 	Variants = forms.IntegerField\
     	(
-    		label = "Необходимое количество вариантов"	
-
+    		label = "Необходимое количество вариантов"
     	)
 	Time = forms.IntegerField\
     	(
-    		label = "Время на прохождение"	
-
+    		label = "Время на прохождение"
     	)
 	TestPerson = forms.ModelChoiceField\
     	(
-
     		queryset = GP.objects.all(),
     		required = False
-
     	)
 	ConnectDataBase = forms.ModelChoiceField\
     	(
 			label = "Выберите БД",
 			queryset = ConnectDataBase.objects.all(),
 			required = False
-
     	)

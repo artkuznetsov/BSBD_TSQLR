@@ -62,6 +62,14 @@ class TestPerson(models.Model):
 	Mark = models.IntegerField(blank = True, null = True)
 	StartTest = models.DateTimeField()
 
+	def get_mark(self):
+		return self.Mark
+
+	def get_test(self):
+		return self.Test
+
+	def get_start_test(self):
+		return self.StartTest
 
 class TestTask(models.Model):
 	Test = models.ForeignKey('Test')

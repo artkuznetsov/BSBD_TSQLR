@@ -37,6 +37,15 @@ def PrimerTests(HttpRequest):
 	return render(HttpRequest, "TestProject/tests.html",{"tests": tests})
 
 @login_required(login_url='/accounts/login/')
+def HistoryTable(request):
+	user = MyUser.objects.get(id=request.user.id)
+	subscribe = TestPerson.objects.filter(Person = user)
+	mass = []
+	for i in subscribe:
+		mass.append(TestPerson.objects.get(id = i.Test_id,Mark=""))
+	return render(request,"TestProject/profile.html",{"Subscribe":mass})
+
+@login_required(login_url='/accounts/login/')
 def TestsUser(request):
 	user = MyUser.objects.get(id = request.user.id)
 	UserTest = TestPerson.objects.filter(Person = user)
@@ -73,7 +82,7 @@ def AddUsers(request):
 			person.save()
 		return redirect("/TestProject/")
 	else:
-		return render(request, "TestProject/tests.html")
+		return render(request, "admin/generate_users.html")
 
 
 def CreateTest(request):
@@ -108,4 +117,4 @@ def CreateTest(request):
 			return redirect("/")
 	else:
 		form = TestForm()
-		return render(request, 'TestProject/create_test.html', {'form':form})
+		return render(request, 'admin/create_test.html', {'form':form})

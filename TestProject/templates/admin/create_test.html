@@ -1,0 +1,10 @@
+{% extends "admin/base.html" %}
+{% block title %} Создать тест {% endblock %}
+{% block content_title %}Созать тест{% endblock %}
+{% block content %}
+    <h1>Создать новый тест</h1>
+    <form method="POST">{% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="save btn btn-default">Сохранить</button>
+    </form>
+{% endblock %}

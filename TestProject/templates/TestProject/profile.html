@@ -44,33 +44,16 @@ empty = []
                     <table class="simple-little-table" cellspacing='0'>
                         <tr>
                             <th>Название теста </th>
-                            <th>Выполнен</th>
                             <th>Оценка</th>
+                            <th>Дата</th>
                         </tr><!-- Table Header -->
-
-                        <tr>
-                            <td>Where</td>
-                            <td>100%</td>
-                            <td>5</td>
-                        </tr><!-- Table Row -->
-
-                        <tr>
-                            <td>SubRequests</td>
-                            <td>100%</td>
-                            <td>4</td>
-                        </tr><!-- Darker Table Row -->
-
-                        <tr>
-                            <td>StoredProcedures</td>
-                            <td>20%</td>
-                            <td>2</td>
-                        </tr>
-
-                        <tr>
-                            <td>Итог(ср)</td>
-                            <td>80%</td>
-                            <td>4</td>
-                        </tr>
+                        {% for i in Subscribe %}
+                            <tr>
+                                <td>i.get_test</td>
+                                <td>i.get_mark</td>
+                                <td>i.get_date</td>
+                            </tr>
+                        {% endfor %}
                     </table>
                 {% endblock %}
         </div>
