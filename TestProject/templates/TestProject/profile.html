@@ -14,23 +14,24 @@ empty = []
            <div class="main-content">
         <article>
         <header>
-            <h1>Приветствую,{{ user }}</h1>
+            <h1 title="Username">Приветствую,{{ user }}</h1>
                 <img src={% static 'images/line.jpg' %}>
         </header>
-
-            {% if not TestUser %}
+            {% if Subscribe.count == 0 %}
                 <div class="UserDontHaveTests">
                     <h2>Сейчас нет тестов, которые вы можете пройти</h2>
                 </div>
             {% else  %}
-                {% for test in TestUser %}
+                {% for test in Subscribe %}
+                    {% if test.get_mark == null %}
                     <h2>Вам доступен тест</h2>
                     <img src={% static 'images/pencil.jpg' %} align="left">
-                    <h3>{{ test }}</h3>
+                    <h3>{{ test.get_test }}</h3>
                     <h8 class="test_time">Длительность теста: {{ test.get_time }} минут</h8>
                     <p></p>
                     <a href="#" class="btnStartTest">Начать</a>
                      <div class="an"></div>
+                    {% endif %}
                 {% endfor %}
               {% endif %}
             </article>
@@ -46,13 +47,16 @@ empty = []
                             <th>Название теста </th>
                             <th>Оценка</th>
                             <th>Дата</th>
-                        </tr><!-- Table Header -->
-                        {% for i in Subscribe %}
+                        </tr>
+                        <!-- Table Header -->
+                        {% for test in Subscribe %}
+                            {% if test.get_mark != null %}
                             <tr>
-                                <td>i.get_test</td>
-                                <td>i.get_mark</td>
-                                <td>i.get_date</td>
+                                <td>{{ test.get_test }}</td>
+                                <td>{{ test.get_mark }}</td>
+                                <td>{{ test.get_start_test_without_time }}</td>
                             </tr>
+                            {% endif %}
                         {% endfor %}
                     </table>
                 {% endblock %}

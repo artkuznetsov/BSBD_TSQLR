@@ -1,13 +1,12 @@
 {% extends "admin/base.html" %}
 {% load i18n %}
 {% block title %} Создать тест {% endblock %}
-{% block content_title %}Созать тест{% endblock %}
+{#{% block content_title %}Созать тест{% endblock %}#}
 
 {% block content %}
-    <h1>Создать новый тест</h1>
+    <h2>Создать новый тест</h2>
     <form method="POST">{% csrf_token %}
         {{ form.as_p }}
-
         <table class="categories table">
             <tr>
                 <th>Категория</th>
@@ -18,7 +17,7 @@
                 <tr>
                     <td> {{ key }}</td>
                     <td>{{ value }}</td>
-                    <td><input type="text" size="5" value="0" class="input {{ key }}"></td>
+                    <td><input title="input {{ key }}" type="text" size="5" value="0"></td>
                 </tr>
             {% endfor %}
         </table>

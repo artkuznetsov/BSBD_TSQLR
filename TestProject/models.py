@@ -45,6 +45,7 @@ class Test(models.Model):
 	Task = models.ManyToManyField('Task', through = 'TestTask')
 	TestPerson = models.ManyToManyField('MyUser', through = 'TestPerson')
 	Variants = models.IntegerField()
+
 	def __str__(self):
 		return self.Name
 
@@ -70,6 +71,9 @@ class TestPerson(models.Model):
 
 	def get_start_test(self):
 		return self.StartTest
+
+	def get_start_test_without_time(self):
+		return self.StartTest.date()
 
 class TestTask(models.Model):
 	Test = models.ForeignKey('Test')
