@@ -1,10 +1,27 @@
 {% extends "admin/base.html" %}
+{% load i18n %}
 {% block title %} Создать тест {% endblock %}
 {% block content_title %}Созать тест{% endblock %}
+
 {% block content %}
     <h1>Создать новый тест</h1>
     <form method="POST">{% csrf_token %}
         {{ form.as_p }}
-        <button type="submit" class="save btn btn-default">Сохранить</button>
+
+        <table class="categories table">
+            <tr>
+                <th>Категория</th>
+                <th>Количество вопросов</th>
+                <th>Требуемое количество вопросов</th>
+            </tr>
+            {% for key,value in categoties.items %}
+                <tr>
+                    <td> {{ key }}</td>
+                    <td>{{ value }}</td>
+                    <td><input type="text" size="5" value="0" class="input {{ key }}"></td>
+                </tr>
+            {% endfor %}
+        </table>
+        <br><input type="submit" class="save btn btn-default" value="Сохранить">
     </form>
 {% endblock %}

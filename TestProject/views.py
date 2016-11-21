@@ -117,4 +117,13 @@ def CreateTest(request):
 			return redirect("/")
 	else:
 		form = TestForm()
-		return render(request, 'admin/create_test.html', {'form':form})
+
+		"""Get categories and count of tasks in him"""
+		category = Category.objects.all()
+		tasks = Task.objects.all()
+		dict = {}
+		count = 0
+		for i in category:
+			dict[i.Name] = len(tasks.filter(Category=i))
+
+		return render(request, 'admin/create_test.html', {'form':form,'categoties':dict})
