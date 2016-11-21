@@ -38,19 +38,17 @@ def PrimerTests(HttpRequest):
 
 @login_required(login_url='/accounts/login/')
 def TestsUser(request):
-	# user = MyUser.objects.get(id = request.user.id)
-	# UserTest = TestPerson.objects.filter(Person = user)
-	# mass = []
-	# for i in UserTest:
-	# 	mass.append(Test.objects.get(id = i.Test_id))
-    #
-	# # History Table making
-	# result = TestPerson.objects.filter(Person= request.user.id)
 	subscribe = TestPerson.objects.filter(Person = request.user.id)
+	with_mark = []
+	without_mark = []
+	for sub in subscribe:
+		if sub.get_mark() != None:
+			with_mark.append(sub)
+		else:
+			without_mark.append(sub)
 	return render(request,"TestProject/profile.html",
                   {
-                      # "TestUser": result2,
-					  "Subscribe":subscribe
+					  "completed_tests":with_mark, "uncompleted_tests":without_mark
                   })
 
 def AddUsers(request):
