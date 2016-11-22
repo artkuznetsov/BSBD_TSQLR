@@ -3,7 +3,6 @@ from django.utils.datetime_safe import datetime
 
 from .models import *
 from django import forms
-#lkz 'njuj ghjwtccbyujdfq wtynh dtltn <L rjnjhfz cjlth;bn lfyyst j ,fyrf[ exfcnybrf[ gc
 #from django.forms.widgets import DateTimeBaseInput
 from django.forms import ModelForm, SplitDateTimeWidget
 from django.contrib.admin.widgets import AdminDateWidget, AdminTimeWidget
@@ -21,7 +20,7 @@ class TestForm(forms.Form):
 			label="Дата активации",
 			input_formats=['%d-%m-%Y %H:%M'],
 			required=True,
-			help_text = 'DD.MM.YYYY HH:MM:S',
+			help_text = 'DD.MM.YYYY HH:MM:SS',
 			initial = datetime.now,
 			widget = SplitDateTimeWidget
 		)
@@ -29,7 +28,8 @@ class TestForm(forms.Form):
 		(
 			label="Время на прохождение",
 			min_value=0,
-			initial=0
+			initial=0,
+			help_text="(мин)"
 		)
 	Variants = forms.IntegerField\
     	(

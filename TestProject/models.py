@@ -13,12 +13,13 @@ class MyUser(AbstractUser):
 class GP(models.Model):
 	NameGP = models.CharField(max_length = 10)
 	def __str__(self):
-		return self.NameGP	
+		return self.NameGP
+
+
 class Category(models.Model):
 	Name = models.CharField(max_length = 20)
 	def __str__(self):
 		return self.Name
-
 
 
 class Task(models.Model):
@@ -32,12 +33,12 @@ class Task(models.Model):
 		return self.NameTask
 
 
-
 class ConnectDataBase(models.Model):
 	NameConnection = models.CharField(max_length = 10)
 	ConnectionString = models.TextField()
 	def __str__(self):
 		return self.NameConnection
+
 
 class Test(models.Model):
 	Name = models.CharField(max_length = 30)
@@ -51,6 +52,7 @@ class Test(models.Model):
 
 	def get_time(self):
 		return self.Time.__str__()
+
 
 class TestConnectDataBase(models.Model):
 	Test = models.ForeignKey('Test')
@@ -75,6 +77,10 @@ class TestPerson(models.Model):
 
 	def get_start_test_without_time(self):
 		return self.StartTest.date()
+
+	def get_variant(self):
+		return self.Variant
+
 
 class TestTask(models.Model):
 	Test = models.ForeignKey('Test')

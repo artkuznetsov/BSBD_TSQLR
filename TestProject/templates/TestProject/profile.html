@@ -1,7 +1,6 @@
 {% extends 'TestProject/base.html' %}
 {% load staticfiles %}
 {% block title %}Личный кабинет{% endblock %}
-empty = []
 {% block content %}
     <head>
         <link rel="stylesheet" href="{% static 'css/profile.css' %}">
@@ -42,7 +41,7 @@ empty = []
                 {% block history_table %}
                     <table class="simple-little-table" cellspacing='0'>
                         <tr>
-                            <th>Название теста </th>
+                            <th>Название теста</th>
                             <th>Оценка</th>
                             <th>Дата</th>
                         </tr>
