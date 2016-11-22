@@ -20,7 +20,7 @@ class TestForm(forms.Form):
 			label="Дата активации",
 			input_formats=['%d-%m-%Y %H:%M'],
 			required=True,
-			help_text = 'DD.MM.YYYY HH:MM:SS'
+			help_text = 'DD.MM.YYYY HH:MM',
 		)
 	Time = forms.IntegerField\
 		(
