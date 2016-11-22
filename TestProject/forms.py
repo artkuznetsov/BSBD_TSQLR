@@ -20,9 +20,7 @@ class TestForm(forms.Form):
 			label="Дата активации",
 			input_formats=['%d-%m-%Y %H:%M'],
 			required=True,
-			help_text = 'DD.MM.YYYY HH:MM:SS',
-			initial = datetime.now,
-			widget = SplitDateTimeWidget
+			help_text = 'DD.MM.YYYY HH:MM:SS'
 		)
 	Time = forms.IntegerField\
 		(
@@ -37,3 +35,8 @@ class TestForm(forms.Form):
 			min_value=0,
 			initial=0
     	)
+	ConnectDataBase = forms.ModelChoiceField\
+		(
+			label="BD",
+			queryset=ConnectDataBase.objects.all()
+		)

@@ -14,11 +14,13 @@
                     <th>Количество вопросов</th>
                     <th>Требуемое количество вопросов</th>
                 </tr>
+
                 {% for key,value in categoties.items %}
                     <tr>
                         <td> {{ key }}</td>
                         <td>{{ value }}</td>
-                        <td><input title="input {{ key }}" type="number" size="5" value="0" max="{{ value }}" min="0"></td>
+
+                        <td><input title="input {{ key }}" name="{{ count}}" type="number" size="5" value="0" max="{{ value }}" min="0"></td>
                     </tr>
                 {% endfor %}
             </table>

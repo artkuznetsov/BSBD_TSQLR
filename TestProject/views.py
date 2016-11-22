@@ -91,13 +91,12 @@ def CreateTest(request):
 			test = Test(
 				Name = form.cleaned_data['Name'],
 				DateActivate =form.cleaned_data['DateActivate'],
-				Time = form.cleaned_data['Time'],
-				Variants = form.cleaned_data['Variants']
+				Time = form.cleaned_data['Time']
 			)
 			test.save()
 			connectdatabase = TestConnectDataBase(Test = test, ConnectDataBase = form.cleaned_data['ConnectDataBase'])
 			connectdatabase.save()
-			for i in range(test.Variants):
+			for i in range(form.cleaned_data['Variants']):
 				tasks = []
 				count = 0
 				while count!=10:
@@ -119,4 +118,7 @@ def CreateTest(request):
 		for i in category:
 			dict[i.Name] = len(tasks.filter(Category=i))
 
-		return render(request, 'admin/create_test.html', {'form':form,'categoties':dict})
+
+	return render(request, 'admin/create_test.html', {'form': form
+		, 'categoties': dict, 'count':count
+													  })
