@@ -40,3 +40,23 @@ class TestForm(forms.Form):
 			label="BD",
 			queryset=ConnectDataBase.objects.all()
 		)
+
+
+class TestPersonForm(forms.Form):
+	Test = forms.ModelChoiceField\
+		(
+			label = "Выбор теста",
+			queryset = Test.objects.all()
+		)
+	Person = forms.ModelMultipleChoiceField\
+		(
+			label = "Список студентов",
+			queryset = MyUser.objects.all(),
+			required=False
+		)
+	Group = forms.ModelMultipleChoiceField\
+		(
+			label = "Список групп",
+			queryset = GP.objects.all(),
+			required=False
+		)

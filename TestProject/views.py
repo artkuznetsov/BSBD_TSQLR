@@ -133,3 +133,38 @@ def CreateTest(request):
 		return redirect("/404")
 
 
+def Add_TestPerson(request):
+	if(request.method=="POST"):
+		form = TestPersonForm(request.POST)
+		if form.is_valid():
+			max = 0
+
+			Groups = form.cleaned_data['Group']
+			Persons = form.cleaned_data['Person']
+			test = form.cleaned_data['Test']
+			testtask =  TestTask.objects.filter(Test = test)
+			students = []
+			for i in Persons:
+				if i.GP in Groups:
+					continue
+				else:
+					students.append(i)
+
+			for i in Groups:
+				students.extend(MyUser.objects.filter(GP = i))
+
+			mas = []
+			for i in testtask:
+				if i.Variant in mas:
+					continue
+				else:
+					mas.append(i.Variant)
+
+			for i in students:
+				choise = random.choice(mas)
+				testperson = TestPerson.objects.create(Person = i, Test = test, Variant = choise)
+			return redirect("/admin")
+	else:
+		form = TestPersonForm()
+		return render(request, 'admin/Add_TestPerson.html', {'form' : form})
+
