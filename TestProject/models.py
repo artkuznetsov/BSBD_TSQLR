@@ -27,6 +27,7 @@ class Task(models.Model):
 	WTask = models.TextField()
 	Category = models.ForeignKey('Category')
 	Weight = models.IntegerField()
+	
 	def __str__(self):
 		return self.NameTask
 
@@ -44,7 +45,6 @@ class Test(models.Model):
 	Time = models.IntegerField()
 	Task = models.ManyToManyField('Task', through = 'TestTask')
 	TestPerson = models.ManyToManyField('MyUser', through = 'TestPerson')
-	Variants = models.IntegerField()
 
 	def __str__(self):
 		return self.Name
@@ -61,7 +61,8 @@ class TestPerson(models.Model):
 	Person = models.ForeignKey('MyUser')
 	Test = models.ForeignKey(Test)
 	Mark = models.IntegerField(blank = True, null = True)
-	StartTest = models.DateTimeField()
+	StartTest = models.DateTimeField(blank = True, null = True)
+	Variant = models.IntegerField()
 
 	def get_mark(self):
 		return self.Mark
@@ -84,3 +85,4 @@ class TestTask(models.Model):
 class Answers(models.Model):
 	TestTask = models.ForeignKey('TestTask')
 	Answer = models.TextField()
+
