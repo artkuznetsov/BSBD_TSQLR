@@ -4,7 +4,6 @@
 {#{% block content_title %}Созать тест{% endblock %}#}
 
 {% block content %}
-    {% if user.is_superuser %}
         <h2>Создать новый тест</h2>
         <form method="POST">
             {% csrf_token %}
@@ -26,8 +25,4 @@
             </table>
             <br><input href="../admin" type="submit" class="save btn btn-default" value="Сохранить">
         </form>
-        {% else %}
-        <h2 align="center" class="permissions">Вы не имеете достаточно прав для создания теста</h2>
-        <a href="../home">Вернуться на сайт</a>
-    {% endif %}
 {% endblock %}

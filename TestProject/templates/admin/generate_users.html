@@ -3,7 +3,6 @@
 {#{% block content_title %}Генерация пользователей{% endblock %}#}
 
 {% block content %}
-    {% if user.is_superuser%}
         {% block object-tools %}{% endblock %}
 
         <form name = "add_user" method = "POST" >
@@ -16,9 +15,5 @@
             <br><a href="../admin"><input type="submit" value="Зарегистрировать"></a>
             <input type="reset" value="Очистить">
         </form>
-        {% else %}
-            <h2 align="center" class="permissions">Вы не имеете достаточно прав доступа</h2>
-            <a href="../home">Вернуться на сайт</a>
-    {% endif %}
 {% endblock %}
     
