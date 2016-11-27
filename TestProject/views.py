@@ -33,12 +33,7 @@ def error404(request):
 	return render(request,"TestProject/404.html")
 
 
-def PrimerTests(HttpRequest):
-	try:
-		tests = Test.objects.values("Name", "DateActivate", "Time")
-	except:
-		return HttpResponseServerError("Server error")
-	return render(HttpRequest, "TestProject/tests.html",{"tests": tests})
+
 
 @login_required(login_url='/accounts/login/')
 def TestsUser(request):
@@ -56,6 +51,7 @@ def TestsUser(request):
                   })
 
 def AddUsers(request):
+	"""Создание группы и пользоваетлей, которые входят в неё"""
 	if request.user.is_superuser:
 		if (request.method == "POST"):
 			Groups = request.POST['Group']
@@ -86,15 +82,18 @@ def AddUsers(request):
 
 
 def CreateTest(request):
+	"""Cоздание теста с вариантами"""
 	if request.user.is_superuser:
 		if (request.method == "POST"):
 			form = TestForm(request.POST)
 			task = Task.objects.all()
+			category = Category.objects.all()
 			taskId = []
-			for i in task:
-				taskId.append(i.id)
-
-			i = 0
+			taskC = []
+			for i in range(len(category)):
+				for j in task.filter(Category = category[i]):
+					taskC.append(j.id)
+				taskId.append(taskC)
 			if form.is_valid():
 				test = Test(
 					Name = form.cleaned_data['Name'],
@@ -105,15 +104,16 @@ def CreateTest(request):
 				connectdatabase = TestConnectDataBase(Test = test, ConnectDataBase = form.cleaned_data['ConnectDataBase'])
 				connectdatabase.save()
 				for i in range(form.cleaned_data['Variants']):
-					tasks = []
-					count = 0
-					while count!=10:
-						RandomId = random.choice(taskId)
-						Check = RandomId in tasks
-						if Check == False:
-							tasks.append(RandomId)
-							test_task = TestTask.objects.create(Test = test, Task = task.get(id = RandomId),Variant=i+1)
-							count+=1
+					for j in range(len(category)):
+						tasks = []
+						count = 0
+						while count!= int(request.POST['input'+str(j+1)]):
+							RandomId = random.choice(taskId[j])
+							Check = RandomId in tasks
+							if Check == False:
+								tasks.append(RandomId)
+								test_task = TestTask.objects.create(Test = test, Task = task.get(id = RandomId),Variant=i+1)
+								count+=1
 				return redirect("/admin")
 		else:
 			form = TestForm()
@@ -132,39 +132,47 @@ def CreateTest(request):
 	else:
 		return redirect("/404")
 
-
 def Add_TestPerson(request):
-	if(request.method=="POST"):
-		form = TestPersonForm(request.POST)
-		if form.is_valid():
-			max = 0
+	"""Привязка группы и(или) пользователя к тесту"""
+	if request.user.is_superuser:
+		if(request.method=="POST"):
+			form = TestPersonForm(request.POST)
+			if form.is_valid():
+				max = 0
 
-			Groups = form.cleaned_data['Group']
-			Persons = form.cleaned_data['Person']
-			test = form.cleaned_data['Test']
-			testtask =  TestTask.objects.filter(Test = test)
-			students = []
-			for i in Persons:
-				if i.GP in Groups:
-					continue
-				else:
-					students.append(i)
+				Groups = form.cleaned_data['Group']
+				Persons = form.cleaned_data['Person']
+				test = form.cleaned_data['Test']
+				testtask =  TestTask.objects.filter(Test = test)
+				students = []
+				for i in Persons:
+					if i.GP in Groups:
+						continue
+					else:
+						students.append(i)
 
-			for i in Groups:
-				students.extend(MyUser.objects.filter(GP = i))
+				for i in Groups:
+					students.extend(MyUser.objects.filter(GP = i))
 
-			mas = []
-			for i in testtask:
-				if i.Variant in mas:
-					continue
-				else:
-					mas.append(i.Variant)
+				mas = []
+				for i in testtask:
+					if i.Variant in mas:
+						continue
+					else:
+						mas.append(i.Variant)
 
-			for i in students:
-				choise = random.choice(mas)
-				testperson = TestPerson.objects.create(Person = i, Test = test, Variant = choise)
-			return redirect("/admin")
+				for i in students:
+					choise = random.choice(mas)
+					testperson = TestPerson.objects.create(Person = i, Test = test, Variant = choise)
+				return redirect("/admin")
+		else:
+			form = TestPersonForm()
+			return render(request, 'admin/Add_TestPerson.html', {'form' : form})
 	else:
-		form = TestPersonForm()
-		return render(request, 'admin/Add_TestPerson.html', {'form' : form})
+		return redirect("/404")
+
+def GoTest(request):
+	personForTest = TestPerson.objects.filter(Person = request.user.id)
+	test = TestTask.objects.filter(Test = perosnForTest[0].Test, Variant = personForTest[0].Variant)
+	return render(request,"TestProject/GoTest.html", {"GTest":test})
 

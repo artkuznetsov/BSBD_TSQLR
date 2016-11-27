@@ -60,3 +60,6 @@ class TestPersonForm(forms.Form):
 			queryset = GP.objects.all(),
 			required=False
 		)
+
+class AnswerForm(forms.Form):
+	pass
