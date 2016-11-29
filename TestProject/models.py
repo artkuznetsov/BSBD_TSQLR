@@ -21,6 +21,9 @@ class Category(models.Model):
 	def __str__(self):
 		return self.Name
 
+	def get_id(self):
+		return self.id
+
 
 class Task(models.Model):
 	NameTask = models.CharField(max_length = 20)
@@ -80,6 +83,9 @@ class TestPerson(models.Model):
 
 	def get_variant(self):
 		return self.Variant
+
+	def get_id(self):
+		return self.id
 
 
 class TestTask(models.Model):

@@ -124,7 +124,7 @@ def CreateTest(request):
 			dict = {}
 			count = 0
 			for i in category:
-				dict[i.Name] = len(tasks.filter(Category=i))
+				dict[len(tasks.filter(Category=i))] = i
 
 			return render(request, 'admin/create_test.html', {'form': form,
 															  'categoties': dict
@@ -171,8 +171,12 @@ def Add_TestPerson(request):
 	else:
 		return redirect("/404")
 
-def GoTest(request):
-	personForTest = TestPerson.objects.filter(Person = request.user.id)
-	test = TestTask.objects.filter(Test = perosnForTest[0].Test, Variant = personForTest[0].Variant)
+def GoTest(request, testid):
+	personForTest = TestPerson.objects.get(Person = request.user.id)
+	tests = Test.objects.get(id=int(testid))
+	test = TestTask.objects.filter(Test = tests	, Variant = personForTest.Variant)
+
 	return render(request,"TestProject/GoTest.html", {"GTest":test})
+
+
 
