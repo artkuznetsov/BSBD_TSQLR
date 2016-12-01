@@ -6,6 +6,10 @@
     <title>Test</title>
 </head>
 <body>
-{{ GTest }}
+{% for test in GTest %}
+	<h8 class="test_time">Название вопроса: {{ GTest.get_task.get_name }} </h8>
+	<h8 class="test_time">Вопрос: {{ GTest.get_task.get_tasktext }} </h8>
+	<input title="input" name="input {{test.get_task.get_id}}">
+{% endfor %}
 </body>
 </html>

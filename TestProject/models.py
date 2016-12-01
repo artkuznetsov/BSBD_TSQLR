@@ -35,6 +35,15 @@ class Task(models.Model):
 	def __str__(self):
 		return self.NameTask
 
+	def get_tasktext(self):
+		return self.TaskText
+		
+	def get_name(self):
+		return self.NameTask
+
+	def get_id(self):
+		return self.id
+
 
 class ConnectDataBase(models.Model):
 	NameConnection = models.CharField(max_length = 10)
@@ -52,6 +61,9 @@ class Test(models.Model):
 
 	def __str__(self):
 		return self.Name
+
+	def get_id(self):
+		return self.id
 
 	def get_time(self):
 		return self.Time.__str__()
@@ -84,15 +96,15 @@ class TestPerson(models.Model):
 	def get_variant(self):
 		return self.Variant
 
-	def get_id(self):
-		return self.id
-
 
 class TestTask(models.Model):
 	Test = models.ForeignKey('Test')
 	Task = models.ForeignKey('Task')
 	Variant = models.IntegerField()
 
+
+	def get_task(self):
+		return self.Task
 
 class Answers(models.Model):
 	TestTask = models.ForeignKey('TestTask')

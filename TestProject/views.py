@@ -55,26 +55,32 @@ def AddUsers(request):
 	if request.user.is_superuser:
 		if (request.method == "POST"):
 			Groups = request.POST['Group']
-			group = GP(NameGP = Groups)
-			group.save()
-			users = request.POST['users']
-			users = users.split('\n')
-			count = 0
-			for i in users:
+			if Groups != "":
+				group = GP(NameGP = Groups)
+				group.save()
+				users = request.POST['users']
+				if users != '':
+					users = users.split('\n')
+					count = 0
+					for i in users:
 
-				user = i.split(' ')
+						user = i.split(' ')
 
-				person =MyUser.objects.create_user(
-					username = Groups + str(count),
-					email =None,
-					password = 'Qwerty123'+ str(count),
-					last_name = user[0],
-					first_name = user[1],
-					GP = group
-				)
-				count+=1
-				person.save()
-			return redirect("/admin")
+						person =MyUser.objects.create_user(
+							username = Groups + str(count),
+							email =None,
+							password = 'Qwerty123'+ str(count),
+							last_name = user[0],
+							first_name = user[1],
+							GP = group
+						)
+						count+=1
+						person.save()
+					return redirect("/admin")
+				else:
+					return redirect("/admin")
+			else:
+				return redirect("/admin")	
 		else:
 			return render(request, "admin/generate_users.html")
 	else:
@@ -176,7 +182,7 @@ def GoTest(request, testid):
 	tests = Test.objects.get(id=int(testid))
 	test = TestTask.objects.filter(Test = tests	, Variant = personForTest.Variant)
 
-	return render(request,"TestProject/GoTest.html", {"GTest":test})
+	return render(request,"TestProject/test.html", {"GTest":test})
 
 
 

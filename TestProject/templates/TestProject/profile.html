@@ -27,7 +27,7 @@
                         <h3>{{ test.get_test }}</h3>
                         <h8 class="test_time">Длительность теста: {{ test.get_test.get_time }} минут</h8>
                         <p></p>
-                        <a href="../testid={{ test.get_id }}" class="btnStartTest">Начать</a>
+                        <a href="../../testid={{ test.get_test.get_id}}" class="btnStartTest">Начать</a>
                          <div class="an"></div>
                 {% endfor %}
               {% endif %}
