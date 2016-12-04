@@ -6,10 +6,32 @@
     <title>Test</title>
 </head>
 <body>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
+<form method="post" class="main_form">
 {% for test in GTest %}
-	<h8 class="test_time">Название вопроса: {{ GTest.get_task.get_name }} </h8>
-	<h8 class="test_time">Вопрос: {{ GTest.get_task.get_tasktext }} </h8>
-	<input title="input" name="input {{test.get_task.get_id}}">
+	<br><h8 class="task_name">Название вопроса: {{ test.get_task.get_name }} </h8></br>
+	<br><h8 class="task_text">Вопрос: {{ test.get_task.get_tasktext }} </h8></br>
+	<br><textarea class="answer" title="input" id="{{test.get_task.get_id}}"></textarea></br>
 {% endfor %}
+<input type="button" value="Завершить тест" onclick="end_test()">
+</form>
 </body>
 </html>
+
+<script>
+    function end_test() {
+        answers = document.getElementsByClassName('answer');
+        dict = {};
+        for (i = 0; i < answers.length; i++) {
+            dict['taskID ' + answers[i].id] = answers[i].value;
+        }
+        console.log(dict);
+
+        $.ajax({
+            url: window.location.href,
+            data: JSON.stringify(dict),
+            type: 'POST',
+            contentType: 'application/json'
+        });
+    }
+</script>

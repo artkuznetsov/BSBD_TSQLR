@@ -5,8 +5,9 @@ from .models import models
 from django.http import *
 from django.shortcuts import *
 #from django.contrib.auth.models import User, Group
-import random
+import random, json
 from django.contrib.auth.decorators import login_required
+import re
 
 
 
@@ -178,6 +179,14 @@ def Add_TestPerson(request):
 		return redirect("/404")
 
 def GoTest(request, testid):
+	if request.is_ajax():
+		data = json.loads(request.read().decode("utf-8"))
+		dict= {}
+		for i in data:
+			dict[i] = data[i]
+		"""Для примера выведем ответа на 9 таск"""
+		print(dict['taskID 9'])
+
 	personForTest = TestPerson.objects.get(Person = request.user.id)
 	tests = Test.objects.get(id=int(testid))
 	test = TestTask.objects.filter(Test = tests	, Variant = personForTest.Variant)
