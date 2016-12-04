@@ -38,7 +38,8 @@ class TestForm(forms.Form):
 	ConnectDataBase = forms.ModelChoiceField\
 		(
 			label="BD",
-			queryset=ConnectDataBase.objects.all()
+			queryset=ConnectDataBase.objects.all(),
+			empty_label='Выбрать...'
 		)
 
 

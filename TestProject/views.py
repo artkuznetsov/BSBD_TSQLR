@@ -96,7 +96,7 @@ def CreateTest(request):
 		for i in data:
 			dict[i] = data[i]
 		"""Для примера выведем ответа на 9 таск"""
-		#print(dict['categoryID 5'])
+		print(dict)
 		return JsonResponse({'status':'ok'}, charset="utf-8",safe=True)
 
 	if request.user.is_superuser:
@@ -195,6 +195,8 @@ def GoTest(request, testid):
 			dict[i] = data[i]
 		"""Для примера выведем ответа на 9 таск"""
 		print(dict['taskID 9'])
+		return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
+
 
 	personForTest = TestPerson.objects.get(Person = request.user.id)
 	tests = Test.objects.get(id=int(testid))

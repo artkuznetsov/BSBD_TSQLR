@@ -30,8 +30,23 @@
 
                     function save() {
                         inputs = document.getElementsByClassName('input_count_tasks');
+                        TestName = document.getElementById('id_Name');
+                        DateActivate = document.getElementById('id_DateActivate');
+                        Time = document.getElementById('id_Time');
+                        Variants = document.getElementById('id_Variants');
+                        ConnectDateBase = document.getElementById('select2-id_ConnectDataBase-container');
+                        console.log(TestName.value);
+                        console.log(DateActivate.value);
+                        console.log(Time.value);
+                        console.log(Variants.value);
+                        console.log(ConnectDateBase.title);
                         dict = {};
                         for (i = 0; i < inputs.length; i++) {
+                            dict['TestName'] = TestName.value;
+                            dict['DateActivate'] = DateActivate.value;
+                            dict['Time'] = Time.value;
+                            dict['Variants'] = Variants.value;
+                            dict['ConnectDateBase'] = ConnectDateBase.title;
                             dict['categoryID ' + inputs[i].id] = inputs[i].value;
                         }
                         console.log(dict);

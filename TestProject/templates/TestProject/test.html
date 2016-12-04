@@ -34,7 +34,17 @@
             url: window.location.href,
             data: JSON.stringify(dict),
             type: 'POST',
-            contentType: 'application/json'
+            contentType: 'application/json',
+            success: function (data) {
+
+                if(data['status']=='ok'){
+                    alert('Выши ответа были отправлены. Спасибо!');
+                    window.location = '/home';}
+
+            },
+            error: function (data) {
+                console.log(data);
+            }
         });
     }
 </script>
