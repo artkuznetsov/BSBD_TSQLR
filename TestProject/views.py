@@ -90,6 +90,15 @@ def AddUsers(request):
 
 def CreateTest(request):
 	"""Cоздание теста с вариантами"""
+	if request.is_ajax():
+		data = json.loads(request.read().decode("utf-8"))
+		dict = {}
+		for i in data:
+			dict[i] = data[i]
+		"""Для примера выведем ответа на 9 таск"""
+		#print(dict['categoryID 5'])
+		return JsonResponse({'status':'ok'}, charset="utf-8",safe=True)
+
 	if request.user.is_superuser:
 		if (request.method == "POST"):
 			form = TestForm(request.POST)

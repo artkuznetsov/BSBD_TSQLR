@@ -4,6 +4,7 @@
 {#{% block content_title %}Созать тест{% endblock %}#}
 
 {% block content %}
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
         <h2>Создать новый тест</h2>
         <form method="POST">
             {% csrf_token %}
@@ -19,10 +20,44 @@
                     <tr>
                         <td> {{ value }}</td>
                         <td>{{ key }}</td>
-                        <td><input title="input {{ value }}" name="input {{value.id}}" type="number" size="5" value="0" max="{{ value }}" min="0"></td>
+                        <td><input class="input_count_tasks" id="{{value.id}}" type="number" size="5" value="0" max="{{ value }}" min="0"></td>
                     </tr>
                 {% endfor %}
             </table>
-            <br><input href="../admin" type="submit" class="save btn btn-default" value="Сохранить">
+{#            <br><input onclick="save()" href="../admin" type="submit" class="save btn btn-default" value="Сохранить">#}
+                <br><input type="button" onclick="save()" value="Сохранить">
+                <script>
+
+                    function save() {
+                        inputs = document.getElementsByClassName('input_count_tasks');
+                        dict = {};
+                        for (i = 0; i < inputs.length; i++) {
+                            dict['categoryID ' + inputs[i].id] = inputs[i].value;
+                        }
+                        console.log(dict);
+
+                        $.ajax({
+                             beforeSend : function(jqXHR) {
+                                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+                            },
+                            accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                            url: window.location.href,
+                            data: JSON.stringify(dict),
+                            type: 'POST',
+                            dataType: 'json',
+                            contentType: 'application/json',
+                            success: function (data) {
+
+                                if(data['status']=='ok'){
+                                alert('Тест создан успешно!');
+                                window.location = '/admin/TestProject/test/';}
+
+                            },
+                            error: function (data) {
+                                console.log(data);
+                            }
+                        });
+                    }
+                </script>
         </form>
 {% endblock %}

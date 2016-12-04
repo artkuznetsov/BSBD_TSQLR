@@ -28,6 +28,9 @@
         console.log(dict);
 
         $.ajax({
+            beforeSend : function(jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
             url: window.location.href,
             data: JSON.stringify(dict),
             type: 'POST',
