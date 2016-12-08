@@ -195,43 +195,44 @@ def Add_TestPerson(request):
 def GoTest(request, testid):
 	if request.is_ajax():
 		data = json.loads(request.read().decode("utf-8"))
-		try:
-			print(data['2'])
-			return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
-		except:
-			test = Test.objects.get(id=int(testid))
-			task = Task.objects.all()
-			personForTest = TestPerson.objects.get(Person = request.user.id, Test = test)
-			connectdb = TestConnectDataBase.objects.get(Test = test)
-			connectStr = ConnectDataBase.objects.get(NameConnection = connectdb.ConnectDataBase).ConnectionString
-			Connect = pyodbc.connect(connectStr)
-			answ = []
-			for i in data:
 
-				curs = Connect.cursor()
-				curs1 = Connect.cursor()
-				try:
-					curs.execute(data[i])
-					t = task.get(NameTask = i)
-					curs1.execute(t.WTask)
-					l = [row for row in curs]
-					l1 = [row for row in curs1]
-					if l1==l:
-						answ.append(1)
-					else:
-						answ.append(0)
-				except:
+			#Здесь нужно обрабатывать запросы о проверки if-ом
+			# print(data['2'])
+			# return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
+
+		test = Test.objects.get(id=int(testid))
+		task = Task.objects.all()
+		personForTest = TestPerson.objects.get(Person = request.user.id, Test = test)
+		connectdb = TestConnectDataBase.objects.get(Test = test)
+		connectStr = ConnectDataBase.objects.get(NameConnection = connectdb.ConnectDataBase).ConnectionString
+		Connect = pyodbc.connect(connectStr)
+		answ = []
+		for i in data:
+
+			curs = Connect.cursor()
+			curs1 = Connect.cursor()
+			try:
+				curs.execute(data[i])
+				t = task.get(NameTask = i)
+				curs1.execute(t.WTask)
+				l = [row for row in curs]
+				l1 = [row for row in curs1]
+				if l1==l:
+					answ.append(1)
+				else:
 					answ.append(0)
+			except:
+				answ.append(0)
 
-			count = 0
-			for i in answ:
-				count +=i
-			personForTest.Mark = int(count/len(answ))
-			personForTest.save()
+		count = 0
+		for i in answ:
+			count +=i
+		personForTest.Mark = int(count/len(answ))
+		personForTest.save()
 
 
 
-			return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
+		return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
 
 	else:
 
