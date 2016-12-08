@@ -195,10 +195,9 @@ def Add_TestPerson(request):
 def GoTest(request, testid):
 	if request.is_ajax():
 		data = json.loads(request.read().decode("utf-8"))
-
-			#Здесь нужно обрабатывать запросы о проверки if-ом
-			# print(data['2'])
-			# return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
+		if len(data) == 1:
+			#Здесь нужно обрабатывать запросы о проверки
+			return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
 
 		test = Test.objects.get(id=int(testid))
 		task = Task.objects.all()
