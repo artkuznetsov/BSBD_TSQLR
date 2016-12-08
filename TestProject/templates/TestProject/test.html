@@ -1,17 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-
+{% load static %}
 <head>
     <meta charset="UTF-8">
     <title>Test</title>
 </head>
 <body>
-<script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
 <form method="post" class="main_form">
 {% for test in GTest %}
-	<br><h8 class="task_name">Название вопроса: {{ test.get_task.get_name }} </h8></br>
-	<br><h8 class="task_text">Вопрос: {{ test.get_task.get_tasktext }} </h8></br>
-	<br><textarea class="answer" title="input" id="{{test.get_task.get_id}}"></textarea></br>
+    <table>
+    <th>
+        <td></td>
+        <td></td>
+    </th>
+        <td>
+            <br><h8 class="task_name">Название вопроса: {{ test.get_task.get_name }} </h8></br>
+            <br><h8 class="task_text">Вопрос: {{ test.get_task.get_tasktext }} </h8></br>
+            <br><textarea class="answer" title="input" id="{{test.get_task.get_id}}"></textarea></br>
+        </td>
+        <td>
+            <input type="button" onclick="check({{ test.get_task.get_id }})" value="Проверить">
+        </td>
+    </table>
 {% endfor %}
 <input type="button" value="Завершить тест" onclick="end_test()">
 </form>
@@ -19,6 +30,34 @@
 </html>
 
 <script>
+    function check(id_task) {
+        console.log('id_task = '+id_task);
+        answer = document.getElementById(id_task);
+        console.log('answer = '+answer.value);
+        request = {};
+        request[id_task] = answer.value;
+
+        $.ajax({
+            beforeSend : function(jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(request),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+
+                if(data['status']=='ok'){
+                    alert('Кнопка работает нормально');
+                    //window.location = '/home';
+                }
+
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    }
     function end_test() {
         answers = document.getElementsByClassName('answer');
         dict = {};
@@ -38,9 +77,8 @@
             success: function (data) {
 
                 if(data['status']=='ok'){
-                    alert('Выши ответа были отправлены. Спасибо!');
+                    alert('Ваши ответы были отправлены. Спасибо!');
                     window.location = '/home';}
-
             },
             error: function (data) {
                 console.log(data);

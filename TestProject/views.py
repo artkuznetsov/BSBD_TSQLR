@@ -8,7 +8,7 @@ from django.shortcuts import *
 import random, json
 from django.contrib.auth.decorators import login_required
 import re
-
+import pyodbc
 
 
 def home(request):
@@ -81,7 +81,7 @@ def AddUsers(request):
 				else:
 					return redirect("/admin")
 			else:
-				return redirect("/admin")	
+				return redirect("/admin")
 		else:
 			return render(request, "admin/generate_users.html")
 	else:
@@ -90,60 +90,65 @@ def AddUsers(request):
 
 def CreateTest(request):
 	"""Cоздание теста с вариантами"""
-	if request.is_ajax():
-		data = json.loads(request.read().decode("utf-8"))
-		dict = {}
-		for i in data:
-			dict[i] = data[i]
-		"""Для примера выведем ответа на 9 таск"""
-		print(dict)
-		return JsonResponse({'status':'ok'}, charset="utf-8",safe=True)
-
 	if request.user.is_superuser:
-		if (request.method == "POST"):
-			form = TestForm(request.POST)
+		if request.is_ajax():
+			data = json.loads(request.read().decode("utf-8"))
 			task = Task.objects.all()
 			category = Category.objects.all()
-			taskId = []
-			taskC = []
-			for i in range(len(category)):
-				for j in task.filter(Category = category[i]):
-					taskC.append(j.id)
-				taskId.append(taskC)
-			if form.is_valid():
-				test = Test(
-					Name = form.cleaned_data['Name'],
-					DateActivate =form.cleaned_data['DateActivate'],
-					Time = form.cleaned_data['Time']
-				)
-				test.save()
-				connectdatabase = TestConnectDataBase(Test = test, ConnectDataBase = form.cleaned_data['ConnectDataBase'])
-				connectdatabase.save()
-				for i in range(form.cleaned_data['Variants']):
-					for j in range(len(category)):
-						tasks = []
-						count = 0
-						while count!= int(request.POST['input'+str(j+1)]):
-							RandomId = random.choice(taskId[j])
-							Check = RandomId in tasks
-							if Check == False:
-								tasks.append(RandomId)
-								test_task = TestTask.objects.create(Test = test, Task = task.get(id = RandomId),Variant=i+1)
-								count+=1
-				return redirect("/admin")
+
+			#id_categories = re.findall(r'\d\d*', str(re.findall(r'categoryID\s\d\d*', str(data))))
+
+			answers = {}
+			for i in re.findall(r'\d\d*', str(re.findall(r'categoryID\s\d\d*', str(data)))):
+				answers[i] = data['categoryID ' + i]
+
+			# dic2 = {}
+			# for i in data:
+			# 	if len(i.split(' '))==2:
+			# 		dic2[i.split(' ')[1]] =data[i]
+			# print('dict2 = '+str(dic2))
+			print('answers = '+str(answers))
+
+			test = Test(
+				Name = data['TestName'],
+				DateActivate =data['DateActivate'],
+				Time = data['Time']
+			)
+			test.save()
+
+			connectDB = ConnectDataBase.objects.get(NameConnection = data['ConnectDateBase'])
+			connectdatabase = TestConnectDataBase(Test = test, ConnectDataBase = connectDB)
+			connectdatabase.save()
+
+			for i in range(int(data['Variants'])):
+				for j in answers:
+					tasks = []
+					count = 0
+					t = []
+					for q in task.filter(Category = category.get(id = j)):
+						t.append(q.id)
+					r = [q for q in t]
+					while count!= int(answers[j]):
+						RandomId = random.choice(r)
+						Check = RandomId in tasks
+						if Check == False:
+							tasks.append(RandomId)
+							test_task = TestTask.objects.create(Test = test, Task = task.get(id = RandomId),Variant=i+1)
+							count+=1
+			return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
 		else:
 			form = TestForm()
 
 			"""Get categories and count of tasks in him"""
 			category = Category.objects.all()
 			tasks = Task.objects.all()
-			dict = {}
+			di = {}
 			count = 0
 			for i in category:
-				dict[len(tasks.filter(Category=i))] = i
+				di[len(tasks.filter(Category=i))] = i
 
 			return render(request, 'admin/create_test.html', {'form': form,
-															  'categoties': dict
+															  'categoties': di
 														  })
 	else:
 		return redirect("/404")
@@ -190,19 +195,55 @@ def Add_TestPerson(request):
 def GoTest(request, testid):
 	if request.is_ajax():
 		data = json.loads(request.read().decode("utf-8"))
-		dict= {}
-		for i in data:
-			dict[i] = data[i]
-		"""Для примера выведем ответа на 9 таск"""
-		print(dict['taskID 9'])
-		return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
+		try:
+			print(data['2'])
+			return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
+		except:
+			test = Test.objects.get(id=int(testid))
+			task = Task.objects.all()
+			personForTest = TestPerson.objects.get(Person = request.user.id, Test = test)
+			connectdb = TestConnectDataBase.objects.get(Test = test)
+			connectStr = ConnectDataBase.objects.get(NameConnection = connectdb.ConnectDataBase).ConnectionString
+			Connect = pyodbc.connect(connectStr)
+			answ = []
+			for i in data:
+
+				curs = Connect.cursor()
+				curs1 = Connect.cursor()
+				try:
+					curs.execute(data[i])
+					t = task.get(NameTask = i)
+					curs1.execute(t.WTask)
+					l = [row for row in curs]
+					l1 = [row for row in curs1]
+					if l1==l:
+						answ.append(1)
+					else:
+						answ.append(0)
+				except:
+					answ.append(0)
+
+			count = 0
+			for i in answ:
+				count +=i
+			personForTest.Mark = int(count/len(answ))
+			personForTest.save()
 
 
-	personForTest = TestPerson.objects.get(Person = request.user.id)
-	tests = Test.objects.get(id=int(testid))
-	test = TestTask.objects.filter(Test = tests	, Variant = personForTest.Variant)
 
-	return render(request,"TestProject/test.html", {"GTest":test})
+			return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
+
+	else:
+
+		tests = Test.objects.get(id=int(testid))
+		personForTest = TestPerson.objects.get(Person = request.user.id, Test = tests)
+		time = timezone.now()
+		personForTest.StartTest = time
+		personForTest.save()
+
+		test = TestTask.objects.filter(Test = tests	, Variant = personForTest.Variant)
+
+		return render(request,"TestProject/test.html", {"GTest":test, "time":time})
 
 
 

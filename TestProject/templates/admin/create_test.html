@@ -1,12 +1,13 @@
 {% extends "admin/base.html" %}
 {% load i18n %}
 {% block title %} Создать тест {% endblock %}
+{% load static %}
 {#{% block content_title %}Созать тест{% endblock %}#}
 
 {% block content %}
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
         <h2>Создать новый тест</h2>
-        <form method="POST">
+        <form method="POST" >
             {% csrf_token %}
             {{ form.as_p }}
             <table class="categories table">
@@ -35,11 +36,14 @@
                         Time = document.getElementById('id_Time');
                         Variants = document.getElementById('id_Variants');
                         ConnectDateBase = document.getElementById('select2-id_ConnectDataBase-container');
-                        console.log(TestName.value);
-                        console.log(DateActivate.value);
-                        console.log(Time.value);
-                        console.log(Variants.value);
-                        console.log(ConnectDateBase.title);
+                        Options = document.getElementsByTagName('option');
+{#                        console.log(Options[1].text);#}
+
+{#                        console.log(TestName.value);#}
+{#                        console.log(DateActivate.value);#}
+{#                        console.log(Time.value);#}
+{#                        console.log(Variants.value);#}
+{#                        console.log(ConnectDateBase.title);#}
                         dict = {};
                         for (i = 0; i < inputs.length; i++) {
                             dict['TestName'] = TestName.value;
@@ -49,8 +53,7 @@
                             dict['ConnectDateBase'] = ConnectDateBase.title;
                             dict['categoryID ' + inputs[i].id] = inputs[i].value;
                         }
-                        console.log(dict);
-
+{#                        console.log(dict);#}
                         $.ajax({
                              beforeSend : function(jqXHR) {
                                 jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
@@ -62,10 +65,13 @@
                             dataType: 'json',
                             contentType: 'application/json',
                             success: function (data) {
-
-                                if(data['status']=='ok'){
-                                alert('Тест создан успешно!');
-                                window.location = '/admin/TestProject/test/';}
+                                if(data['status']=='ok') {
+                                    alert('Тест создан успешно!');
+                                    window.location = '/admin/TestProject/test/';
+                                }
+                                if(data['status']=='err'){
+                                    alert('Скорее всего, вы не верно заполнили поля. Повторите попытку снова');
+                                }
 
                             },
                             error: function (data) {
