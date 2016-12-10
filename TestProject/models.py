@@ -48,6 +48,7 @@ class Task(models.Model):
 class ConnectDataBase(models.Model):
 	NameConnection = models.CharField(max_length = 10)
 	ConnectionString = models.TextField()
+	ShadowConnectionString = models.TextField(default = None)
 	def __str__(self):
 		return self.NameConnection
 
@@ -71,7 +72,7 @@ class Test(models.Model):
 
 class TestConnectDataBase(models.Model):
 	Test = models.ForeignKey('Test')
-	ConnectDataBase = models.ForeignKey('ConnectDataBase')		
+	ConnectDataBase = models.ForeignKey('ConnectDataBase')
 
 
 class TestPerson(models.Model):
@@ -102,11 +103,10 @@ class TestTask(models.Model):
 	Task = models.ForeignKey('Task')
 	Variant = models.IntegerField()
 
-
 	def get_task(self):
 		return self.Task
 
 class Answers(models.Model):
 	TestTask = models.ForeignKey('TestTask')
+	TestPerson = models.ForeignKey('TestPerson', default = None)
 	Answer = models.TextField()
-

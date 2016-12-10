@@ -18,6 +18,8 @@
             <br><h8 class="task_name">Название вопроса: {{ test.get_task.get_name }} </h8></br>
             <br><h8 class="task_text">Вопрос: {{ test.get_task.get_tasktext }} </h8></br>
             <br><textarea class="answer" title="input" id="{{test.get_task.get_id}}"></textarea></br>
+            {{ Monster }}
+            {{ time }}
         </td>
         <td>
             <input type="button" onclick="check({{ test.get_task.get_id }})" value="Проверить">
@@ -49,6 +51,7 @@
 
                 if(data['status']=='ok'){
                     alert('Кнопка работает нормально');
+                    console.log(data['table']);
                     //window.location = '/home';
                 }
 

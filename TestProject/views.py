@@ -141,11 +141,14 @@ def CreateTest(request):
 
 			"""Get categories and count of tasks in him"""
 			category = Category.objects.all()
+			print('category = ' + str(category))
 			tasks = Task.objects.all()
+			print('tasks = '+str(tasks))
 			di = {}
-			count = 0
 			for i in category:
-				di[len(tasks.filter(Category=i))] = i
+				di[i] = len(tasks.filter(Category=i))
+				print('i added '+ str(len(tasks.filter(Category=i))) +' tasks in category ' + str(i))
+			print('di = '+str(di))
 
 			return render(request, 'admin/create_test.html', {'form': form,
 															  'categoties': di
@@ -197,53 +200,96 @@ def GoTest(request, testid):
 		data = json.loads(request.read().decode("utf-8"))
 		if len(data) == 1:
 			#Здесь нужно обрабатывать запросы о проверки
-			return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
-
-		test = Test.objects.get(id=int(testid))
-		task = Task.objects.all()
-		personForTest = TestPerson.objects.get(Person = request.user.id, Test = test)
-		connectdb = TestConnectDataBase.objects.get(Test = test)
-		connectStr = ConnectDataBase.objects.get(NameConnection = connectdb.ConnectDataBase).ConnectionString
-		Connect = pyodbc.connect(connectStr)
-		answ = []
-		for i in data:
-
-			curs = Connect.cursor()
-			curs1 = Connect.cursor()
-			try:
+			test = Test.objects.get(id=int(testid))
+			connectdb = TestConnectDataBase.objects.get(Test = test)
+			connectStr = ConnectDataBase.objects.get(NameConnection = connectdb.ConnectDataBase).ConnectionString
+			Connect = pyodbc.connect(connectStr)
+			for i in data:
+				curs = Connect.cursor()
+				table = {}
+				# try:
 				curs.execute(data[i])
-				t = task.get(NameTask = i)
-				curs1.execute(t.WTask)
 				l = [row for row in curs]
-				l1 = [row for row in curs1]
-				if l1==l:
-					answ.append(1)
-				else:
+				print('l = ' + str(l))
+				col = [column[0] for column in curs.description]
+				print('col = ' + str(col))
+				for j in range(len(col)):
+					for q in l:
+						table[col[j]] = [q[j] for w in q]
+				# except:
+				# 	table['error'] = 'error'
+
+			return JsonResponse({'status': 'ok', 'table': table}, charset="utf-8", safe=True)
+		else:
+
+			test = Test.objects.get(id=int(testid))
+			task = Task.objects.all()
+			personForTest = TestPerson.objects.get(Person = request.user.id, Test = test)
+			connectdb = TestConnectDataBase.objects.get(Test = test)
+			connectStr = ConnectDataBase.objects.get(NameConnection = connectdb.ConnectDataBase)
+			Connect = pyodbc.connect(connectStr.ConnectionString)
+			ConnectSahdow = pyodbc.connect(connectStr.ShadowConnectionString)
+			answ = []
+			for i in data:
+				answer = Answers.objects.create(TestTask = TestTask.objects.get(Task = Task.objects.get(id = i)), TestPerson = personForTest, Answer = data[i])
+				curs = Connect.cursor()
+				curs1 = Connect.cursor()
+				Shadowcurs = ConnectSahdow.cursor()
+				Shadowcurs1 = ConnectSahdow.cursor()
+				try:
+					Shadowcurs.execute(data[i])
+					curs.execute(data[i])
+					t = task.get(NameTask = i)
+					curs1.execute(t.WTask)
+					Shadowcurs1.execute(t.WTask)
+					l = [row for row in curs]
+					l1 = [row for row in curs1]
+					sl = [row for row in Shadowcurs]
+					sl1 = [row for row in Shadowcurs1]
+					if l1==l and sl1==sl:
+						answ.append(1)
+					else:
+						answ.append(0)
+				except:
 					answ.append(0)
-			except:
-				answ.append(0)
 
-		count = 0
-		for i in answ:
-			count +=i
-		personForTest.Mark = int(count/len(answ))
-		personForTest.save()
-
-
-
-		return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
+			count = 0
+			for i in answ:
+				count +=i
+			personForTest.Mark = int(10*count/len(answ))
+			personForTest.save()
+			return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
 
 	else:
 
 		tests = Test.objects.get(id=int(testid))
+		task = Task.objects.all()
+		connectdb = TestConnectDataBase.objects.get(Test = tests)
+		connectStr = ConnectDataBase.objects.get(NameConnection = connectdb.ConnectDataBase)
+		Connect = pyodbc.connect(connectStr.ConnectionString)
 		personForTest = TestPerson.objects.get(Person = request.user.id, Test = tests)
-		time = timezone.now()
-		personForTest.StartTest = time
-		personForTest.save()
+
+
+		if(personForTest.StartTest == None):
+			time = timezone.now()
+			personForTest.StartTest = time
+			personForTest.save()
+		else:
+			time = personForTest.StartTest
 
 		test = TestTask.objects.filter(Test = tests	, Variant = personForTest.Variant)
-
-		return render(request,"TestProject/test.html", {"GTest":test, "time":time})
+		table = {}
+		finalMonster = []
+		for i in test:
+			curs = Connect.cursor()
+			curs.execute(i.get_task().WTask)
+			l = [row for row in curs]
+			col = [column[0] for column in curs.description]
+			for j in range(len(col)):
+				for q in l:
+					table[col[j]] = [q[j] for w in range(len(q))]
+			finalMonster.append(table)
+		return render(request,"TestProject/test.html", {"GTest":test, "time":time, 'Monster':finalMonster})
 
 
 
