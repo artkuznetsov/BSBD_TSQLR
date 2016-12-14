@@ -20,7 +20,7 @@ class TestForm(forms.Form):
 			label="Дата активации",
 			input_formats=['%d-%m-%Y %H:%M'],
 			required=True,
-			help_text = 'DD.MM.YYYY HH:MM',
+			help_text = 'YYYY.MM.DD HH:MM',
 		)
 	Time = forms.IntegerField\
 		(
@@ -63,4 +63,19 @@ class TestPersonForm(forms.Form):
 		)
 
 class AnswerForm(forms.Form):
-	pass
+	Test = forms.ModelChoiceField\
+		(
+			label = "Выбор теста",
+			queryset = Test.objects.all()
+		)
+	Person = forms.ModelMultipleChoiceField\
+		(
+			label = "Список студентов",
+			queryset = MyUser.objects.all(),
+			required=False
+		)
+	Variant = forms.IntegerField\
+    	(
+    		label = "Вариант теста",
+			min_value=0,
+    	)

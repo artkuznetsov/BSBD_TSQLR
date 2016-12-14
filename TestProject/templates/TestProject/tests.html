@@ -1,18 +1,73 @@
-{% extends "admin/base.html" %}
-{% block title %} Генерация пользователей {% endblock %}
-{% block content_title %}Генерация пользователей{% endblock %}
+{% load staticfiles %}
+<script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/test.css' %}">
+ <table id="table1" style='position: absolute; top: 0px; left:0px; width:100%; height:100%' border="1">
+     <tr class="panel-footer" height=10%>
+         <div class="clock" align="left">
+             Время
+         </div>
+         <div class="next_task" align="right">
+            <input type="button" onclick="NextTask()" value="Следующее задание" class="next_task">
+         </div>
+     </tr>
+    <tr class="tr_1" height=40%>
+        <td id='left_top' class="task_area">
+            <textarea class="input_user_query" spellcheck="false" placeholder="task" readonly></textarea>
+        </td>
+        <td id='right_top' class="user_area">
+           <textarea class="input_user_query" spellcheck="false" placeholder="Введите ваш запрос..." required></textarea>
+        </td>
+    </tr>
+    <tr class="tr_2" height=50%>
+        <td id='left_bottom' width=50% class="td_2">
+            <table class="scrolling-table">
+              <thead>
+              <tr><th>Заголовок</th><th>Заголовок</th><th>Заголовок</th><th>Заголовок</th></tr>
 
-{% block content %}
-    {% block object-tools %}{% endblock %}
+              </thead>
+              <tbody>
+              <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
 
-    <form name = "add_user" method = "POST" >
- -            {% csrf_token %}
- -            <i>Group:</i><br>
- -            <input type = "text" name = "Group" value = "{{ Group }}" size = 55><br>
- -            <i>Spisok:</i><br>
- -            <p><textarea name = "users"></textarea> </p>
- -
- -            <br><a href="../admin"><input type="submit" value="Зарегистрировать"></a>
- -            <input type="reset" value="Очистить">
-    </form>
-{% endblock %}
+              </tbody>
+            </table>
+        </td>
+        <td id='right_bottom' width=50%>
+            <table class="scrolling-table">
+              <thead>
+              <tr><th>Заголовок</th><th>Заголовок</th><th>Заголовок</th><th>Заголовок</th></tr>
+
+              </thead>
+              <tbody>
+              <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+               <tr><td>Текст</td><td>Текст</td><td>Текст</td><td>Текст</td></tr>
+
+              </tbody>
+            </table>
+        </td>
+    </tr>
+</table>

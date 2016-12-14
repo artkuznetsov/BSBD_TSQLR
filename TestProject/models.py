@@ -31,13 +31,13 @@ class Task(models.Model):
 	WTask = models.TextField()
 	Category = models.ForeignKey('Category')
 	Weight = models.IntegerField()
-	
+	ConnectDataBase = models.ForeignKey('ConnectDataBase')
 	def __str__(self):
 		return self.NameTask
 
 	def get_tasktext(self):
 		return self.TaskText
-		
+
 	def get_name(self):
 		return self.NameTask
 
@@ -78,7 +78,7 @@ class TestConnectDataBase(models.Model):
 class TestPerson(models.Model):
 	Person = models.ForeignKey('MyUser')
 	Test = models.ForeignKey(Test)
-	Mark = models.IntegerField(blank = True, null = True)
+	Mark = models.FloatField(blank = True, null = True)
 	StartTest = models.DateTimeField(blank = True, null = True)
 	Variant = models.IntegerField()
 

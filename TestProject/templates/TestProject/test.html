@@ -1,80 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-{% load static %}
-<head>
-    <meta charset="UTF-8">
-    <title>Test</title>
-</head>
-<body>
+{% load staticfiles %}
 <script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
-<form method="post" class="main_form">
-{% for test in GTest %}
-    <table>
-    <th>
-        <td></td>
-        <td></td>
-    </th>
-        <td>
-            <br><h8 class="task_name">Название вопроса: {{ test.get_task.get_name }} </h8></br>
-            <br><h8 class="task_text">Вопрос: {{ test.get_task.get_tasktext }} </h8></br>
-            <br><textarea class="answer" title="input" id="{{test.get_task.get_id}}"></textarea></br>
-            {{ Monster }}
-            {{ time }}
-        </td>
-        <td>
-            <input type="button" onclick="check({{ test.get_task.get_id }})" value="Проверить">
-        </td>
-    </table>
-{% endfor %}
-<input type="button" value="Завершить тест" onclick="end_test()">
-</form>
-</body>
-</html>
+<link rel="stylesheet" href="{% static 'css/test.css' %}">
+<script type="text/javascript" src="{% static 'js/shortcut.js' %}"></script>
 
-<script>
-    function check(id_task) {
-        console.log('id_task = '+id_task);
-        answer = document.getElementById(id_task);
-        console.log('answer = '+answer.value);
-        request = {};
-        request[id_task] = answer.value;
-
-        $.ajax({
+<script lang="JavaScript">
+function endTest() {
+    $.ajax({
             beforeSend : function(jqXHR) {
                 jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
             },
             url: window.location.href,
-            data: JSON.stringify(request),
-            type: 'POST',
-            contentType: 'application/json',
-            success: function (data) {
-
-                if(data['status']=='ok'){
-                    alert('Кнопка работает нормально');
-                    console.log(data['table']);
-                    //window.location = '/home';
-                }
-
-            },
-            error: function (data) {
-                console.log(data);
-            }
-        });
-    }
-    function end_test() {
-        answers = document.getElementsByClassName('answer');
-        dict = {};
-        for (i = 0; i < answers.length; i++) {
-            dict['taskID ' + answers[i].id] = answers[i].value;
-        }
-        console.log(dict);
-
-        $.ajax({
-            beforeSend : function(jqXHR) {
-                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
-            },
-            url: window.location.href,
-            data: JSON.stringify(dict),
+            data: JSON.stringify(Answers),
             type: 'POST',
             contentType: 'application/json',
             success: function (data) {
@@ -87,5 +23,232 @@
                 console.log(data);
             }
         });
+}
+function rememberAnswer(task_id) {
+    if(Step == 0){
+    window.onload = function () {
+          var user_query = document.getElementById("user_query").value;
+            console.log(user_query)
+    };
+    }else{
+        var user_query = document.getElementById("user_query").value;
+        console.log('user_query = '+user_query);
+
+        Answers['taskID '+ task_id] = user_query;
+        console.log('Answers = ');console.log(Answers);
     }
+}
+CurrentTask = 0;
+CurrentTaskID = 0;
+Step=0;
+Answers = {};
+
+    // Hotkeys for text area
+    shortcut.add("Alt+Enter", function() {
+        FillUserTable();
+    });
+GTest = [];
+    {% for test in GTest %}
+        var task = {};
+        task['id']={{ test.get_task.get_id }};
+        task['name']='{{ test.get_task.get_name }}';
+        task['text']='{{ test.get_task.get_tasktext }}';
+        GTest.push(task);
+    {% endfor %}
+var task = GTest[0];
+CurrentTaskID = task['id'];
+console.log(GTest);
+getTask(0);
+function FillTaskArea(task) {
+    console.log('iam in the FillTaskArea()');
+    var task_area = document.getElementById("teacher");
+         console.log(task_area);
+         task_area.value = null;
+         task_area.value +="Задание:\r\n";
+         task_area.value +=task['text'];
+}
+function FillTeacherTable(task) {
+    var data = {{ Monster | safe }};
+    var table = data[task['id']];
+    var columns = table[0];
+         console.log(table);
+    var rows = table.length;
+    var new_table = "<thead id=\"teacher_table_head\"><tr id=\"teacher_table_head_tr\"></tr></thead><tbody id=\"teacher_table_tbody\"></tbody>";;
+    document.getElementById("teacher_table").innerHTML = "";
+    document.getElementById("teacher_table").innerHTML = new_table;
+
+    for(var i=0;i<columns.length;i++)
+    {
+        document.getElementById("teacher_table_head_tr").innerHTML += "<td><b>"+columns[i]+"<b></td>";
+    }
+    for(var j=1;j<table.length;j++)
+    {
+        document.getElementById("teacher_table_tbody").innerHTML += "<tr id=\"teacher_table_tr_"+i+"\"></tr>";
+        for(var k=0;k<table[j].length;k++)
+        {
+            document.getElementById("teacher_table_tr_"+i+"").innerHTML += "<td><i>"+table[j][k]+"<i></td>";
+        }
+    }
+}
+function getTask(task_number) {
+    console.log('task_number = '+task_number);
+    console.log(' BEFORE:: task[id] =' + CurrentTaskID);
+    console.log('task_number = '+task_number);
+    console.log('Step = ' + Step);
+    rememberAnswer(CurrentTaskID);
+
+    try {
+        var button_test = document.getElementById("next_task");
+        if (button_test.value == "Завершить тест")
+            endTest()
+    }catch(e){}
+
+
+    CurrentTask = task_number;
+    var task;
+    task = GTest[task_number];
+    console.log('task = '+task);
+    CurrentTaskID = task['id'];
+    console.log(' AFTER:: task[id] =' + task['id']);
+
+    if(Step==0){
+         window.onload = function() {
+             console.log('h111111');
+             FillTaskArea(task);
+             //fill teacher_table from Monster
+             FillTeacherTable(task);
+             var uu = document.getElementById("step").innerHTML = "Текущий вопрос: <b>"+(Step+1)+"/"+GTest.length+"<b>";
+                 Step = Step+1;
+         };
+    }else
+    {
+        FillTaskArea(task);
+        FillTeacherTable(task);
+        var uu = document.getElementById("step").innerHTML = "Текущий вопрос: <b>"+(Step+1)+"/"+GTest.length+"<b>";
+            Step = Step+1;
+    }
+
+    console.log( 'GTest.lengt = ' +GTest.length);
+    if(Step == GTest.length)
+    {
+        var right_button = document.getElementById("next_task").value = "Завершить тест";
+        console.log(right_button)
+    }
+
+        //fill task_area
+{#    FillTaskArea();#}
+{#         //fill teacher_table from Monster#}
+{#    FillTeacherTable();#}
+
+
+}
+function FillUserTable() {
+    var user_query = document.getElementById("user_query").value;
+    var request = {};
+    request[CurrentTaskID] = user_query;
+    console.log(user_query);
+
+    $.ajax({
+            beforeSend : function(jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(request),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+
+                if(data['status']=='ok'){
+                    var new_table = "<thead id=\"user_table_thead\"><tr id=\"user_table_thead_tr\"></tr></thead><tbody id=\"user_table_tbody\"></tbody>";;
+                    document.getElementById("user_table").innerHTML = "";
+                    document.getElementById("user_table").innerHTML = new_table;
+{#                    alert('Кнопка работает нормально');#}
+                    var table = data['table'];
+                    var columns = data['table'][0];
+                        console.log(table);
+
+                    var rows = table.length;
+                    for(var i=0;i<columns.length;i++)
+                     {
+                         document.getElementById("user_table_thead_tr").innerHTML += "<td><b>"+columns[i]+"<b></td>";
+                     }
+                     for(var j=1;j<table.length;j++)
+                     {
+                         document.getElementById("user_table_tbody").innerHTML += "<tr id=\"user_table_tr_"+i+"\"></tr>";
+                         for(var k=0;k<table[j].length;k++)
+                         {
+                             document.getElementById("user_table_tr_"+i+"").innerHTML += "<td><i>"+table[j][k]+"<i></td>";
+                         }
+                     }
+                }
+
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+}
 </script>
+<script type="text/javascript" src="{% static 'js/test.js' %}"></script>
+ <table id="table1" style='position: absolute; top: 0px; left:0px; width:100%; height:100%' border="2">
+     <tr class="f" height=10%>
+         <td id="shadow_td">
+         <table id="table2" style=' position: absolute; top: 0px; left:0px; width:100%; height:200%' border="0">
+             <tr height=100%>
+                 <td id="clock" width=30%>clock</td>
+                 <td id="step" width=30%>Step</td>
+                 <td width=30%>
+                     <table class="buttons" style=' top: 0px; left:0px; width:100%; height:100%' border="0">
+                         <tr height = 100%>
+                             <td></td>
+                             <td width="50%"><input onclick="getTask(CurrentTask+1)" id="next_task" type="button" value="Следующее задание" class="button_task"></td>
+{#                             <td width=50%>#}
+{#                                 <div id="TaskButton" align="right">#}
+{#                                    <input id="next_task" onclick="getTask(CurrentTask+1)" type="button" value="Следующее задание">#}
+{#                                 </div>#}
+{#                             </td>#}
+{#                             <td></td>#}
+                         </tr>
+                     </table>
+                 </td>
+             </tr>
+         </table>
+         </td>
+     </tr>
+    <tr class="tr_1" height=40%>
+        <td id='left_top' class="task_area">
+            <textarea id="teacher" spellcheck="false"></textarea>
+        </td>
+        <td id='right_top' class="user_area">
+           <textarea id="user_query" class="input_u reser_query" spellcheck="false" placeholder="Введите ваш запрос..." required autofocus></textarea>
+        </td>
+    </tr>
+    <tr class="tr_2" height=50%>
+        <td id='left_bottom' width=50% class="td_2">
+            <table class="scrolling-table" id="teacher_table">
+              <thead id="teacher_table_head">
+                <tr id="teacher_table_head_tr">
+                </tr>
+              </thead>
+              <tbody id="teacher_table_tbody">
+
+
+              </tbody>
+            </table>
+        </td>
+        <td id='right_bottom' width=50%>
+            <table class="scrolling-table" id="user_table">
+              <thead id="user_table_thead">
+              <tr id="user_table_thead_tr">
+
+              </tr>
+
+              </thead>
+              <tbody id="user_table_tbody">
+
+
+              </tbody>
+            </table>
+        </td>
+    </tr>
+</table>

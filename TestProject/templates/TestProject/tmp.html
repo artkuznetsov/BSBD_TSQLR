@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+</head>
+<body>
+<script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+
+<form method="post" class="main_form">
+{% for test in GTest %}
+
+    <table id="main_table">
+{#    <th>#}
+{#        <td></td>#}
+{#        <td></td>#}
+{#    </th>#}
+        <td>
+            <br><h8 class="task_name">Название вопроса: {{ test.get_task.get_name }} </h8></br>
+            <br><h8 class="task_text">Вопрос: {{ test.get_task.get_tasktext }} </h8></br>
+            <br><textarea rows="10" cols="50" class="answer" title="input" id="{{test.get_task.get_id}}"></textarea></br>
+{#            {{ Monster }}#}
+{#            {{ time }}#}
+        </td>
+        <td>
+            <input type="button" onclick="check({{ test.get_task.get_id }})" value="Проверить">
+        </td>
+        <td>
+
+            <div class="div_user_table" id="div_for_user_table_task_{{ test.get_task.get_id }}">
+                <script>
+                    function UserTableCreate(taskid,table){
+                        $("table#user_table_for_task_" + taskid).remove();
+                        var columns = table[0];
+                        console.log(table);
+
+                        var rows = table.length;
+
+                        var body = document.getElementById('div_for_user_table_task_' + taskid),
+                            tbl  = document.createElement('table');
+                        tbl.id = 'user_table_for_task_' + taskid;
+                        tbl.style.width  = '100px';
+                        tbl.style.border = '1px solid black';
+
+                        for(var i = 0; i < rows; i++){//строки
+                            var tr = tbl.insertRow();
+                            for(var j = 0; j < columns.length; j++){//столбцы
+                                var td = tr.insertCell();
+                                if(i==0){
+                                    td.appendChild(document.createTextNode(columns[j]));}
+{#                                    td.style.border = '1px solid black';}#}
+                                else{
+                                    td.appendChild(document.createTextNode(table[i][j]));}
+{#                                    td.style.border = '1px solid black';}#}
+
+                            }
+                        }
+                        body.appendChild(tbl);
+                    }
+                </script>
+            </div>
+        </td>
+        <td>
+            <div class="div_teacher_table" id="div_for_teacher_table_task_{{ test.get_task.get_id }}">
+                <script>
+                    function CreateTeacherTable(taskid) {
+                        var data = {{ Monster | safe }};
+                        var table = data[taskid];
+{#                        $("table#teacher_table_for_task_" + taskid).remove();#}
+                        var columns = table[0];
+                        console.log(table);
+
+                        var rows = table.length;
+
+                        var body = document.getElementById('div_for_teacher_table_task_' + taskid),
+                            tbl  = document.createElement('table');
+                        tbl.id = 'teacher_table_for_task_' + taskid;
+                        tbl.style.width  = '100px';
+                        tbl.style.border = '1px solid black';
+                        tbl.style.alignContent.fontColor = 'red';
+
+                        for(var i = 0; i < rows; i++){//строки
+                            var tr = tbl.insertRow();
+                            for(var j = 0; j < columns.length; j++){//столбцы
+                                var td = tr.insertCell();
+                                if(i==0){
+                                    td.appendChild(document.createTextNode(columns[j]));}
+{#                                    td.style.border = '1px solid black';}#}
+                                else{
+                                    td.appendChild(document.createTextNode(table[i][j]));}
+{#                                    td.style.border = '1px solid black';}#}
+
+                            }
+                        }
+                        body.appendChild(tbl);
+
+                    }
+                </script>
+{#                        console.log();#}
+
+{#                        $("table#teacher_table_for_task_"+ taskid).remove();#}
+{#                        var tasks = document.getElementsByClassName("div_teacher_table");#}
+{#                        console.log(tasks);#}
+{#                        var columns = table[0];console.log(table);#}
+{##}
+{#                        var rows = table.length;#}
+{##}
+{#                        var body = document.getElementById('div_for_user_table_task_'+taskid),#}
+{#                            tbl  = document.createElement('table');#}
+{#                        tbl.id = 'user_table_for_task_'+taskid;#}
+{#                        tbl.style.width  = '100px';#}
+{#                        tbl.style.border = '1px solid black';#}
+{##}
+{#                        for(var i = 0; i < rows; i++){//строки#}
+{#                            var tr = tbl.insertRow();#}
+{#                            for(var j = 0; j < columns.length; j++){//столбцы#}
+{#                                var td = tr.insertCell();#}
+{#                                if(i==0){#}
+{#                                    td.appendChild(document.createTextNode(columns[j]));}#}
+    {#                                td.style.border = '1px solid black';}#}
+{#                                else{#}
+{#                                    td.appendChild(document.createTextNode(table[i][j]));}#}
+    {#                                td.style.border = '1px solid black';}#}
+{##}
+{#                            }#}
+{#                        }#}
+{#                        body.appendChild(tbl);#}
+{#                </script>#}
+            </div>
+        </td>
+    </table>
+    <script>
+        CreateTeacherTable({{ test.get_task.get_id }})
+    </script>
+{% endfor %}
+<input type="button" value="Завершить тест" onclick="end_test()">
+</form>
+</body>
+</html>
+
+<script>
+    function check(id_task) {
+        console.log('id_task = '+id_task);
+        answer = document.getElementById(id_task);
+        console.log('answer = '+answer.value);
+        request = {};
+        request[id_task] = answer.value;
+
+        $.ajax({
+            beforeSend : function(jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(request),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+
+                if(data['status']=='ok'){
+{#                    alert('Кнопка работает нормально');#}
+                    UserTableCreate(id_task,data['table']);
+{#                    create_user_table(id_task,data['table']);#}
+{#                    console.log(data['table']);#}
+{#                    table = data['table'];#}
+{#                    columns = table[0];#}
+{#                    task = data['task'];#}
+{#                    console.log(columns);#}
+                    //window.location = '/home';
+                }
+
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    }
+    function end_test() {
+        answers = document.getElementsByClassName('answer');
+        dict = {};
+        for (i = 0; i < answers.length; i++) {
+            dict['taskID ' + answers[i].id] = answers[i].value;
+        }
+        console.log(dict);
+
+        $.ajax({
+            beforeSend : function(jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(dict),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+
+                if(data['status']=='ok'){
+                    alert('Ваши ответы были отправлены. Спасибо!');
+                    window.location = '/home';}
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    }
+</script>

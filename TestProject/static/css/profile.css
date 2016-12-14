@@ -8,6 +8,9 @@ color: #1C1C1C;
   font-family: "Times New Roman";
 
 }
+pre{
+    overflow: scroll;
+}
 h3 {
 color: #551A8B;
 text-align: left;
