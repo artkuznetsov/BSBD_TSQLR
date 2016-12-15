@@ -16,11 +16,11 @@
             <h1 title="Username">Приветствую,{{ user }}</h1>
             <img src={% static 'images/line.jpg' %}>
         </header>
-            {% if completed_tests.count == 0 %}
-                <div class="UserDontHaveTests">
+            {% if uncompleted_tests.count == 0 %}
+                <div class="UserNotHaveTests">
                     <h2>Сейчас нет тестов, которые вы можете пройти</h2>
                 </div>
-            {% else  %}
+            {% endif %}
                 {% for test in uncompleted_tests %}
                         <h2>Вам доступен тест</h2>
                         <img src={% static 'images/pencil.jpg' %} align="left">
@@ -30,7 +30,7 @@
                         <a href="../../testid={{ test.get_test.get_id}}" class="btnStartTest">Начать</a>
                          <div class="an"></div>
                 {% endfor %}
-              {% endif %}
+
             </article>
             </div>
 

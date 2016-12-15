@@ -1,5 +1,7 @@
 #from django.http import HttpResponse
 #from django.shortcuts import render_to_response
+from django.utils.safestring import mark_safe
+
 from .forms import *
 from .models import models
 from django.http import *
@@ -48,6 +50,8 @@ def TestsUser(request):
 			with_mark.append(sub)
 		else:
 			without_mark.append(sub)
+	print(without_mark)
+	print(with_mark)
 	return render(request,"TestProject/profile.html",
                   {
 					  "completed_tests":with_mark, "uncompleted_tests":without_mark
@@ -94,23 +98,30 @@ def CreateTest(request):
 	"""Cоздание теста с вариантами"""
 	if request.user.is_superuser:
 		if request.is_ajax():
-			if(request.POST['check']== True):
+			# data = json.loads(request.read().decode("utf-8"))
+			print('HI!')
+			print(request.POST.get("ConnectDataBase"))
+			if (request.POST.get("check") == 'True'):
 				"""Get categories and count of tasks in him"""
 				form = TestForm(request.POST)
 				category = Category.objects.all()
-
-				tasks = Task.objects.filter(ConnectDataBase = form.cleaned_data['ConnectDateBase'])
-
-				di = {}
+				database = ConnectDataBase.objects.get(NameConnection= request.POST.get('ConnectDataBase'))
+				tasks = Task.objects.filter(ConnectDataBase=database).values()
+				print(tasks)
+				di2 = []
+				di = []
 				for i in category:
-					di[i] = len(tasks.filter(Category=i))
-				return JsonResponse({'status': 'ok', 'categoties':di, 'tasks':tasks}, charset="utf-8", safe=True)
+					di.append(str(i.id))
+					di.append(str(i))
+					di.append(len(tasks.filter(Category=i)))
+					di2.append(di)
+					di = []
+				return JsonResponse({'status': 'ok', 'categories': di2, 'tasks': list(tasks)}, charset="utf-8", safe=True)
+
 			else:
 				data = json.loads(request.read().decode("utf-8"))
 				task = data['tasks']
 				category = Category.objects.all()
-
-				#id_categories = re.findall(r'\d\d*', str(re.findall(r'categoryID\s\d\d*', str(data))))
 
 				answers = {}
 				for i in re.findall(r'\d\d*', str(re.findall(r'categoryID\s\d\d*', str(data)))):

@@ -10,24 +10,62 @@
         <form method="POST" >
             {% csrf_token %}
             {{ form.as_p }}
-            <table class="categories table">
+        <input onclick="getCategories()" value="Показать категории" type="button"><p></p>
+            <table id="categories table" border="0" style="text-align: center">
                 <tr>
                     <th>Категория</th>
                     <th>Количество вопросов</th>
                     <th>Требуемое количество вопросов</th>
                 </tr>
-                {% for key,value in categoties.items %}
-                    <tr>
-                        <td> {{ key }}</td>
-                        <td>{{ value }}</td>
-                        <td><input class="input_count_tasks" id="{{key.id}}" type="number" size="5" value="0" max="{{ value }}" min="0"></td>
-                    </tr>
-                {% endfor %}
-            </table>
-{#            <br><input onclick="save()" href="../admin" type="submit" class="save btn btn-default" value="Сохранить">#}
-                <br><input type="button" onclick="save()" value="Сохранить">
-                <script>
 
+{#                {% for key,value in categoties.items %}#}
+{#                    <tr>#}
+{#                        <td> {{ key }}</td>#}
+{#                        <td>{{ value }}</td>#}
+{#                        <td><input class="input_count_tasks" id="{{key.id}}" type="number" size="5" value="0" max="{{ value }}" min="0"></td>#}
+{#                    </tr>#}
+{#                {% endfor %}#}
+            </table>
+                <br><input type="button" onclick="save()" value="Создать">
+                <script>
+{#                    tasks = [];#}
+                    function getCategories() {
+                        var DB = document.getElementById("select2-id_ConnectDataBase-container").title;
+                        var dic = {};
+                        dic['ConnectDataBase'] = DB;
+                        dic["check"] = 'True';
+
+                        $.ajax({
+                            beforeSend : function(jqXHR) {
+                                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+                            },
+                            url: window.location.href,
+                            data: dic,
+                            type: 'POST',
+{#                            contentType: 'application/text',#}
+                            success: function (data) {
+                                if(data['status']=='ok'){
+                                    var categories = data['categories'];
+{#                                    tasks = data['tasks'];#}
+{#                                    console.log('tasks = ');#}
+                                    var categories_table = document.getElementById("categories table");
+                                    categories_table.innerHTML = "<tr><th>Категория</th> <th>Количество вопросов</th> <th>Требуемое количество вопросов</th></tr>";
+                                    for(var i=0;i<categories.length;i++)
+                                    {
+                                        categories_table.innerHTML += "<tr><td>"+categories[i][1]+"</td><td>"+categories[i][2]+"</td><td><input class=\"input_count_tasks\" id=\""+categories[i][0]+"\" type=\"number\" size=\"5\" value=\"0\" max=\""+categories[i][2]+"\" min=\"0\"></td></tr>";
+{#                                        console.log(categories);#}
+                                    }
+{#                                    tasks= data['tasks'];#}
+
+
+                                }
+
+                            },
+                            error: function (data) {
+                                console.log(data);
+                            }
+                        });
+                    }
                     function save() {
                         inputs = document.getElementsByClassName('input_count_tasks');
                         TestName = document.getElementById('id_Name');

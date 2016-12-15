@@ -18,12 +18,15 @@ class GP(models.Model):
 
 class Category(models.Model):
 	Name = models.CharField(max_length = 20)
+
 	def __str__(self):
 		return self.Name
 
 	def get_id(self):
 		return self.id
 
+	def get_name(self):
+		return self.Name
 
 class Task(models.Model):
 	NameTask = models.CharField(max_length = 20)
@@ -44,6 +47,8 @@ class Task(models.Model):
 	def get_id(self):
 		return self.id
 
+	def get_weight(self):
+		return self.Weight
 
 class ConnectDataBase(models.Model):
 	NameConnection = models.CharField(max_length = 10)

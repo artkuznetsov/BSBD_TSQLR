@@ -6,7 +6,7 @@ from django import forms
 #from django.forms.widgets import DateTimeBaseInput
 from django.forms import ModelForm, SplitDateTimeWidget
 from django.contrib.admin.widgets import AdminDateWidget, AdminTimeWidget
-
+BIRTH_YEAR_CHOICES = ('1980', '1981', '1982')
 class TestForm(forms.Form):
 	Name = forms.CharField\
         (
@@ -20,7 +20,7 @@ class TestForm(forms.Form):
 			label="Дата активации",
 			input_formats=['%d-%m-%Y %H:%M'],
 			required=True,
-			help_text = 'YYYY.MM.DD HH:MM',
+			help_text = 'YYYY-MM-DD HH:MM'
 		)
 	Time = forms.IntegerField\
 		(
@@ -37,9 +37,9 @@ class TestForm(forms.Form):
     	)
 	ConnectDataBase = forms.ModelChoiceField\
 		(
-			label="BD",
+			label="База данных",
 			queryset=ConnectDataBase.objects.all(),
-			empty_label='Выбрать...'
+			empty_label='Выбрать...',
 		)
 
 
