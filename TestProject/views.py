@@ -50,7 +50,9 @@ def TestsUser(request):
 			with_mark.append(sub)
 		else:
 			without_mark.append(sub)
+	print('WITHOUT_MARK = ')
 	print(without_mark)
+	print('WITH_MARK = ')
 	print(with_mark)
 	return render(request,"TestProject/profile.html",
                   {
@@ -189,12 +191,16 @@ def Add_TestPerson(request):
 						continue
 					else:
 						mas.append(i.Variant)
-				for i in students:
-					tp = TestPerson.objects.filter(Person = i, Test = test)
+				for st in students:
+					print(i)
+					tp = TestPerson.objects.filter(Person = st.id, Test = test)
+					print(tp)
 					tpv = [q.Variant for q in tp]
-					t = [j for j in mas if((j in tpv)==0) ]
+					print(tpv)
+					t = [j for j in mas if((j in tpv)==0)]
+					print(t)
 					choise = random.choice(t)
-					testperson = TestPerson.objects.create(Person = i, Test = test, Variant = choise)
+					testperson = TestPerson.objects.create(Person = st, Test = test, Variant = choise)
 				return redirect("/admin")
 		else:
 			form = TestPersonForm()
@@ -233,6 +239,7 @@ def GoTest(request, testid, var):
 			print(table)
 			return JsonResponse({'status': 'ok', 'table': table,'task': taskid}, charset="utf-8", safe=True)
 		else:
+			print('i here!!!')
 			test = Test.objects.get(id=int(testid))
 			task = Task.objects.all()
 			personForTest = TestPerson.objects.get(Person=request.user.id, Test=test, Variant=int(var))
@@ -244,7 +251,9 @@ def GoTest(request, testid, var):
 			weight = 0
 			for i in data:
 				temp = i.split(" ")[1]
-				answer = Answers.objects.create(TestTask=TestTask.objects.get(Task=task.get(id=temp), Test=test),
+				answer = Answers.objects.create(TestTask=TestTask.objects.get(Test=test,
+																			  Task=Task.objects.get(id=temp),
+																			  Variant=int(var)),
 												TestPerson=personForTest, Answer=data[i])
 				curs = Connect.cursor()
 				curs1 = Connect.cursor()

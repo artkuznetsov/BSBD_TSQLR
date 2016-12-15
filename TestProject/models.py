@@ -110,6 +110,8 @@ class TestTask(models.Model):
 
 	def get_task(self):
 		return self.Task
+	def get_test(self):
+		return self.Test
 
 class Answers(models.Model):
 	TestTask = models.ForeignKey('TestTask')

@@ -16,11 +16,14 @@
             <h1 title="Username">Приветствую,{{ user }}</h1>
             <img src={% static 'images/line.jpg' %}>
         </header>
-            {% if uncompleted_tests.count == 0 %}
                 <div class="UserNotHaveTests">
-                    <h2>Сейчас нет тестов, которые вы можете пройти</h2>
+                    <script>
+                        var a = "{{ uncompleted_tests }}";
+                        if(a == "[]")
+                            document.write("<h2>Сейчас нет тестов, которые вы можете пройти</h2>");
+                    </script>
+
                 </div>
-            {% endif %}
                 {% for test in uncompleted_tests %}
                         <h2>Вам доступен тест</h2>
                         <img src={% static 'images/pencil.jpg' %} align="left">
@@ -48,7 +51,7 @@
                         <!-- Table Header -->
                         {% for test in completed_tests %}
                             <tr>
-                                <td>{{ test.get_test }}</td>
+                                <td><a href="../../404">{{ test.get_test }}</a></td>
                                 <td>{{ test.get_mark }}</td>
                                 <td>{{ test.get_start_test_without_time }}</td>
                             </tr>

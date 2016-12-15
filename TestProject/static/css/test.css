@@ -125,3 +125,9 @@ textarea{
     font-size: 100%;
 
 }
+
+#clock{
+	color: #0071D0;
+	font-weight: bold;
+	font-size: 20px;
+}
