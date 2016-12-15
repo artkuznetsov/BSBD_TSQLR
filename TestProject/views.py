@@ -120,7 +120,8 @@ def CreateTest(request):
 
 			else:
 				data = json.loads(request.read().decode("utf-8"))
-				task = data['tasks']
+				database = ConnectDataBase.objects.get(NameConnection=data['ConnectDataBase'])
+				task = Task.objects.filter(ConnectDataBase=database)
 				category = Category.objects.all()
 
 				answers = {}
@@ -134,7 +135,7 @@ def CreateTest(request):
 				)
 				test.save()
 
-				connectDB = ConnectDataBase.objects.get(NameConnection = data['ConnectDateBase'])
+				connectDB = ConnectDataBase.objects.get(NameConnection = data['ConnectDataBase'])
 				connectdatabase = TestConnectDataBase(Test = test, ConnectDataBase = connectDB)
 				connectdatabase.save()
 
