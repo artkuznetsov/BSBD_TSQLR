@@ -12,5 +12,5 @@ urlpatterns = [
   url(r'^generate_users/$', views.AddUsers,name='AddUsers'),
   url(r'404/$', TestProject.views.error404),
   url(r'add_subscribe/$', views.Add_TestPerson, name='Add_TestPerson'),
-  url(r'testid=(?P<testid>[0-9]+)/$', views.GoTest, name='GoTest')
+  url(r'testid=(?P<testid>[0-9]+)&var=(?P<var>[0-9]+)/$', views.GoTest, name='GoTest')
 ]
