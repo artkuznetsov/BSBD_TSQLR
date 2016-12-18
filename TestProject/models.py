@@ -9,6 +9,10 @@ class MyUser(AbstractUser):
 	def __str__(self):
 		return self.username
 
+	def get_group(self):
+		return self.GP.__str__()
+
+
 
 class GP(models.Model):
 	NameGP = models.CharField(max_length = 10)
@@ -101,7 +105,10 @@ class TestPerson(models.Model):
 
 	def get_variant(self):
 		return self.Variant
-
+	def get_person(self):
+		return self.Person.username
+	def get_person_all(self):
+		return self.Person
 
 class TestTask(models.Model):
 	Test = models.ForeignKey('Test')
@@ -116,4 +123,7 @@ class TestTask(models.Model):
 class Answers(models.Model):
 	TestTask = models.ForeignKey('TestTask')
 	TestPerson = models.ForeignKey('TestPerson', default = None)
-	Answer = models.TextField()
+	Answer = models.TextField(max_length=30000)
+
+	def get_answer(self):
+		return self.Answer

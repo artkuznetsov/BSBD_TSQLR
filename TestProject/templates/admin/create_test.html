@@ -2,11 +2,11 @@
 {% load i18n %}
 {% block title %} Создать тест {% endblock %}
 {% load static %}
-{#{% block content_title %}Созать тест{% endblock %}#}
 
 {% block content %}
     <script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
         <h2>Создать новый тест</h2>
+        <p><h3 id="warning" style="color: #ba2121; display: none">Вы не указали одно или несколько полей!</h3></p>
         <form method="POST" >
             {% csrf_token %}
             {{ form.as_p }}
@@ -17,18 +17,9 @@
                     <th>Количество вопросов</th>
                     <th>Требуемое количество вопросов</th>
                 </tr>
-
-{#                {% for key,value in categoties.items %}#}
-{#                    <tr>#}
-{#                        <td> {{ key }}</td>#}
-{#                        <td>{{ value }}</td>#}
-{#                        <td><input class="input_count_tasks" id="{{key.id}}" type="number" size="5" value="0" max="{{ value }}" min="0"></td>#}
-{#                    </tr>#}
-{#                {% endfor %}#}
             </table>
                 <br><input type="button" onclick="save()" value="Создать">
                 <script>
-{#                    tasks = [];#}
                     function getCategories() {
                         var DB = document.getElementById("select2-id_ConnectDataBase-container").title;
                         var dic = {};
@@ -42,79 +33,70 @@
                             url: window.location.href,
                             data: dic,
                             type: 'POST',
-{#                            contentType: 'application/text',#}
+
                             success: function (data) {
                                 if(data['status']=='ok'){
                                     var categories = data['categories'];
-{#                                    tasks = data['tasks'];#}
-{#                                    console.log('tasks = ');#}
+
                                     var categories_table = document.getElementById("categories table");
                                     categories_table.innerHTML = "<tr><th>Категория</th> <th>Количество вопросов</th> <th>Требуемое количество вопросов</th></tr>";
                                     for(var i=0;i<categories.length;i++)
-                                    {
                                         categories_table.innerHTML += "<tr><td>"+categories[i][1]+"</td><td>"+categories[i][2]+"</td><td><input class=\"input_count_tasks\" id=\""+categories[i][0]+"\" type=\"number\" size=\"5\" value=\"0\" max=\""+categories[i][2]+"\" min=\"0\"></td></tr>";
-{#                                        console.log(categories);#}
-                                    }
-{#                                    tasks= data['tasks'];#}
-
-
                                 }
-
                             },
-                            error: function (data) {
-                                console.log(data);
-                            }
+                            error: function (data) {}
                         });
                     }
                     function save() {
-                        inputs = document.getElementsByClassName('input_count_tasks');
-                        TestName = document.getElementById('id_Name');
-                        DateActivate = document.getElementById('id_DateActivate');
-                        Time = document.getElementById('id_Time');
-                        Variants = document.getElementById('id_Variants');
-                        ConnectDateBase = document.getElementById('select2-id_ConnectDataBase-container');
-                        Options = document.getElementsByTagName('option');
-{#                        console.log(Options[1].text);#}
+                        var inputs = document.getElementsByClassName('input_count_tasks');
+                        var TestName = document.getElementById('id_Name');
+                        var DateActivate = document.getElementById('id_DateActivate');
+                        var Time = document.getElementById('id_Time');
+                        var Variants = document.getElementById('id_Variants');
+                        var ConnectDateBase = document.getElementById('select2-id_ConnectDataBase-container');
+                        var all_fields_is_not_null = 0;
+                            if(TestName == "" || DateActivate=="" || Time.value==0 || Variants.value==0 || ConnectDateBase.title=="Выбрать...")
+                                    all_fields_is_not_null =1;
 
-{#                        console.log(TestName.value);#}
-{#                        console.log(DateActivate.value);#}
-{#                        console.log(Time.value);#}
-{#                        console.log(Variants.value);#}
-{#                        console.log(ConnectDateBase.title);#}
-                        dict = {};
-                        for (i = 0; i < inputs.length; i++) {
-                            dict['TestName'] = TestName.value;
-                            dict['DateActivate'] = DateActivate.value;
-                            dict['Time'] = Time.value;
-                            dict['Variants'] = Variants.value;
-                            dict['ConnectDataBase'] = ConnectDateBase.title;
-                            dict['categoryID ' + inputs[i].id] = inputs[i].value;
-                        }
-{#                        console.log(dict);#}
-                        $.ajax({
-                             beforeSend : function(jqXHR) {
-                                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
-                            },
-                            accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                            url: window.location.href,
-                            data: JSON.stringify(dict),
-                            type: 'POST',
-                            dataType: 'json',
-                            contentType: 'application/json',
-                            success: function (data) {
-                                if(data['status']=='ok') {
-                                    alert('Тест создан успешно!');
-                                    window.location = '/admin/TestProject/test/';
-                                }
-                                if(data['status']=='err'){
-                                    alert('Скорее всего, вы не верно заполнили поля. Повторите попытку снова');
-                                }
-
-                            },
-                            error: function (data) {
-                                console.log(data);
+                        if(all_fields_is_not_null==1)
+                        {
+                            $("#warning").show();
+                        }else {
+                            $("#warning").hide();
+                            var dict = {};
+                            for (var i = 0; i < inputs.length; i++) {
+                                dict['TestName'] = TestName.value;
+                                dict['DateActivate'] = DateActivate.value;
+                                dict['Time'] = Time.value;
+                                dict['Variants'] = Variants.value;
+                                dict['ConnectDataBase'] = ConnectDateBase.title;
+                                dict['categoryID ' + inputs[i].id] = inputs[i].value;
                             }
-                        });
+                            $.ajax({
+                                beforeSend: function (jqXHR) {
+                                    jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+                                },
+                                accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                                url: window.location.href,
+                                data: JSON.stringify(dict),
+                                type: 'POST',
+                                dataType: 'json',
+                                contentType: 'application/json',
+                                success: function (data) {
+                                    if (data['status'] == 'ok') {
+                                        alert('Тест создан успешно!');
+                                        window.location = '/admin/TestProject/test/';
+                                    }
+                                    if (data['status'] == 'err') {
+                                        alert('Скорее всего, вы не верно заполнили поля. Повторите попытку снова');
+                                    }
+
+                                },
+                                error: function (data) {
+                                    alert(data.responseText)
+                                }
+                            });
+                        }
                     }
                 </script>
         </form>

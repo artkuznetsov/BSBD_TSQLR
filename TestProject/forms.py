@@ -68,7 +68,7 @@ class AnswerForm(forms.Form):
 			label = "Выбор теста",
 			queryset = Test.objects.all()
 		)
-	Person = forms.ModelMultipleChoiceField\
+	Person = forms.ModelChoiceField\
 		(
 			label = "Список студентов",
 			queryset = MyUser.objects.all(),

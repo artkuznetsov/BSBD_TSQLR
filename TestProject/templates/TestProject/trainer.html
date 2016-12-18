@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Тренажер</title>
+</head>
+<body>
+<h2>Выберите категорию</h2>
+<script>
+    var response = {{ categries | safe}};
+    for(var i=0;i<response.length;i++)
+        document.write("<input type=\"checkbox\">"+response[i][0]+"</a><p></p>");
+</script>
+</body>
+</html>

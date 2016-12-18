@@ -11,6 +11,8 @@ import random, json
 from django.contrib.auth.decorators import login_required
 import re
 import pyodbc
+from datetime import *
+from pytz import timezone
 
 def tests(request):
 	return render_to_response('TestProject/tests.html');
@@ -45,15 +47,13 @@ def TestsUser(request):
 	subscribe = TestPerson.objects.filter(Person = request.user.id)
 	with_mark = []
 	without_mark = []
+	tz = timezone('Asia/Omsk')
 	for sub in subscribe:
 		if sub.get_mark() != None:
 			with_mark.append(sub)
 		else:
-			without_mark.append(sub)
-	print('WITHOUT_MARK = ')
-	print(without_mark)
-	print('WITH_MARK = ')
-	print(with_mark)
+			if sub.Test.DateActivate <= datetime.now(tz):
+				without_mark.append(sub)
 	return render(request,"TestProject/profile.html",
                   {
 					  "completed_tests":with_mark, "uncompleted_tests":without_mark
@@ -100,16 +100,14 @@ def CreateTest(request):
 	"""Cоздание теста с вариантами"""
 	if request.user.is_superuser:
 		if request.is_ajax():
-			# data = json.loads(request.read().decode("utf-8"))
-			print('HI!')
-			print(request.POST.get("ConnectDataBase"))
+
 			if (request.POST.get("check") == 'True'):
 				"""Get categories and count of tasks in him"""
 				form = TestForm(request.POST)
 				category = Category.objects.all()
 				database = ConnectDataBase.objects.get(NameConnection= request.POST.get('ConnectDataBase'))
 				tasks = Task.objects.filter(ConnectDataBase=database).values()
-				print(tasks)
+
 				di2 = []
 				di = []
 				for i in category:
@@ -225,7 +223,6 @@ def GoTest(request, testid, var):
 				try:
 					curs.execute(data[i])
 					l = [row for row in curs]
-					print('l = ' + str(l))
 					col = [column[0] for column in curs.description]
 					table.append(col)
 					a = []
@@ -236,10 +233,8 @@ def GoTest(request, testid, var):
 						a=[]
 				except:
 					table['error'] = 'error'
-			print(table)
 			return JsonResponse({'status': 'ok', 'table': table,'task': taskid}, charset="utf-8", safe=True)
 		else:
-			print('i here!!!')
 			test = Test.objects.get(id=int(testid))
 			task = Task.objects.all()
 			personForTest = TestPerson.objects.get(Person=request.user.id, Test=test, Variant=int(var))
@@ -287,58 +282,181 @@ def GoTest(request, testid, var):
 			return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
 
 	else:
-
 		tests = Test.objects.get(id=int(testid))
 		task = Task.objects.all()
 		connectdb = TestConnectDataBase.objects.get(Test=tests)
 		connectStr = ConnectDataBase.objects.get(NameConnection=connectdb.ConnectDataBase)
 		Connect = pyodbc.connect(connectStr.ConnectionString)
 		personForTest = TestPerson.objects.get(Person=request.user.id, Test=tests, Variant=int(var))
+		tz = timezone('Asia/Omsk')
+		if personForTest.Mark == None and tests.DateActivate <= datetime.now(tz):
+			if (personForTest.StartTest == None):
+				time = datetime.now(tz)
+				personForTest.StartTest = time
+				personForTest.save()
+			else:
+				time = personForTest.StartTest
 
-		if (personForTest.StartTest == None):
-			time = timezone.now()
-			personForTest.StartTest = time
-			personForTest.save()
-		else:
-			time = personForTest.StartTest
+			test = TestTask.objects.filter(Test=tests, Variant=int(var))
+			table = []
 
-		test = TestTask.objects.filter(Test=tests, Variant=int(var))
-		table = []
-		# print(test)
-		finalMonster = {}
-		for i in test:
-			curs = Connect.cursor()
-			curs.execute(i.get_task().WTask)
-			l = [row for row in curs]
-			col = [column[0] for column in curs.description]
-			table.append(col)
-			a = []
-			for j in l:
-				for k in j:
-					a.append(k)
-				table.append(a)
+			finalMonster = {}
+			for i in test:
+				curs = Connect.cursor()
+				curs.execute(i.get_task().WTask)
+				l = [row for row in curs]
+				col = [column[0] for column in curs.description]
+				table.append(col)
 				a = []
-			# print('table = '+ str(table))
-			finalMonster[i.get_task().get_id()] = table
-			# print('finalMonster = '+ str(finalMonster))
-			table=[]
-		return render(request,"TestProject/test.html", {"GTest":test, "time":time, 'Monster':finalMonster})
+				for j in l:
+					for k in j:
+						a.append(k)
+					table.append(a)
+					a = []
+
+				finalMonster[i.get_task().get_id()] = table
+
+				table=[]
+			return render(request,"TestProject/test.html", {"GTest":test, "time":time, 'Monster':finalMonster})
+		else:
+			return redirect("/404")
 
 def TakeAnswer(request):
 	if request.user.is_superuser:
-		if (request.method == "POST"):
-			form = 	AnswerForm(request.POST)
-			if form.is_valid():
-				test = form.cleaned_data["Test"]
-				person = form.cleaned_data["Person"]
-				variant = form.cleaned_data["Variant"]
-				testperson = TestPerson.objects.get(Person = person, Test = test, Variant = variant)
-				testtask = TestTask.objects.filter(Test = test, Variant = testperson.Variant)
-				answers = []
-				for i in testtask:
-					answers.append(Answers.objects.get(TestPerson = testperson, TestTask = i))
-				return render(request, 'TestProject/answer_user.html', {'answers': answers})
+		if request.is_ajax():
+			data = json.loads(request.read().decode("utf-8"))
+			if data['GetTests'] == "True":
+				tests = Test.objects.all()
+				a = []
+				for i in tests:
+					a.append(i.Name)
+				return JsonResponse({'status': 'ok', 'tests':a}, charset="utf-8", safe=True)
+			else:
+				if data['GetStudents'] == "True":
+					test = Test.objects.get(Name=data['Test'])
+					# myuser =
+					students = {}
+					for i in TestPerson.objects.filter(Test=test):
+						for j in MyUser.objects.all():
+							if i.Person == j:
+								students[j.username]=1
+					return JsonResponse({'status': 'ok','students':students}, charset="utf-8", safe=True)
+				else:
+					if data['GetVariants'] == "True":
+						variants = {}
+						for i in TestPerson.objects.filter(Person=MyUser.objects.get(username=data['Student']),
+														   Test=Test.objects.get(Name=data['Test'])):
+							variants[i.Variant] = 1
+						return JsonResponse({'status': 'ok', "variants":variants}, charset="utf-8", safe=True)
+					else:
+						if data['GetAnswers'] == "True":
+							test = Test.objects.get(Name=data['Test'])
+							student = MyUser.objects.get(username=data['Student'])
+							variant = data['Variant']
+							tt = TestTask.objects.filter(Test=test,Variant=variant)
+							tp = TestPerson.objects.get(Person = student,Test=test,Variant=variant)
+							answers = []
+							for i in tt:
+								tmp = []
+								tmp.append(i.Task.TaskText)
+								tmp.append(i.Task.WTask)
+								tmp.append(Answers.objects.get(TestTask=i,TestPerson=tp).get_answer())
+								answers.append(tmp)
+							return JsonResponse({'status': 'ok', "answers": answers}, charset="utf-8", safe=True)
+		# if (request.method == "POST"):
+		# 	form = 	AnswerForm(request.POST)
+		# 	if form.is_valid():
+		# 		test = form.cleaned_data["Test"]
+		# 		person = form.cleaned_data["Person"]
+		# 		variant = form.cleaned_data["Variant"]
+		# 		testperson = TestPerson.objects.get(Person = person, Test = test, Variant = variant)
+		# 		print(testperson)
+		# 		testtask = TestTask.objects.filter(Test = test, Variant = testperson.get_variant())
+		# 		print(testtask)
+		# 		answers = []
+		# 		for i in testtask:
+		# 			tmp = []
+		# 			tmp.append(i.get_task().get_tasktext())
+        #
+		# 			answer = Answers.objects.get(TestPerson= testperson,TestTask=i)
+		# 			tmp.append(answer.get_answer())
+		# 			# answers[i.get_task().get_tasktext()] = answer.get_answer()
+		# 			answers.append(tmp)
+		# 			tmp = []
+		# 		print(answers)
+		# 		return render(request, 'admin/answer_user.html', {'answers': answers})
 		else:
 			form = AnswerForm()
-			return render(request, 'admin/answer.html', {'form' : form})
+			return render(request, 'admin/answer_user.html', {'form' : form})
 
+def DeleteSubscribe(request):
+	if request.user.is_superuser:
+		if request.is_ajax():
+			data = data = json.loads(request.read().decode("utf-8"))
+			if data['GetGroups'] == "True":
+				Groups = []
+				tmp = GP.objects.all().values("NameGP") #MyUser.objects.all().values("username")
+				for i in tmp:
+					Groups.append(i['NameGP'])
+				return JsonResponse({'status': 'ok', "groups": Groups}, charset="utf-8", safe=True)
+			if data['GetResult']=="True":
+				print("test1")
+				student = MyUser.objects.filter(GP=GP.objects.get(NameGP=data['Group']))
+				if data['Student'] != "False":
+					print('data[Student] != False')
+					print(data['Student'])
+					student = student.filter(username=data['Student'])
+				print(student)
+				print("test2")
+				mass = []
+				for i in student:
+					tp = TestPerson.objects.all()
+					print(tp)
+						# tp = tp2
+					if data['Test']!="False": tp = tp.filter(Test=Test.objects.get(Name=data['Test']))
+					print(tp)
+					if data['Mark']!="False":
+
+						if data['Mark'] == 'null':
+							tp = tp.filter(Mark=None)
+						else:
+							tp = tp.filter(Mark=data['Mark'])
+					print(tp)
+					if data['Variant']!="False": tp = tp.filter(Variant=data['Variant'])
+					print(tp)
+					print(i)
+					mass.append(tp.filter(Person=MyUser.objects.get(username=i.username)))
+					print('MASS=')
+					print(mass)
+				result = []
+				for i in mass:
+					for j in i:
+						print(j)
+						tmp = {}
+						tmp['Group'] = j.get_person_all().get_group()
+						print(tmp['Group'])
+						tmp['Person']=(j.get_person())
+						tmp['Test']=(j.Test.Name)
+						tmp['Mark']=(j.get_mark())
+						tmp['StartTest']=(j.get_start_test())
+						tmp['Variant']=(j.get_variant())
+						result.append(tmp)
+						print(result)
+				return JsonResponse({'status': 'ok', "result": result}, charset="utf-8", safe=True)
+	return render(request,'admin/delete_subscribe.html',{'answers':Answers.objects.all()})
+
+
+def Trainer(request):
+	categories = Category.objects.all()
+	result = []
+	for i in Category.objects.all():
+		tmp = []
+		print(i)
+		tmp.append(i.Name)
+		task = Task.objects.filter(Category=i)
+		for j in task:
+			tmp.append(j.NameTask)
+		result.append(tmp)
+		# tmp[i] = Task.objects.filter(Category=i)
+	print(result)
+	return render(request,'TestProject/trainer.html',{'categries':result})
