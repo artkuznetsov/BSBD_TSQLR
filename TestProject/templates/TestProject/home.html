@@ -3,6 +3,8 @@
 {% block title %} Тестирование SQL запросов {% endblock %}
 
 {% block content %}
+    {% load staticfiles %}
+    <script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
     <h1>Привет студент!</h1>
     <p><span>Давай-ка я тебя познакомлю с системой</span></p>
 {% endblock %}

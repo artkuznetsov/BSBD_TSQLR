@@ -54,6 +54,9 @@ class Task(models.Model):
 	def get_weight(self):
 		return self.Weight
 
+	def get_connectdatabase(self):
+		return self.ConnectDataBase
+
 class ConnectDataBase(models.Model):
 	NameConnection = models.CharField(max_length = 10)
 	ConnectionString = models.TextField()

@@ -15,5 +15,6 @@ urlpatterns = [
   url(r'testid=(?P<testid>[0-9]+)&var=(?P<var>[0-9]+)/$', views.GoTest, name='GoTest'),
   url(r'answer_user/$', views.TakeAnswer, name='TakeAnswer'),
   url(r'delete_subscribe/$', views.DeleteSubscribe, name='DeleteSubscribe'),
-  url(r'trainer/$', views.Trainer, name='Trainer')
+  url(r'trainer/$', views.Trainer, name='Trainer'),
+  url(r'show_users/$', views.ShowUsers, name='ShowUsers')
 ]

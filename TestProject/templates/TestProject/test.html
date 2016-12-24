@@ -6,19 +6,6 @@
 <script type="text/javascript" src="{% static 'js/shortcut.js' %}"></script>
 <script>
     $("#previous_task").hide();
-{#    var init = "{{ time }}";#}
-{#var str = "{{ time| date:"Y-m-d"}}";#}
-{#var year = "{{ time |date:"Y" }}";#}
-{#var month = "{{ time |date:"m" }}";#}
-{#var day = "{{ time |date:"d" }}";#}
-{#var hour = "{{ time |date:"H" }}";#}
-{#    var utc = "{{ time | date:"c" }}";#}
-{#    var minutes = "{{ time | date:"i" }}";#}
-{#var user_start = new Date(utc);#}
-{#    var now_time = new Date();#}
-{#    var ioo = now_time-user_start;#}
-
-{#alert(ioo);#}
 
 {% load tz %}
 {{ value|localtime }}
@@ -28,7 +15,6 @@
             $("#previous_task").hide();
         else
             $("#previous_task").show();
-{#        var utc = "{{ time | date:"c" }}";#}
         var user_start = new Date("{{ time | date:"c" }}").getTime();
             var TestTime = 0;
         {% for test in GTest %}
@@ -75,12 +61,12 @@ function endTest() {
             type: 'POST',
             contentType: 'application/json',
             success: function (data) {
-
                 if (data['status'] == 'ok') {
                 }
+
             },
             error: function (data) {
-                console.log(data);
+                console.log(data.body);
             }
         });
 }
@@ -277,7 +263,12 @@ function FillUserTable() {
                          }
                      }
                 }
-
+                else if (data['status'] == 'error')
+                {
+                    var error_text = data['error'];
+                    document.getElementById("user_table").innerHTML = "";
+                    document.getElementById("user_table").innerHTML = "<h2 id=\"error_text\">"+error_text+"</h2>";
+                }
             },
             error: function (data) {
                 console.log(data);
@@ -300,12 +291,6 @@ function FillUserTable() {
                          <tr height = 100%>
                              <td><input onclick="getTask(CurrentTask-1,1)" style="display: none" id="previous_task" type="button"  value="Предыдущее задание" class="button_task"></td>
                              <td width="50%"><input onclick="getTask(CurrentTask+1,2)" id="next_task" type="button" value="Следующее задание" class="button_task"></td>
-{#                             <td width=50%>#}
-{#                                 <div id="TaskButton" align="right">#}
-{#                                    <input id="next_task" onclick="getTask(CurrentTask+1)" type="button" value="Следующее задание">#}
-{#                                 </div>#}
-{#                             </td>#}
-{#                             <td></td>#}
                          </tr>
                      </table>
                  </td>
@@ -315,10 +300,10 @@ function FillUserTable() {
      </tr>
     <tr class="tr_1" height=40%>
         <td id='left_top' class="task_area">
-            <textarea id="teacher" spellcheck="false"></textarea>
+            <textarea id="teacher" spellcheck="false" readonly></textarea>
         </td>
         <td id='right_top' class="user_area">
-           <textarea id="user_query" class="input_u reser_query" spellcheck="false" placeholder="Введите ваш запрос..." required autofocus></textarea>
+           <textarea id="user_query" class="input_user_query" spellcheck="false" placeholder="Введите ваш запрос и нажмите Alt+Enter для его выполнения..." required autofocus></textarea>
         </td>
     </tr>
     <tr class="tr_2" height=50%>

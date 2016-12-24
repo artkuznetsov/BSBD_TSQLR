@@ -131,3 +131,12 @@ textarea{
 	font-weight: bold;
 	font-size: 20px;
 }
+
+#error_text{
+    color: #cd0a0a;
+    font-family: 'Ubuntu', 'Lucida Grande', 'Lucida Sans Unicode', 'Geneva', 'Verdana', sans-serif;
+}
+
+#fail_text{
+    color: #1e44e9;
+}

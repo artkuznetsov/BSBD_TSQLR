@@ -1,15 +1,407 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Тренажер</title>
-</head>
-<body>
-<h2>Выберите категорию</h2>
-<script>
-    var response = {{ categries | safe}};
-    for(var i=0;i<response.length;i++)
-        document.write("<input type=\"checkbox\">"+response[i][0]+"</a><p></p>");
+{% extends 'TestProject/base.html' %}
+{% load staticfiles %}
+{% block title %}Личный кабинет{% endblock %}
+{% block content %}
+    <script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/test.css' %}">
+    <script src="{% static 'js/sweet-alert.min.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/sweet-alert.css' %}" />
+    <script type="text/javascript" src="{% static 'js/shortcut.js' %}"></script>
+    <script>
+        shortcut.add("Alt+Enter", function() {
+        FillUserTable();
+    });
+    GTest=[];
+    CurrentTask = 0;
+    CurrentTaskID = 0;
+    Step=0;
+    Answers = {};
+    forminputs = document.getElementsByTagName('input');
+    function select_all(name, value) {
+        for (i = 0; i < forminputs.length; i++) {
+          // regex here to check name attribute
+          var regex = new RegExp(name, "i");
+          if (regex.test(forminputs[i].getAttribute('name'))) {
+            if (value == '1') {
+              forminputs[i].checked = true;
+            } else {
+              forminputs[i].checked = false;
+              }
+          }
+        }
+    }
+    function startTrainer() {
+        $("#first_field").hide();
+        $("#table1").show();
+        var checked = [];
+         $('input:checkbox:checked').each(function(){
+        checked.push($(this).val());
+        });
+        var request={};
+        request['checked_categories'] = checked;
+        request['start_test'] = "True";
+        $.ajax({
+            beforeSend : function(jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(request),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+                if(data['status']=='ok'){
+                    var tasks = data['tasks'];
+
+                    for(var i = 0;i<tasks.length;i++){
+                        var tmp = {};
+                        console.log(tasks[i]['table']);
+                        var table = tasks[i]['table'];
+                        console.log('table = ');
+                        console.log(table);
+                        tmp['text'] = tasks[i]['text'];
+                        tmp['name'] = tasks[i]['name'];
+                        tmp['id'] = tasks[i]['id'];
+                        tmp['table'] = table;
+{#                        tmp['table'] = tasks[i]['table'];#}
+                        GTest.push(tmp);
+                    }
+                    console.log('iam load Trainer...');
+                    trainerLoad();
+                }
+            },
+            error: function (data) {}
+        });
+    }
+    $("#previous_task").hide();
+
+{% load tz %}
+{{ value|localtime }}
+
+function clearUserTable() {
+    document.getElementById("user_table").innerHTML = "";
+}
+function fillUserTextarea(task) {
+    document.getElementById("user_query").value = Answers['taskID '+task['id']];
+}
+function endTest() {
+{#        $.ajax({#}
+{#            beforeSend: function (jqXHR) {#}
+{#                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');#}
+{#            },#}
+{#            url: window.location.href,#}
+{#            data: JSON.stringify(Answers),#}
+{#            type: 'POST',#}
+{#            contentType: 'application/json',#}
+{#            success: function (data) {#}
+{#                if (data['status'] == 'ok') {#}
+{#                }#}
+{#            },#}
+{#            error: function (data) {#}
+{#                console.log(data);#}
+{#            }#}
+{#        });#}
+}
+function rememberAnswer(task_id) {
+    if(Step == 0){
+    window.onload = function () {
+          var user_query = document.getElementById("user_query").value;
+            console.log(user_query)
+    };
+    }else{
+        var user_query = document.getElementById("user_query").value;
+        console.log('user_query = '+user_query);
+
+        Answers['taskID '+ task_id] = user_query;
+        console.log('Answers = ');console.log(Answers);
+    }
+}
+function trainerLoad() {
+console.log('iam loading trainer');
+    {#CurrentTask = 0;#}
+    {#CurrentTaskID = 0;#}
+    {#Step=0;#}
+    {#Answers = {};#}
+
+    // Hotkeys for text area
+    {#    shortcut.add("Alt+Enter", function() {#}
+    {#        FillUserTable();#}
+    {#    });#}
+console.log('iam start cycle for add Answers');
+    console.log('GTest =');
+    console.log(GTest);
+    for (var i = 0; i < GTest.length; i++) {
+        {#        var task = {};#}
+        {#        task['id'] = GTest[i]['id'];#}
+        {#        task['name'] = GTest[i]['NameTask'];#}
+        {#        task['text'] = GTest[i]['TaskText'];#}
+        Answers['taskID ' + GTest[i]['id']] = "";
+    }
+    console.log('Answers is =');
+    console.log(Answers);
+    {#    {% for test in GTest %}#}
+    {#        #}
+    {#        task['id']={{ test.get_task.get_id }};#}
+    {#        task['name']='{{ test.get_task.get_name }}';#}
+    {#        task['text']='{{ test.get_task.get_tasktext }}';#}
+    {#        GTest.push(task);#}
+    {#        Answers['taskID '+ {{ test.get_task.get_id }}] = "";#}
+    {#    {% endfor %}#}
+    console.log('iam initialyzing task from GTest[0]');
+    var task = GTest[0];
+    console.log('task = ');
+    console.log(task);
+    CurrentTaskID = task['id'];
+    console.log(GTest);
+    getTask(0, 0);
+}
+function FillTaskArea(task) {
+    console.log('iam in the FillTaskArea()');
+    var task_area = document.getElementById("teacher");
+         console.log(task_area);
+         task_area.value = null;
+         task_area.value +="Задание:\r\n";
+         task_area.value +=task['text'];
+}
+function FillTeacherTable(task) {
+{#    var data = {{ Monster | safe }};#}
+    var table = task['table'];
+    var columns = table[0];
+         console.log(table);
+    var rows = table.length;
+    var new_table = "<thead id=\"teacher_table_head\"><tr id=\"teacher_table_head_tr\"></tr></thead><tbody id=\"teacher_table_tbody\"></tbody>";;
+    document.getElementById("teacher_table").innerHTML = "";
+    document.getElementById("teacher_table").innerHTML = new_table;
+
+    for(var i=0;i<columns.length;i++)
+    {
+        document.getElementById("teacher_table_head_tr").innerHTML += "<td><b>"+columns[i]+"<b></td>";
+    }
+    for(var j=1;j<table.length;j++)
+    {
+        document.getElementById("teacher_table_tbody").innerHTML += "<tr id=\"teacher_table_tr_"+j+"\"></tr>";
+        for(var k=0;k<table[j].length;k++)
+        {
+            document.getElementById("teacher_table_tr_"+j+"").innerHTML += "<td><i>"+table[j][k]+"<i></td>";
+        }
+    }
+}
+function getTask(task_number,flag) {
+    console.log('task_number = '+task_number);
+    console.log(' BEFORE:: task[id] =' + CurrentTaskID);
+    console.log('task_number = '+task_number);
+    console.log('Step = ' + Step);
+    rememberAnswer(CurrentTaskID);
+    try {
+        var button_test = document.getElementById("next_task");
+        var left_button = document.getElementById("previous_task");
+        if (button_test.value == "Закрыть тренажер" && flag == 2){
+            swal({
+              title: "Вы уверены, что хотите закрыть тренажер?",
+              type: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#DD6B55",
+              confirmButtonText: "Да, закрыть.",
+                cancelButtonText: "Отмена",
+              closeOnConfirm: false
+            },
+            function(){
+                endTest();
+                swal({
+                  title: "Спасибо!",
+                  text: "Приходите еще.",
+                  type: "success",
+                  showCancelButton: false,
+                  confirmButtonColor: "#DD6B55",
+                  confirmButtonText: "Ok",
+                  closeOnConfirm: false},
+                function(){
+                    window.location = '/trainer/';
+                });
+            }
+            );
+        }else
+        if(button_test.value == "Закрыть тренажер" && flag == 1)
+            button_test.value  = "Следующее задание";
+    }catch(e){}
+
+if(task_number!=GTest.length) {
+    CurrentTask = task_number;
+    var task;
+    task = GTest[task_number];
+    console.log('task = ' + task);
+    CurrentTaskID = task['id'];
+    console.log(' AFTER:: task[id] =' + task['id']);
+
+    if (Step == 0) {
+{#        window.onload = function () {#}
+            console.log('h111111');
+            FillTaskArea(task);
+            //fill teacher_table from Monster
+            FillTeacherTable(task);
+            fillUserTextarea(task);
+            clearUserTable();
+            if (flag == 2 || flag == 0) {
+                document.getElementById("step").innerHTML = "Текущий вопрос: <b>" + (Step + 1) + "/" + GTest.length + "<b>";
+                Step = Step + 1;
+            } else if (flag == 1) {
+                document.getElementById("step").innerHTML = "Текущий вопрос: <b>" + (Step - 1) + "/" + GTest.length + "<b>";
+                Step = Step - 1;
+            }
+            if(Step==1)
+        $("#previous_task").hide();
+    else
+        $("#previous_task").show();
+{#        };#}
+    } else {
+        FillTaskArea(task);
+        FillTeacherTable(task);
+        fillUserTextarea(task);
+        clearUserTable();
+        if (flag == 2 || flag == 0) {
+            document.getElementById("step").innerHTML = "Текущий вопрос: <b>" + (Step + 1) + "/" + GTest.length + "<b>";
+            Step = Step + 1;
+        } else if (flag == 1) {
+            document.getElementById("step").innerHTML = "Текущий вопрос: <b>" + (Step - 1) + "/" + GTest.length + "<b>";
+            Step = Step - 1;
+        }
+            if(Step==1)
+        $("#previous_task").hide();
+    else
+        $("#previous_task").show();
+    }
+
+    console.log('GTest.lengt = ' + GTest.length);
+    if (Step == GTest.length) {
+        var right_button = document.getElementById("next_task").value = "Закрыть тренажер";
+        console.log(right_button)
+    }
+}
+
+
+}
+function FillUserTable() {
+    var user_query = document.getElementById("user_query").value;
+    var request = {};
+{#    request[CurrentTaskID] = user_query;#}
+    request['id'] = CurrentTaskID;
+    request['user_query'] = user_query;
+    request['start_test'] = "False";
+    request['check_task'] = "True";
+    console.log(user_query);
+
+    $.ajax({
+            beforeSend : function(jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(request),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+
+                if(data['status']=='ok'){
+                    var new_table = "<thead id=\"user_table_thead\"><tr id=\"user_table_thead_tr\"></tr></thead><tbody id=\"user_table_tbody\"></tbody>";
+                    document.getElementById("user_table").innerHTML = "";
+                    document.getElementById("user_table").innerHTML = new_table;
+{#                    alert('Кнопка работает нормально');#}
+                    var table = data['table'];
+                    var columns = data['table'][0];
+                        console.log(table);
+
+                    var rows = table.length;
+                    for(var i=0;i<columns.length;i++)
+                     {
+                         document.getElementById("user_table_thead_tr").innerHTML += "<td><b>"+columns[i]+"<b></td>";
+                     }
+                     for(var j=1;j<table.length;j++)
+                     {
+                         document.getElementById("user_table_tbody").innerHTML += "<tr id=\"user_table_tr_"+j+"\"></tr>";
+                         for(var k=0;k<table[j].length;k++)
+                         {
+                             document.getElementById("user_table_tr_"+j+"").innerHTML += "<td><i>"+table[j][k]+"<i></td>";
+                         }
+                     }
+                }
+
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+}
 </script>
-</body>
-</html>
+
+
+
+    <div id="first_field">
+    <h2>Выберите категорию</h2>
+    {% csrf_token %}
+        <input type="button" value="Выбрать все" onclick="select_all('category',1)">
+        <input type="button" value="Сбросить все" onclick="select_all('category',0)">
+        {% for i in categories %}
+            <p><input name="category" type="checkbox" id="{{ i.get_id }}" value="{{ i.Name }}">{{ i.Name }}</p>
+        {% endfor %}
+        <input type="submit" value="Начать" onclick="startTrainer()">
+    </div>
+
+     <table id="table1" style='display: none; position: relative; top: 0px; left:0px; width:100%; height:100%' border="2">
+     <tr class="f" height=7%>
+         <td id="shadow_td">
+         <table id="table2" style=' position: absolute; top: 0px; left:0px; width:100%; height:200%' border="0">
+             <tr height=100%>
+                 <td id="clock_td" width=30%>
+                     <div id="clock"></div>
+                 </td>
+                 <td id="step" width=30%></td>
+                 <td width=30%>
+                     <table class="buttons" style=' top: 0px; left:0px; width:100%; height:100%' border="0">
+                         <tr height = 100%>
+                             <td><input onclick="getTask(CurrentTask-1,1)" style="display: none" id="previous_task" type="button"  value="Предыдущее задание" class="button_task"></td>
+                             <td width="50%"><input onclick="getTask(CurrentTask+1,2)" id="next_task" type="button" value="Следующее задание" class="button_task"></td>
+                         </tr>
+                     </table>
+                 </td>
+             </tr>
+         </table>
+         </td>
+     </tr>
+    <tr class="tr_1" height=45%>
+        <td id='left_top' class="task_area">
+            <textarea id="teacher" spellcheck="false" readonly></textarea>
+        </td>
+        <td id='right_top' class="user_area">
+           <textarea id="user_query" class="input_u reser_query" spellcheck="false" placeholder="Введите ваш запрос и нажмите Alt+Enter для его выполнения..." required autofocus></textarea>
+        </td>
+    </tr>
+    <tr class="tr_2" height=50%>
+        <td id='left_bottom' width=50% class="td_2">
+            <table class="scrolling-table" id="teacher_table">
+              <thead id="teacher_table_head">
+                <tr id="teacher_table_head_tr">
+                </tr>
+              </thead>
+              <tbody id="teacher_table_tbody">
+
+
+              </tbody>
+            </table>
+        </td>
+        <td id='right_bottom' width=50%>
+            <table class="scrolling-table" id="user_table">
+              <thead id="user_table_thead">
+              <tr id="user_table_thead_tr">
+
+              </tr>
+
+              </thead>
+              <tbody id="user_table_tbody">
+
+
+              </tbody>
+            </table>
+        </td>
+    </tr>
+</table>
+{% endblock %}
+
+
