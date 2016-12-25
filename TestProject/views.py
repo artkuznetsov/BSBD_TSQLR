@@ -541,11 +541,33 @@ def Trainer(request):
 
 def ShowUsers(request):
     if request.user.is_superuser:
+        if request.is_ajax():
+            data = json.loads(request.read().decode("utf-8"))
+            if data['resetPassword'] == "True":
+                a = MyUser.objects.get(id=data['user_id'])
+                b = {}
+                b['username'] = a.username
+                b['email'] = a.email
+                b['last_name'] = a.last_name
+                b['first_name'] = a.first_name
+                b['GP'] = a.GP
+                a.delete()
+                person = MyUser.objects.create_user(username=b['username'],
+                                                    email=b['email'],
+                                                    password="P@$$word",
+                                                    GP=b['GP'])
+                person.save()
+                return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
+
         result = {}
-        keys = []
         for group in GP.objects.all():
-            students = MyUser.objects.filter(GP=group)
-            result[group.NameGP] = students
+            for i in MyUser.objects.filter(GP=group):
+                stud = []
+                stud.append(i.id)
+                stud.append(i.get_group())
+                stud.append(i.username)
+                stud.append(i.last_name)
+                stud.append(i.first_name)
+                result[i.get_group()] = stud
         print(result)
-        keys = ["username", "first_name", "last_name"]
-        return render(request, 'admin/show_users.html', {'students_list': result, 'keys': keys})
+        return render(request, 'admin/show_users.html', {'students_list': result})

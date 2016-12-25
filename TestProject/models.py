@@ -13,7 +13,6 @@ class MyUser(AbstractUser):
 		return self.GP.__str__()
 
 
-
 class GP(models.Model):
 	NameGP = models.CharField(max_length = 10)
 	def __str__(self):

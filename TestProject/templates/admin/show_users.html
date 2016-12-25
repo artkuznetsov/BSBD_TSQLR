@@ -3,6 +3,33 @@
 {% block title %} Создать тест {% endblock %}
 {% load static %}
 {% block content %}
+    <script>
+    function resetPassword(userid) {
+        var request = {};
+        request['resetPassword'] = "True";
+        request['user_id'] = userid;
+
+        $.ajax({
+            beforeSend: function (jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(request),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+                if (data['status'] == 'ok') {
+                    window.location = window.location.href;
+
+                }
+
+            },
+            error: function (data) {
+                console.log(data.body);
+            }
+        });
+    }
+    </script>
 <head>
     <script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
     <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
@@ -25,18 +52,18 @@
 					<tr>
 						<th class="hidden-xs">Группа</th>
 						<th class="hidden-xs">Логин</th>
+                        <th class="hidden-xs">Фамилия</th>
 						<th class="hidden-xs">Имя</th>
-                        <th class="hidden-xs">Последняя дата посещения</th>
+                        <th class="hidden-xs">Сброс пароля</th>
 					</tr>
-					{% for group,students in students_list.items %}
-                        {% for s in students %}
-                            <tr><td>{{ group }}</td>
-                            {% for key in s.values %}
-                                <td>{{ key }}</td>
+                    <tbody id="tbody_table">
+                        <script>
+                            {% for stud in students_list.values %}
+                                var a = {{ stud | safe}};
+                                    document.write("<tr id=\""+a[0]+"\"><td>"+a[1]+"</td><td>"+a[2]+"</td><td>"+a[3]+"</td><td>"+a[4]+"</td><td><input type=\"button\" id=\""+a[0]+"\" onclick=resetPassword("+a[0]+")></td></tr>");
                             {% endfor %}
-                            </tr>
-                        {% endfor %}
-                    {% endfor %}
+                        </script>
+                </tbody>
 				</table>
 			</div><!-- /.container -->
 		</section>
