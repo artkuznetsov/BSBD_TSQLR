@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 {% load i18n %}
-{% block title %} Создать тест {% endblock %}
+{% block title %} Ответы студентов {% endblock %}
 {% load static %}
 
 {% block content %}
@@ -53,7 +53,6 @@
     function getStudents() {
         var test = $("#select_test :selected").text();
 
-        console.log(test);
         var request = {};
         request['GetStudents'] = "True";
         request['Test'] = test;
@@ -79,10 +78,7 @@
                     $.each(data['students'], function (key, value) {
                         $('select#select_students').append($(new Option(key, value)));
                     });
-{#                    alert('Ваши ответы были отправлены. Спасибо!');#}
-{#                    console.log(data['tests']);#}
                 }
-                {#                    window.location = '/accounts/profile/';}#}
             },
             error: function (data) {
                 console.log(data);

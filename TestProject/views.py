@@ -22,7 +22,6 @@ def tests(request):
         for group in GP.objects.all():
             students = MyUser.objects.filter(GP=group)
             result[group.NameGP] = students
-        print(result)
         keys = ["username", "first_name", "last_name"]
         return render(request, 'TestProject/tests.html', {'students_list': result, 'keys': keys})
 
@@ -73,41 +72,96 @@ def TestsUser(request):
                   })
 
 
+'''
 def AddUsers(request):
     """Создание группы и пользоваетлей, которые входят в неё"""
     if request.user.is_superuser:
-        if (request.method == "POST"):
-            Groups = request.POST['Group']
-            if Groups != "":
-                group = GP(NameGP=Groups)
-                group.save()
-                users = request.POST['users']
-                if users != '':
-                    users = users.split('\n')
-                    count = 0
-                    for i in users:
-                        user = i.split(' ')
-
-                        person = MyUser.objects.create_user(
-                            username=Groups + str(count),
-                            email=None,
-                            password='Qwerty123' + str(count),
-                            last_name=user[0],
-                            first_name=user[1],
-                            GP=group
-                        )
-                        count += 1
-                        person.save()
-                    return redirect("/admin")
-                else:
-                    return redirect("/admin")
-            else:
-                return redirect("/admin")
-        else:
+    	if request.method == ["POST"]:
+    		Groups = request.POST['Group']
+    		if Groups != "":
+    			if GP.objects.get(NameGP = Groups) is None:
+    				group = GP(NameGP=Groups)
+    				group.save()
+    				users = request.POST['users']
+    				if users != '':
+    					users = users.split('\n')
+    					count = 0
+    					for i in users:
+    						user = i.split(' ')
+    						person = MyUser.objects.create_user(
+								username=Groups +"-"+ str(count),
+	                            email=None,
+	                            password='Qwerty123' + str(count),
+	                            last_name=user[0],
+	                            first_name=user[1],
+	                            GP=group
+	                       )
+    						count += 1
+    						person.save()
+    					return redirect("/admin")
+    				else:
+    					return redirect("/admin")
+    			else:
+    				users = request.POST['users']
+    				if users != '':
+    					users = users.split('\n')
+    					count = max(MyUser.objects.filter(GP = Groups))+1
+    					for i in users:
+    						user = i.split(' ')
+    						person = MyUser.objects.create_user(
+	                            username=Groups +"-"+ str(count),
+	                            email=None,
+	                            password='Qwerty123' + str(count),
+	                            last_name=user[0],
+	                            first_name=user[1],
+	                            GP=group
+	                            )
+    						count+=1
+    						person.save()
+    					return redirect("/admin")
+    				else:
+    					return redirect("/admin")
+    		else:
+    			return redirect("/admin")
+    	else:
             return render(request, "admin/generate_users.html")
     else:
-        return redirect("/404")
+    	return redirect("/404")
+'''
+def AddUsers(request):
+    """Создание группы и пользоваетлей, которые входят в неё"""
+    if request.user.is_superuser:
+    	if (request.method == "POST"):
+    		Groups = request.POST['Group']
+    		if Groups != "":
+    			group = GP(NameGP=Groups)
+    			group.save()
+    			users = request.POST['users']
+    			if users != '':
+    				users = users.split('\n')
+    				count = 0
+    				for i in users:
+    					user = i.split(' ')
+    					person = MyUser.objects.create_user(
+							username=Groups +"-"+ str(count),
+	                        email=None,
+	                        password='Qwerty123' + str(count),
+	                        last_name=user[0],
+	                        first_name=user[1],
+	                        GP=group
+	                    )
+    					count += 1
+    					person.save()
+    				return redirect("/admin")
+    			else:
+    				return redirect("/admin")
 
+    		else:
+    			return redirect("/admin")
+    	else:
+            return render(request, "admin/generate_users.html")
+    else:
+    	return redirect("/404")
 
 def CreateTest(request):
     """Cоздание теста с вариантами"""
@@ -333,7 +387,7 @@ def GoTest(request, testid, var):
                 a = []
                 for j in l:
                     for k in j:
-                        a.append(k)
+                        a.append(str(k))
                     table.append(a)
                     a = []
 
@@ -343,6 +397,7 @@ def GoTest(request, testid, var):
             return render(request, "TestProject/test.html", {"GTest": test, "time": time, 'Monster': finalMonster})
         else:
             return redirect("/404")
+
 
 
 def TakeAnswer(request):
@@ -358,7 +413,6 @@ def TakeAnswer(request):
             else:
                 if data['GetStudents'] == "True":
                     test = Test.objects.get(Name=data['Test'])
-                    # myuser =
                     students = {}
                     for i in TestPerson.objects.filter(Test=test):
                         for j in MyUser.objects.all():
@@ -387,28 +441,6 @@ def TakeAnswer(request):
                                 tmp.append(Answers.objects.get(TestTask=i, TestPerson=tp).get_answer())
                                 answers.append(tmp)
                             return JsonResponse({'status': 'ok', "answers": answers}, charset="utf-8", safe=True)
-                        # if (request.method == "POST"):
-                        # 	form = 	AnswerForm(request.POST)
-                        # 	if form.is_valid():
-                        # 		test = form.cleaned_data["Test"]
-                        # 		person = form.cleaned_data["Person"]
-                        # 		variant = form.cleaned_data["Variant"]
-                        # 		testperson = TestPerson.objects.get(Person = person, Test = test, Variant = variant)
-                        # 		print(testperson)
-                        # 		testtask = TestTask.objects.filter(Test = test, Variant = testperson.get_variant())
-                        # 		print(testtask)
-                        # 		answers = []
-                        # 		for i in testtask:
-                        # 			tmp = []
-                        # 			tmp.append(i.get_task().get_tasktext())
-                        #
-        # answer = Answers.objects.get(TestPerson= testperson,TestTask=i)
-        # 			tmp.append(answer.get_answer())
-        # 			# answers[i.get_task().get_tasktext()] = answer.get_answer()
-        # 			answers.append(tmp)
-        # 			tmp = []
-        # 		print(answers)
-        # 		return render(request, 'admin/answer_user.html', {'answers': answers})
         else:
             form = AnswerForm()
             return render(request, 'admin/answer_user.html', {'form': form})
@@ -425,60 +457,44 @@ def DeleteSubscribe(request):
                     Groups.append(i['NameGP'])
                 return JsonResponse({'status': 'ok', "groups": Groups}, charset="utf-8", safe=True)
             if data['GetResult'] == "True":
-                print("test1")
                 student = MyUser.objects.filter(GP=GP.objects.get(NameGP=data['Group']))
                 if data['Student'] != "False":
-                    print('data[Student] != False')
-                    print(data['Student'])
                     student = student.filter(username=data['Student'])
-                print(student)
-                print("test2")
                 mass = []
                 for i in student:
                     tp = TestPerson.objects.all()
-                    print(tp)
                     # tp = tp2
                     if data['Test'] != "False": tp = tp.filter(Test=Test.objects.get(Name=data['Test']))
-                    print(tp)
                     if data['Mark'] != "False":
 
                         if data['Mark'] == 'null':
                             tp = tp.filter(Mark=None)
                         else:
                             tp = tp.filter(Mark=data['Mark'])
-                    print(tp)
                     if data['Variant'] != "False": tp = tp.filter(Variant=data['Variant'])
-                    print(tp)
-                    print(i)
                     mass.append(tp.filter(Person=MyUser.objects.get(username=i.username)))
-                    print('MASS=')
-                    print(mass)
                 result = []
                 for i in mass:
                     for j in i:
-                        print(j)
                         tmp = {}
                         tmp['Group'] = j.get_person_all().get_group()
-                        print(tmp['Group'])
                         tmp['Person'] = (j.get_person())
                         tmp['Test'] = (j.Test.Name)
                         tmp['Mark'] = (j.get_mark())
                         tmp['StartTest'] = (j.get_start_test())
                         tmp['Variant'] = (j.get_variant())
                         result.append(tmp)
-                        print(result)
                 return JsonResponse({'status': 'ok', "result": result}, charset="utf-8", safe=True)
     return render(request, 'admin/delete_subscribe.html', {'answers': Answers.objects.all()})
 
-
+@login_required(login_url='/accounts/login/')
 def Trainer(request):
     if request.is_ajax():
         data = json.loads(request.read().decode("utf-8"))
         if data['start_test'] == "True":
             tasks = []
-            print(data['checked_categories'])
             for i in data['checked_categories']:
-                subtasks = Task.objects.filter(Category=Category.objects.get(Name=i))
+                subtasks = Task.objects.filter(Category=Category.objects.get(Name=i), Vision= True)
                 if (subtasks.count() != 0):
                     for task in subtasks:
                         di = {}
@@ -487,23 +503,13 @@ def Trainer(request):
                         curs = Connect.cursor()
                         curs.execute(task.WTask)
                         l = [row for row in curs]
-                        print('l = ')
-                        print(l)
                         col = [column[0] for column in curs.description]
                         table.append(col)
                         a = []
                         for j in l:
-                            print('j = ')
-                            print(j)
                             for k in j:
-                                print('k = ')
-                                print(k)
                                 a.append(k)
-                                print('a = ')
-                                print(a)
                             table.append(a)
-                            print('table = ')
-                            print(table)
                             a = []
 
                         # finalMonster[i.get_task().get_id()] = table
@@ -511,11 +517,8 @@ def Trainer(request):
                         di['name'] = task.NameTask
                         di['text'] = task.TaskText
                         di['table'] = table
-                        print('di = ')
-                        print(di)
                         table = []
                         tasks.append(di)
-            print(tasks)
             return JsonResponse({'status': 'ok', 'tasks': tasks}, charset="utf-8", safe=True)
         if data['check_task'] == "True":
             task = Task.objects.get(id=int(data['id']))
@@ -559,7 +562,7 @@ def ShowUsers(request):
                 person.save()
                 return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
 
-        result = {}
+        result = []
         for group in GP.objects.all():
             for i in MyUser.objects.filter(GP=group):
                 stud = []
@@ -568,6 +571,5 @@ def ShowUsers(request):
                 stud.append(i.username)
                 stud.append(i.last_name)
                 stud.append(i.first_name)
-                result[i.get_group()] = stud
-        print(result)
+                result.append(stud)
         return render(request, 'admin/show_users.html', {'students_list': result})

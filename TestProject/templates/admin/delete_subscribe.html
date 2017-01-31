@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 {% load i18n %}
-{% block title %} Создать тест {% endblock %}
+{% block title %} Результаты тестирования {% endblock %}
 {% load static %}
 
 {% block content %}
@@ -37,7 +37,7 @@
                     for(var i = 0;i<data['groups'].length;i++)
                     {
 {#                        alert('fsdfds');#}
-                        Groups[data['groups'][i].substr(0,data['groups'][i].length-1)]= i;
+                        Groups[data['groups'][i]]= i;
                     }
                     $.each(Groups, function(key, value) {
                         $('select#select_group').append($(new Option(key, value)));
@@ -149,36 +149,36 @@
 
     }
     function getStudents() {
-        fillTable($("#select_group :selected").text()+"-");
+        fillTable($("#select_group :selected").text());
     }
     function getTests() {
         var student = $("#select_users :selected").text();
         CurrentStudent = student;
 {#        console.log('sssssssstuuuuuuudeeeeeeeeentttttt' + student);#}
-        fillTable($("#select_group :selected").text()+"-",student);
+        fillTable($("#select_group :selected").text(),student);
     }
     function getMarks() {
         var test = $("#select_test :selected").text();
         CurrentTest = test;
         console.log('TEST =');
         console.log(test);
-        fillTable($("#select_group :selected").text()+"-",CurrentStudent,test);
+        fillTable($("#select_group :selected").text(),CurrentStudent,test);
     }
     function getVariants() {
         var mark = $("#select_mark :selected").text();
         CurrentMark = mark;
         var test =  CurrentTest;
-        fillTable($("#select_group :selected").text()+"-",CurrentStudent,test,mark);
+        fillTable($("#select_group :selected").text(),CurrentStudent,test,mark);
     }
     function getResult() {
         var variant = $("#select_variant :selected").text();
-        fillTable($("#select_group :selected").text()+"-",CurrentStudent,CurrentTest,CurrentMark,variant);
+        fillTable($("#select_group :selected").text(),CurrentStudent,CurrentTest,CurrentMark,variant);
     }
     function resetFilters() {
         window.location = window.location.href;
     }
     </script>
-    <h2>Просмотр ответов</h2>
+    <h2>Результаты тестирования</h2>
     <input type="button" value="Сбросить фильтры" onclick="resetFilters()">
     <h3>Группа:<select id="select_group" type="text" onchange="getStudents()"></select>
         Пользователь:<select id="select_users" type="text" onchange="getTests()"></select>

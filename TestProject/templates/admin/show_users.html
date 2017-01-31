@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 {% load i18n %}
-{% block title %} Создать тест {% endblock %}
+{% block title %} Студенты {% endblock %}
 {% load static %}
 {% block content %}
     <script>
@@ -58,9 +58,10 @@
 					</tr>
                     <tbody id="tbody_table">
                         <script>
-                            {% for stud in students_list.values %}
+                            {% for stud in students_list %}
                                 var a = {{ stud | safe}};
-                                    document.write("<tr id=\""+a[0]+"\"><td>"+a[1]+"</td><td>"+a[2]+"</td><td>"+a[3]+"</td><td>"+a[4]+"</td><td><input type=\"button\" id=\""+a[0]+"\" onclick=resetPassword("+a[0]+")></td></tr>");
+                                console.log(a);
+                                    document.write("<tr id=\""+a[0]+"\"><td>"+a[1]+"</td><td>"+a[2]+"</td><td>"+a[3]+"</td><td>"+a[4]+"</td><td><input type=\"button\" value=\"Сбросить\" id=\""+a[0]+"\" onclick=resetPassword("+a[0]+")></td></tr>");
                             {% endfor %}
                         </script>
                 </tbody>

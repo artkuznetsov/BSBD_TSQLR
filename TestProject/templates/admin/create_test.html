@@ -39,7 +39,7 @@
                                     var categories = data['categories'];
 
                                     var categories_table = document.getElementById("categories table");
-                                    categories_table.innerHTML = "<tr><th>Категория</th> <th>Количество вопросов</th> <th>Требуемое количество вопросов</th></tr>";
+                                    categories_table.innerHTML = "<tr><th>Категория</th><th>Количество вопросов</th> <th>Требуемое количество вопросов</th></tr>";
                                     for(var i=0;i<categories.length;i++)
                                         categories_table.innerHTML += "<tr><td>"+categories[i][1]+"</td><td>"+categories[i][2]+"</td><td><input class=\"input_count_tasks\" id=\""+categories[i][0]+"\" type=\"number\" size=\"5\" value=\"0\" max=\""+categories[i][2]+"\" min=\"0\"></td></tr>";
                                 }
