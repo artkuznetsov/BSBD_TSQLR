@@ -6,6 +6,7 @@ from django import forms
 
 BIRTH_YEAR_CHOICES = ('1980', '1981', '1982')
 
+
 class TestForm(forms.Form):
 	Name = forms.CharField\
         (
