@@ -32,7 +32,6 @@ ALLOWED_HOSTS = []
 
 
 AUTH_USER_MODEL = 'TestProject.MyUser'
-
 INSTALLED_APPS = [
     'jet.dashboard',
     'jet',
@@ -45,6 +44,7 @@ INSTALLED_APPS = [
     'TestProject',
     'registration',
 ]
+
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
