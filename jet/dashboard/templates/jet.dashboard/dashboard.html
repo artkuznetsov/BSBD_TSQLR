@@ -1,7 +1,6 @@
 {% load i18n %}
 
 <div class="dashboard-container columns_{{ columns|length }} cf">
-{% block content %}
     {% for i in columns %}
         <div class="dashboard-column-wrapper">
             <div class="dashboard-column{% if forloop.first %} first{% endif %}">
@@ -13,10 +12,6 @@
             </div>
         </div>
     {% endfor %}
-    <div class="add_user">
-<!--<a href="/tests/"><h1>ADD_USERS</h1></a>-->
-    </div>
-{% endblock %}
 </div>
 
 <div class="dialog-confirm" id="module-remove-dialog" title="{% trans "Delete widget" %}">
@@ -39,3 +34,4 @@
     {% csrf_token %}
     <input type="hidden" name="id">
 </form>
+

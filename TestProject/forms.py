@@ -3,17 +3,16 @@ from django.utils.datetime_safe import datetime
 
 from .models import *
 from django import forms
-#from django.forms.widgets import DateTimeBaseInput
-from django.forms import ModelForm, SplitDateTimeWidget
-from django.contrib.admin.widgets import AdminDateWidget, AdminTimeWidget
+
 BIRTH_YEAR_CHOICES = ('1980', '1981', '1982')
+
 class TestForm(forms.Form):
 	Name = forms.CharField\
         (
-            label=" Название теста",
+            label='Название теста',
             max_length=30,
             required=True,
-			initial = "\"Тест\""
+			initial = '\"Тест\"'
         )
 	DateActivate = forms.DateTimeField\
 		(
