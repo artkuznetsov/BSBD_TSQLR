@@ -1,0 +1,11 @@
+import eralchemy
+from eralchemy import render_er
+import sqlalchemy
+from sqlalchemy import create_engine
+render_er('mysql+pymysql://root:P@$$word@localhost/testbsbd','test.png')
+
+
+For execute this script during Server's work we should to run this command into the view.py:
+
+import os
+os.system("python3 generate_ERD_from_database.py");

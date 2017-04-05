@@ -138,6 +138,7 @@ function FillTeacherTable(task) {
     }
 }
 function getTask(task_number,flag) {
+
     console.log('task_number = '+task_number);
     console.log(' BEFORE:: task[id] =' + CurrentTaskID);
     console.log('task_number = '+task_number);
@@ -301,6 +302,7 @@ function FillUserTable() {
     <tr class="tr_1" height=40%>
         <td id='left_top' class="task_area">
             <textarea id="teacher" spellcheck="false" readonly></textarea>
+            <button>Database view</button>
         </td>
         <td id='right_top' class="user_area">
            <textarea id="user_query" class="input_user_query" spellcheck="false" placeholder="Введите ваш запрос и нажмите Alt+Enter для его выполнения..." required autofocus></textarea>
