@@ -1,4 +1,4 @@
-#Testing of the SQL Requests
+# Testing of the SQL Requests
 
 Required - >=Python3.4
 sudo su
@@ -7,11 +7,11 @@ sudo apt-get install git
 git clone https://github.com/artkuznetsov/BSBD_TSQLR.git
 sudo apt-get install mysql-server
 
-----Create Database for Application (see configuration TestApp/settings.py). Default: testbsbd---
+Create Database for Application (see configuration TestApp/settings.py). Default: testbsbd
+
 mysql -u root -p
 mysql>create database testbsbd;
 mysql>exit;
------------------------------------------------------------------------
 
 sudo apt-get install python3-setuptools
 sudo apt-get install python3-pip
@@ -25,6 +25,7 @@ sudo pip3 install pygraphviz --install-option="--include-path=/usr/include/graph
 sudo pip3 install eralchemy
 
 Install libraries for working with images:
+
 sudo apt-get install python3-dev
 sudo apt-get install libtiff5-dev libjpeg8-dev zlib1g-dev libfreetype6-dev liblcms2-dev libwebp-dev tcl8.6-dev tk8.6-dev python3-tk
 sudo apt-get install pillow
@@ -33,14 +34,17 @@ sudo apt-get install pillow
 
 All required libraries has been installed and now we can to migrate
 project's database; For this run following command:
+
 python3 manage.py migrate
 
 
 Now we need to create a superuser:
+
 python3 manage.py createsuperuser
 
 
 Install MySQL ODBC Driver:
+
 sudo apt-get install mysql-client
 sudo apt-get install libmyodbc unixodbc-bin
 
@@ -82,12 +86,15 @@ Option      = 3
 ReadOnly    = No
 
 Install the ODBC driver:
+
 odbcinst -i -d -f /etc/odbcinst.ini
 
 Install your system DSN:
+
 odbcinst -i -s -l -f /etc/odbc.ini
 
 Test if your system DSN was installed successfully: 
+
 odbcinst -s -q
 
 OUTPUT (EXAMPLE):
@@ -101,6 +108,7 @@ mysql> create database shadowdb;
 mysql> exit
 
 Example for connection string to whitedb and shadowdb:
+
 DRIVER={MySQL}; DATABASE=whitedb; SERVER=localhost; UID=root; PWD=12345;
 DRIVER={MySQL}; DATABASE=shadowdb; SERVER=localhost; UID=root; PWD=12345;
 
