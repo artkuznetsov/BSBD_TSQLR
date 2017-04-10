@@ -23,7 +23,6 @@
         TestTime = TestTime * 60000;
 		var now = new Date().getTime();
         var new_new = new Date(user_start+TestTime-now);
-{#        console.log();#}
         if(new_new.getTime() < 0){
             clearInterval(intervalID);
             endTest();
@@ -74,7 +73,6 @@ function rememberAnswer(task_id) {
     if(Step == 0){
     window.onload = function () {
           var user_query = document.getElementById("user_query").value;
-            console.log(user_query)
     };
     }else{
         var user_query = document.getElementById("user_query").value;
@@ -276,64 +274,90 @@ function FillUserTable() {
             }
         });
 }
+function getDBSchema() {
+    var request = {};
+    request[CurrentTaskID] = "GetDBSchema";
+
+    $.ajax({
+            beforeSend : function(jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(request),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+              var raw = data['image']
+
+              var image = new Image();
+              image.src = "data:image/jpg;base64," + raw.substring(2,raw.length-1);
+
+              var new_tab = window.open("");
+
+              new_tab.document.write(image.outerHTML);
+              new_tab.document.title = "Обзор схемы БД";
+            },
+            error: function (data) {}
+        });
+}
 </script>
-<script type="text/javascript" src="{% static 'js/test.js' %}"></script>
- <table id="table1" style='position: absolute; top: 0px; left:0px; width:100%; height:100%' border="2">
-     <tr class="f" height=10%>
-         <td id="shadow_td">
-         <table id="table2" style=' position: absolute; top: 0px; left:0px; width:100%; height:200%' border="0">
-             <tr height=100%>
-                 <td id="clock_td" width=30%>
-                     <div id="clock"></div>
-                 </td>
-                 <td id="step" width=30%></td>
-                 <td width=30%>
-                     <table class="buttons" style=' top: 0px; left:0px; width:100%; height:100%' border="0">
-                         <tr height = 100%>
-                             <td><input onclick="getTask(CurrentTask-1,1)" style="display: none" id="previous_task" type="button"  value="Предыдущее задание" class="button_task"></td>
-                             <td width="50%"><input onclick="getTask(CurrentTask+1,2)" id="next_task" type="button" value="Следующее задание" class="button_task"></td>
-                         </tr>
-                     </table>
-                 </td>
-             </tr>
-         </table>
-         </td>
-     </tr>
-    <tr class="tr_1" height=40%>
-        <td id='left_top' class="task_area">
-            <textarea id="teacher" spellcheck="false" readonly></textarea>
-            <button>Database view</button>
-        </td>
-        <td id='right_top' class="user_area">
-           <textarea id="user_query" class="input_user_query" spellcheck="false" placeholder="Введите ваш запрос и нажмите Alt+Enter для его выполнения..." required autofocus></textarea>
-        </td>
-    </tr>
-    <tr class="tr_2" height=50%>
-        <td id='left_bottom' width=50% class="td_2">
-            <table class="scrolling-table" id="teacher_table">
-              <thead id="teacher_table_head">
-                <tr id="teacher_table_head_tr">
-                </tr>
-              </thead>
-              <tbody id="teacher_table_tbody">
 
-
-              </tbody>
-            </table>
-        </td>
-        <td id='right_bottom' width=50%>
-            <table class="scrolling-table" id="user_table">
-              <thead id="user_table_thead">
-              <tr id="user_table_thead_tr">
-
+<html>
+<head>
+<title>SQL тестирование</title>
+<table id="table1" style='position: absolute; top: 0px; left:0px; width:100%; height:100%' border="2">
+  <tr class="header_tr" height=10%>
+    <td id="shadow_td">
+      <table id="table2" style=' position: absolute; top: 0px; left:0px; width:100%; height:100%' border="2">
+        <tr height=100% id="header">
+          <td id="clock_td" width=33%>
+            <div id="clock"></div>
+          </td>
+          <td id="step" width=33%></td>
+          <td width=33%>
+            <table class="buttons" style='width:100%; height:100%' border="2">
+              <tr height = 100%>
+                <td>
+                  <input onclick="getTask(CurrentTask-1,1)" style="display: none" id="previous_task" type="button"  value="Предыдущее задание" class="button_task">
+                </td>
+                <td width="50%">
+                  <input onclick="getTask(CurrentTask+1,2)" id="next_task" type="button" value="Следующее задание" class="button_task">
+                </td>
               </tr>
-
-              </thead>
-              <tbody id="user_table_tbody">
-
-
-              </tbody>
             </table>
-        </td>
-    </tr>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr class="tr_1" height=40%>
+    <td id='left_top' class="task_area">
+      <textarea class="teacher_textarea" id="teacher" spellcheck="false" readonly></textarea>
+        <button class="btn_view_database_schema" onclick="getDBSchema()">Обзор схемы Базы Данных</button>
+    </td>
+    <td id='right_top' class="user_area">
+      <textarea id="user_query" class="input_user_query" spellcheck="false" placeholder="Введите ваш запрос и нажмите Alt+Enter для его выполнения..." required autofocus></textarea>
+    </td>
+  </tr>
+  <tr class="tr_2" height=50%>
+    <td id='left_bottom' width=50% class="td_2">
+      <table class="scrolling-table" id="teacher_table">
+        <thead id="teacher_table_head">
+          <tr id="teacher_table_head_tr"></tr>
+        </thead>
+        <tbody id="teacher_table_tbody"></tbody>
+      </table>
+    </td>
+    <td id='right_bottom' width=50%>
+      <table class="scrolling-table" id="user_table">
+        <thead id="user_table_thead">
+          <tr id="user_table_thead_tr"></tr>
+
+        </thead>
+        <tbody id="user_table_tbody"></tbody>
+      </table>
+    </td>
+  </tr>
 </table>
+</head>
+</html>

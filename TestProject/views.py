@@ -1,11 +1,15 @@
 # from django.http import HttpResponse
 # from django.shortcuts import render_to_response
-from django.utils.safestring import mark_safe
 
+from PIL import Image
+from wsgiref.util import FileWrapper
+from TestApp import settings
+from django.utils.safestring import mark_safe
 from .forms import *
 from .models import models
 from django.http import *
 from django.shortcuts import *
+from django.http import FileResponse
 # from django.contrib.auth.models import User, Group
 import random, json
 from django.contrib.auth.decorators import login_required
@@ -13,6 +17,11 @@ import re
 import pyodbc
 from datetime import *
 from pytz import timezone
+import eralchemy
+from eralchemy import render_er
+import base64
+
+
 
 
 def tests(request):
@@ -281,10 +290,23 @@ def GoTest(request, testid, var):
     if request.is_ajax():
         data = json.loads(request.read().decode("utf-8"))
         if len(data) == 1:
-            # Здесь нужно обрабатывать запросы о проверки
+            # Здесь нужно обрабатывать запросы о проверке ...
             test = Test.objects.get(id=int(testid))
             connectdb = TestConnectDataBase.objects.get(Test=test)
             connectStr = ConnectDataBase.objects.get(NameConnection=connectdb.ConnectDataBase).ConnectionString
+            for i in data:
+                #... или получении схемы БД
+                if data[i] == 'GetDBSchema':
+                    host = re.search(r'\w*SERVER=\w*',connectStr).group(0)[7:]
+                    user = re.search(r'\w*UID=\w*',connectStr).group(0)[4:]
+                    password = re.search(r'\w*PWD=\w*',connectStr).group(0)[4:]
+                    database = re.search(r'\w*DATABASE=\w*',connectStr).group(0)[9:]
+
+                    render_er('mysql+pymysql://' + user + ':' + password + '@' + host + '/' + database + '','' + host + '->' + database + '.png')
+
+                    response = base64.b64encode(open(host+'->'+database+'.png',"rb").read())    
+
+                    return JsonResponse({'status': 'ok', 'image': str(response)}, safe=True)
             Connect = pyodbc.connect(connectStr)
             taskid = 0
             for i in data:
