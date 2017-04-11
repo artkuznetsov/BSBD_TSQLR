@@ -32,11 +32,12 @@ class Category(models.Model):
 	def get_name(self):
 		return self.Name
 
+
 class Task(models.Model):
 	NameTask = models.CharField(max_length = 20)
 	TaskText = models.TextField()
 	WTask = models.TextField()
-	Category = models.ForeignKey('Category')
+	Category = models.ManyToManyField('Category')
 	Weight = models.IntegerField()
 	ConnectDataBase = models.ForeignKey('ConnectDataBase')
 	Vision = models.BooleanField()
