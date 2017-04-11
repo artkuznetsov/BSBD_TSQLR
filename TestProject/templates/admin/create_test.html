@@ -90,6 +90,10 @@
                                     if (data['status'] == 'err') {
                                         alert('Скорее всего, вы не верно заполнили поля. Повторите попытку снова');
                                     }
+                                    if (data['status'] == 'error') {
+                                        alert('Количество требуемых заданий превышает количество доступных! Создаваемый тест удалён.');
+                                        window.location = '/admin/TestProject/test/';
+                                    }
 
                                 },
                                 error: function (data) {
