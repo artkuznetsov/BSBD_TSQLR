@@ -1,7 +1,7 @@
 # from django.http import HttpResponse
 # from django.shortcuts import render_to_response
 from django.utils.safestring import mark_safe
-
+from django.contrib.auth.models import *
 from .forms import *
 from .models import models
 from django.http import *
@@ -13,6 +13,7 @@ import re
 import pyodbc
 from datetime import *
 from pytz import timezone
+
 
 
 def tests(request):
@@ -76,57 +77,64 @@ def TestsUser(request):
 def AddUsers(request):
     """Создание группы и пользоваетлей, которые входят в неё"""
     if request.user.is_superuser:
-    	if request.method == ["POST"]:
-    		Groups = request.POST['Group']
-    		if Groups != "":
-    			if GP.objects.get(NameGP = Groups) is None:
-    				group = GP(NameGP=Groups)
-    				group.save()
-    				users = request.POST['users']
-    				if users != '':
-    					users = users.split('\n')
-    					count = 0
-    					for i in users:
-    						user = i.split(' ')
-    						person = MyUser.objects.create_user(
-								username=Groups +"-"+ str(count),
-	                            email=None,
-	                            password='Qwerty123' + str(count),
-	                            last_name=user[0],
-	                            first_name=user[1],
-	                            GP=group
-	                       )
-    						count += 1
-    						person.save()
-    					return redirect("/admin")
-    				else:
-    					return redirect("/admin")
-    			else:
-    				users = request.POST['users']
-    				if users != '':
-    					users = users.split('\n')
-    					count = max(MyUser.objects.filter(GP = Groups))+1
-    					for i in users:
-    						user = i.split(' ')
-    						person = MyUser.objects.create_user(
-	                            username=Groups +"-"+ str(count),
-	                            email=None,
-	                            password='Qwerty123' + str(count),
-	                            last_name=user[0],
-	                            first_name=user[1],
-	                            GP=group
-	                            )
-    						count+=1
-    						person.save()
-    					return redirect("/admin")
-    				else:
-    					return redirect("/admin")
-    		else:
-    			return redirect("/admin")
-    	else:
+
+        if request.method == ["POST"]:
+            print('y')
+            Groups = request.POST['Group']
+            if Groups != "":
+                if len(GP.objects.filter(NameGP = Groups))  == 0:
+                    print('1')
+                    group = GP(NameGP=Groups)
+                    group.save()
+                    users = request.POST['users']
+                    if users != '':
+                        print('2')
+                        users = users.split('\n')
+                        count = 0
+                        for i in users:
+                            user = i.split(' ')
+                            person = MyUser.objects.create_user(
+                                username=Groups +"-"+ str(count),
+                                email=None,
+                                password='Qwerty123' + str(count),
+                                last_name=user[0],
+                                first_name=user[1],
+                                GP=group
+                            )
+                            count += 1
+                            person.save()
+                        return redirect("/admin")
+                    else:
+                        return redirect("/admin")
+                else:
+                    print('3')
+                    users = request.POST['users']
+                    if users != '':
+                        users = users.split('\n')
+                        count = max(MyUser.objects.filter(GP = Groups))+1
+                        print(count)
+                        for i in users:
+                            user = i.split(' ')
+                            person = MyUser.objects.create_user(
+                                username=Groups +"-"+ str(count),
+                                email=None,
+                                password='Qwerty123' + str(count),
+                                last_name=user[0],
+                                first_name=user[1],
+                                GP=group
+                            )
+                            count+=1
+                            person.save()
+                        return redirect("/admin")
+                    else:
+                        print('haha')
+                        return redirect("/admin")
+            else:
+                return redirect("/admin")
+        else:
             return render(request, "admin/generate_users.html")
     else:
-    	return redirect("/404")
+        return redirect("/404")
 '''
 def AddUsers(request):
     """Создание группы и пользоваетлей, которые входят в неё"""
@@ -208,21 +216,26 @@ def CreateTest(request):
                 connectdatabase.save()
 
                 for i in range(int(data['Variants'])):
-                    for j in answers:
-                        tasks = []
-                        count = 0
-                        t = []
-                        for q in task.filter(Category=category.get(id=j)):
-                            t.append(q.id)
-                        r = [q for q in t]
-                        while count != int(answers[j]):
-                            RandomId = random.choice(r)
-                            Check = RandomId in tasks
-                            if Check == False:
-                                tasks.append(RandomId)
-                                test_task = TestTask.objects.create(Test=test, Task=task.get(id=RandomId),
+                	tasks = []
+                	for j in answers:
+                		count = 0
+                		t = []
+                		for q in task.filter(Category=category.get(id=j)):
+                			t.append(q.id)
+                		r = [q for q in t]
+                		testlist = [w for w in r if w not in tasks]
+                		if len(testlist)>=int(answers[j]):
+                			while count != int(answers[j]):
+                				RandomId = random.choice(r)
+                				Check = RandomId in tasks
+                				if Check == False:
+                					tasks.append(RandomId)
+                					test_task = TestTask.objects.create(Test=test, Task=task.get(id=RandomId),
                                                                     Variant=i + 1)
-                                count += 1
+                					count += 1
+                		else:
+                			Test.objects.filter(Name=data['TestName']).delete()
+                			return JsonResponse({'status': 'error'}, charset="utf-8", safe=True)
                 return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
 
         else:
@@ -279,16 +292,26 @@ def Add_TestPerson(request):
 
 def GoTest(request, testid, var):
     if request.is_ajax():
+# Проверка студентом написанного запроса
         data = json.loads(request.read().decode("utf-8"))
         if len(data) == 1:
             # Здесь нужно обрабатывать запросы о проверки
             test = Test.objects.get(id=int(testid))
+            personForTest = TestPerson.objects.get(Person=request.user.id, Test=test, Variant=int(var))
             connectdb = TestConnectDataBase.objects.get(Test=test)
             connectStr = ConnectDataBase.objects.get(NameConnection=connectdb.ConnectDataBase).ConnectionString
             Connect = pyodbc.connect(connectStr)
             taskid = 0
             for i in data:
                 taskid = int(i)
+                try:
+                    ans = Answers.objects.get(TestPerson = personForTest, TestTask = TestTask.objects.get(Task = Task.objects.get(id=taskid), Test = test))
+                    ans.Answer = data[i]
+                    ans.save()
+                except:
+                    ans = Answers.objects.create(TestPerson = personForTest,
+                                                TestTask = TestTask.objects.get(Task = Task.objects.get(id=taskid), Test = test),
+                                                Answer = data[i])
                 curs = Connect.cursor()
                 table = []
                 try:
@@ -314,6 +337,8 @@ def GoTest(request, testid, var):
                     return JsonResponse({'status': 'error', 'error': result}, charset="utf-8", safe=True)
             return JsonResponse({'status': 'ok', 'table': table, 'task': taskid}, charset="utf-8", safe=True)
         else:
+
+# Проверка ответов студента и их сохранение в базу, после нажатия на кнопку завершения
             test = Test.objects.get(id=int(testid))
             task = Task.objects.all()
             personForTest = TestPerson.objects.get(Person=request.user.id, Test=test, Variant=int(var))
@@ -325,10 +350,14 @@ def GoTest(request, testid, var):
             weight = 0
             for i in data:
                 temp = i.split(" ")[1]
-                answer = Answers.objects.create(TestTask=TestTask.objects.get(Test=test,
-                                                                              Task=Task.objects.get(id=temp),
-                                                                              Variant=int(var)),
-                                                TestPerson=personForTest, Answer=data[i])
+                try:
+                    ans = Answers.objects.get(TestPerson = personForTest, TestTask = TestTask.objects.get(Task = Task.objects.get(id=temp), Test = test))
+                    ans.Answer = data[i]
+                    ans.save()
+                except:
+                    ans = Answers.objects.create(TestPerson = personForTest,
+                                                TestTask = TestTask.objects.get(Task = Task.objects.get(id=temp), Test = test),
+                                                Answer = data[i])
                 try:
                     curs = Connect.cursor()
                     curs.execute(data[i])
@@ -359,12 +388,24 @@ def GoTest(request, testid, var):
             return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
 
     else:
+# Формирование страниц для теста
+#Определение теста, студента, который проходит тест     
         tests = Test.objects.get(id=int(testid))
         task = Task.objects.all()
         connectdb = TestConnectDataBase.objects.get(Test=tests)
         connectStr = ConnectDataBase.objects.get(NameConnection=connectdb.ConnectDataBase)
         Connect = pyodbc.connect(connectStr.ConnectionString)
         personForTest = TestPerson.objects.get(Person=request.user.id, Test=tests, Variant=int(var))
+        test = TestTask.objects.filter(Test=tests, Variant=int(var))
+        CheckAnswer = False
+#Проверка наличия ответов на этот тест
+        for q in test:
+            if len(Answers.objects.filter(TestPerson = personForTest, TestTask = q)) ==0:
+                CheckAnswer = False
+            else:
+                CheckAnswer = True
+                continue
+# Запуск таймера
         tz = timezone('Asia/Omsk')
         if personForTest.Mark == None and tests.DateActivate <= datetime.now(tz):
             if (personForTest.StartTest == None):
@@ -373,8 +414,9 @@ def GoTest(request, testid, var):
                 personForTest.save()
             else:
                 time = personForTest.StartTest
-
-            test = TestTask.objects.filter(Test=tests, Variant=int(var))
+#Если ответов нет, то отдаётся страница с пустыми полями для заполнения
+            
+            
             table = []
 
             finalMonster = {}
@@ -394,9 +436,18 @@ def GoTest(request, testid, var):
                 finalMonster[i.get_task().get_id()] = table
 
                 table = []
-            return render(request, "TestProject/test.html", {"GTest": test, "time": time, 'Monster': finalMonster})
+            if CheckAnswer == False:
+                return render(request, "TestProject/test.html", {"GTest": test, "time": time, 'Monster': finalMonster})
+            else:
+                answers = {}
+                for w in test:
+                    answers[i.get_task().get_id()]= Answers.objects.get(TestPerson = personForTest, TestTask = w).get_answer()
+                return render(request, "TestProject/test.html", {"GTest": test, "time": time, 'Monster': finalMonster, "answers" : answers})
+
+
         else:
             return redirect("/404")
+
 
 
 
@@ -548,18 +599,8 @@ def ShowUsers(request):
             data = json.loads(request.read().decode("utf-8"))
             if data['resetPassword'] == "True":
                 a = MyUser.objects.get(id=data['user_id'])
-                b = {}
-                b['username'] = a.username
-                b['email'] = a.email
-                b['last_name'] = a.last_name
-                b['first_name'] = a.first_name
-                b['GP'] = a.GP
-                a.delete()
-                person = MyUser.objects.create_user(username=b['username'],
-                                                    email=b['email'],
-                                                    password="P@$$word",
-                                                    GP=b['GP'])
-                person.save()
+                a.set_password("Qwerty1234")
+                a.save()
                 return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
 
         result = []
