@@ -186,7 +186,6 @@
    */
 
   window.sweetAlert = window.swal = function() {
-
     // Default parameters
     var params = {
       title: '',

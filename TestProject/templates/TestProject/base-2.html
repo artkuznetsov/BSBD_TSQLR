@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ru-RU" >
+    <head>
+    <title>Тестирование SQL запросов</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    {% load staticfiles %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
+    <link rel="stylesheet" type="text/css" href="/static/jet/css/vendor.css?v=1.0.5" />
+    <link rel="stylesheet" type="text/css" href="/static/jet/css/icons/style.css?v=1.0.5" />
+    <link rel="stylesheet" type="text/css" href="/static/jet/css/themes/default/base.css?v=1.0.5" class="base-stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/static/jet/css/themes/default/select2.theme.css?v=1.0.5" class="select2-stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/static/jet/css/themes/default/jquery-ui.theme.css?v=1.0.5" class="jquery-ui-stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/dashboard.css" />
+    <script src="{% static 'js/base.js' %}"></script>
+    <script src="{% static 'js/core.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
+
+    <script src="{% static 'js/sweetalert2.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}">
+    <script type="text/javascript" charset="utf-8">
+        var DATE_FORMAT = "%d.%m.%Y";
+        var TIME_FORMAT = "%H:%M:%S";
+        var DATETIME_FORMAT = "%d.%m.%Y %H:%M:%S";
+    </script>
+    <script type="text/javascript" src="/jet/jsi18n/"></script>
+    <script src="/static/jet/js/build/bundle.min.js?v=1.0.5"></script>
+    <script src="/static/jet/js/i18n/jquery-ui/datepicker-ru.js?v=1.0.5"></script>
+    <script src="/static/jet/js/i18n/jquery-ui-timepicker/jquery.ui.timepicker-ru.js?v=1.0.5"></script>
+    <script src="/static/jet/js/i18n/select2/ru.js?v=1.0.5"></script>
+    <meta name="robots" content="NONE,NOARCHIVE" />
+</head>
+{% block body %}
+    <body class=" dashboard jet" data-admin-utc-offset="21600">
+
+<!-- Container -->
+        <div id="container">
+
+
+    <!-- Header -->
+            <div id="header">
+                <div id="branding">
+                    <h1 id="site-name"><a href="/">Testing of the SQL requests</a></h1>
+                </div>
+                <div id="user-tools">Добро пожаловать,
+                {% if user.is_authenticated %}
+                    <strong>{{ user.username }}</strong>.
+                    <a href="#" onclick="changePassword('{{ csrf_token }}')">Сменить пароль</a>
+                    <a href="/accounts/logout/">Выйти</a>
+                {% else %}
+                    <strong>Гость</strong>
+                    <a href="/accounts/login/">Войти</a>
+                {% endif %}
+                </div>
+            </div>
+    <!-- END Header -->
+        <div class="dashboard-tools-toggle-container">
+            <a href="#" class="dashboard-tools-toggle button">
+                <span class="dashboard-tools-toggle-icon icon-settings"></span>
+            </a>
+        </div>
+    <!-- Content -->
+        {% block content %}
+            <div id="content" class="colM">
+                <div class="dashboard-container columns_3 cf">
+                    <div class="dashboard-column-wrapper">
+                        <div class="dashboard-column first">
+
+                            {#                            ДОСТУПНЫЕ ТЕСТЫ#}
+                            <div class="dashboard-item-header ui-sortable-handle">
+
+                                <span class="dashboard-item-header-title">
+                                    ДОСТУПНЫЕ ТЕСТЫ
+                                </span>
+                                <div class="cf"></div>
+                            </div>
+                            <div style="height: auto;" class="dashboard-item-content contrast">
+                            <div class="padding center">
+                            <div class="UserNotHaveTests">
+                                <script>
+                                    var a = "{{ uncompleted_tests }}";
+                                    if(a == "[]")
+                                        document.write("<h2>Сейчас нет тестов, которые вы можете пройти</h2>");
+                                </script>
+
+                            </div>
+                                    {% for test in uncompleted_tests %}
+                                        <p><img src={% static 'images/exam3.png' %}></p>
+                                        <ul class="inline bordered">
+                                                <li>
+                                                    <div class="big">{{ test.get_test }}</div>
+                                                    <div class="dim">Название</div>
+                                                </li>
+
+                                                <li>
+                                                    <div class="big">{{ test.get_test.get_time }} минут</div>
+                                                    <div class="dim">Длительность</div>
+                                                </li>
+
+                                                <li>
+                                                    <div class="big">{{ test.get_variant }}</div>
+                                                    <div class="dim">Вариант</div>
+                                                </li>
+
+                                        </ul>
+                                        <p></p>
+                                        <a href=../../testid={{ test.get_test.get_id}}&var={{ test.get_variant }}><button class="button" type="submit" title="Начать тест"  id="btnStartTest">Начать</button></a>
+                                    {% endfor %}
+                            </div>
+                        </div>
+{#                  ГРАФИК#}
+                            <div class="dashboard-item-header ui-sortable-handle">
+                                <span class="dashboard-item-header-title">
+                                    <a href="#" class="dashboard-item-collapse"><span class="dashboard-item-header-collapse-button icon-arrow-down"></span></a>
+                                    <a href="#" class="dashboard-item-collapse"><span class="dashboard-item-header-collapse-button icon-arrow-up"></span></a>
+                                    График успеваемости
+                                </span>
+                                <div class="cf"></div>
+                            </div>
+                            <div class="dashboard-item-content contrast" style="height: auto; overflow-x: auto;">
+                                <div class="padding center">
+                                    <canvas height="196" width="392" id="chart_8" style="width: 392px; height: 196px;">
+                                        <div class="chart-fillColor"></div>
+                                        <div class="chart-strokeColor"></div>
+                                        <div class="chart-pointColor"></div>
+                                        <div class="chart-pointHighlightFill"></div>
+                                        <div class="chart-scaleGridLineColor"></div>
+                                        <div class="chart-scaleLineColor"></div>
+                                        <div class="chart-scaleFontColor"></div>
+                                        <div class="chart-data">
+                                            <div class="chart-data-item" data-date="05/04" data-value="43"></div>
+                                            <div class="chart-data-item" data-date="06/04" data-value="57"></div>
+                                            <div class="chart-data-item" data-date="07/04" data-value="60"></div>
+                                            <div class="chart-data-item" data-date="08/04" data-value="23"></div>
+                                            <div class="chart-data-item" data-date="09/04" data-value="46"></div>
+                                            <div class="chart-data-item" data-date="10/04" data-value="45"></div>
+                                            <div class="chart-data-item" data-date="11/04" data-value="17"></div>
+                                        </div>
+                                    </canvas>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                    <div class="dashboard-column-wrapper">
+                        <div class="dashboard-column">
+                {#                ОТВЕТЫ#}
+                            <div class="dashboard-item collapsible deletable draggable" data-module-id="2">
+                                <div class="dashboard-item-header">
+                                    <span class="dashboard-item-header-title">
+                                        <a href="#" class="dashboard-item-collapse"><span class="dashboard-item-header-collapse-button icon-arrow-down"></span></a>
+                                        <a href="#" class="dashboard-item-collapse"><span class="dashboard-item-header-collapse-button icon-arrow-up"></span></a>
+                                        Ответы
+                                    </span>
+                                    <div class="cf"></div>
+                                </div>
+                                <div class="dashboard-item-content">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th align="center" width="1">Тест</th>
+                                                <th align="center" width="1">Выполнено</th>
+                                                <th align="center" width="1">Дата и время</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for test in completed_tests %}
+                                                <tr>
+                                                    <th align="center" width="1">{{ test.get_test }}</th>
+                                                    <td align="center" width="1">{{ test.get_mark }}%</td>
+                                                    <td align="center" width="1">{{ test.get_start_test_without_time }}</td>
+                                                </tr>
+                                            {% endfor %}
+{#                                            <tr>#}
+{#                                                <th align="center" width="1">Where</th>#}
+{#                                                <td align="center" width="1">100%</td>#}
+{#                                                <td align="center" width="1">21.07.1995 20:20</td>#}
+{#                                            </tr>#}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-column-wrapper">
+                        <div class="dashboard-column">
+                {#                Новости#}
+                            <div class="dashboard-item-header ui-sortable-handle">
+                                <span class="dashboard-item-header-title">
+                                    <a href="#" class="dashboard-item-collapse"><span class="dashboard-item-header-collapse-button icon-arrow-down"></span></a>
+                                    <a href="#" class="dashboard-item-collapse"><span class="dashboard-item-header-collapse-button icon-arrow-up"></span></a>
+                                    Новости о курсе
+                                </span>
+                                <div class="cf"></div>
+                            </div>
+                            <div style="height: auto;" class="dashboard-item-content">
+                                <ul>
+                                    <li>
+                                        <span class="float-right dim">4 апреля 2017 г.</span>
+                                        <a href="#" target="_blank" class="nowrap">
+                                            <span class="icon-open-external"></span>Любич А.С: Пары отменяются
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <span class="float-right dim">1 апреля 2017 г.</span>
+                                        <a href="#" target="_blank" class="nowrap">
+                                            <span class="icon-open-external"></span>Важные новости.
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <span class="float-right dim">30 марта 2017 г.</span>
+                                        <a href="#" target="_blank" class="nowrap">
+                                            <span class="icon-open-external"></span> Нужно сдать 1,2 лабораторные работы
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <span class="float-right dim">21 марта 2017 г.</span>
+                                            <a href="#" target="_blank" class="nowrap">
+                                                <span class="icon-open-external"></span> Любич А.С: Я приболел =(
+                                            </a>
+                                    </li>
+                                    <li>
+                                        <span class="float-right dim">1 марта 2017 г.</span>
+                                            <a href="#" target="_blank" class="nowrap">
+                                                <span class="icon-open-external"></span> Приветствую на курсе БСБД!
+                                            </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <form action="/jet/dashboard/update_dashboard_modules/" method="POST" id="update-dashboard-modules-form">
+                    <input type='hidden' name='csrfmiddlewaretoken' value='7hcfVY5KDMrsmkRUdGNTLLxRwP6MGbaxg561M9b4BokU2qgLRNWYxdj8raxPSsPe' />
+                    <input type="hidden" name="app_label" value="">
+                    <input type="hidden" name="modules">
+                </form>
+                <form action="/jet/dashboard/update_dashboard_module_collapse/" method="POST" id="update-dashboard-module-collapse-form">
+                    <input type='hidden' name='csrfmiddlewaretoken' value='7hcfVY5KDMrsmkRUdGNTLLxRwP6MGbaxg561M9b4BokU2qgLRNWYxdj8raxPSsPe' />
+                    <input type="hidden" name="id">
+                    <input type="hidden" name="collapsed">
+                </form>
+                <form action="/jet/dashboard/remove_dashboard_module/" method="POST" id="remove-dashboard-module-form">
+                    <input type='hidden' name='csrfmiddlewaretoken' value='7hcfVY5KDMrsmkRUdGNTLLxRwP6MGbaxg561M9b4BokU2qgLRNWYxdj8raxPSsPe' />
+                    <input type="hidden" name="id">
+                </form>
+                <br class="clear" />
+            </div>
+        {% endblock content %}
+    <!-- END Content -->
+
+            <div id="footer"></div>
+            <div class="related-popup-container scrollable">
+                <a href="#" class="related-popup-back">
+                    <span class="related-popup-back-icon icon-arrow-left"></span>
+                    <span class="related-popup-back-label">назад</span>
+                </a>
+                <span class="icon-refresh loading-indicator"></span>
+            </div>
+            <div class="sidebar-header-wrapper sidebar-dependent">
+                <div class="sidebar-header sidebar-dependent">
+                    <a href="#" class="sidebar-header-menu sidebar-toggle">
+                        <span class="sidebar-header-menu-icon icon-menu"></span>
+                        <span class="sidebar-header-menu-icon icon-cross"></span>
+                    </a>
+                </div>
+            </div>
+            <div class="sidebar sidebar-dependent">
+                <div class="sidebar-wrapper scrollable">
+                    <div class="sidebar-section">
+                        {% if user.is_superuser %}
+                        <a href="/admin/" class="sidebar-link icon">
+                            <span class="sidebar-link-label">
+                                <span class="sidebar-link-icon icon-data"></span>
+                                Панель администратора
+                                {% else %}
+                                    <a href="/trainer/" class="sidebar-link icon">
+                                    <span class="sidebar-link-label">
+                                        <span class="sidebar-link-icon icon-data"></span>
+                                        Открыть тренажер
+                                {% endif %}
+                            </span>
+                        </a>
+                        <a href="/" class="sidebar-link icon">
+                            <span class="sidebar-link-label">
+                                <span class="sidebar-link-icon icon-open-external"></span>
+                                Открыть сайт
+                            </span>
+                        </a>
+                    </div>
+                    <div class="sidebar-section last">
+                        <a href="/trainer" class="sidebar-link bookmark-item">
+                            <span class="sidebar-link-label">Пройти тренажер</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="sidebar-popup-container">
+                    <div class="sidebar-popup scrollable">
+                        <a href="#" class="sidebar-close sidebar-back">
+                            <span class="sidebar-close-icon icon-arrow-left"></span>
+                        </a>
+                            <div class="sidebar-popup-section sidebar-popup-section-registration">
+                                <div class="sidebar-popup-title">
+                                        Registration
+                                </div>
+                                <input class="sidebar-popup-search" placeholder="Search...">
+                                <ul class="sidebar-popup-list">
+                                    <li class="sidebar-popup-list-item app-registration">
+                                        <a href="/admin/registration/" class="sidebar-popup-list-item-link">Страница приложения</a>
+                                    </li>
+                                        <li class="sidebar-popup-list-item model-registrationprofile">
+                                                <a href="/admin/registration/registrationprofile/" class="sidebar-popup-list-item-link">Registration profiles</a>
+                                        </li>
+                                </ul>
+                            </div>
+                            <div class="sidebar-popup-section sidebar-popup-section-TestProject">
+                                <div class="sidebar-popup-title">
+                                    Testproject
+                                </div>
+                                <input class="sidebar-popup-search" placeholder="Search...">
+                                <ul class="sidebar-popup-list">
+                                    <li class="sidebar-popup-list-item app-TestProject">
+                                        <a href="/admin/TestProject/" class="sidebar-popup-list-item-link">Страница приложения</a>
+                                    </li>
+
+
+                                        <li class="sidebar-popup-list-item model-category">
+
+                                                <a href="/admin/TestProject/category/" class="sidebar-popup-list-item-link">Categorys</a>
+
+                                        </li>
+
+                                        <li class="sidebar-popup-list-item model-connectdatabase">
+
+                                                <a href="/admin/TestProject/connectdatabase/" class="sidebar-popup-list-item-link">Connect data bases</a>
+
+                                        </li>
+
+                                        <li class="sidebar-popup-list-item model-task">
+
+                                                <a href="/admin/TestProject/task/" class="sidebar-popup-list-item-link">Tasks</a>
+
+                                        </li>
+
+                                        <li class="sidebar-popup-list-item model-testperson">
+
+                                                <a href="/admin/TestProject/testperson/" class="sidebar-popup-list-item-link">Test persons</a>
+
+                                        </li>
+
+                                        <li class="sidebar-popup-list-item model-test">
+
+                                                <a href="/admin/TestProject/test/" class="sidebar-popup-list-item-link">Tests</a>
+
+                                        </li>
+
+                                </ul>
+                            </div>
+
+                            <div class="sidebar-popup-section sidebar-popup-section-auth">
+                                <div class="sidebar-popup-title">
+
+                                        Пользователи и группы
+
+                                </div>
+
+                                <input class="sidebar-popup-search" placeholder="Search...">
+
+                                <ul class="sidebar-popup-list">
+                                    <li class="sidebar-popup-list-item app-auth">
+                                        <a href="/admin/auth/" class="sidebar-popup-list-item-link">Страница приложения</a>
+                                    </li>
+
+
+                                        <li class="sidebar-popup-list-item model-group">
+
+                                                <a href="/admin/auth/group/" class="sidebar-popup-list-item-link">Группы</a>
+
+                                        </li>
+
+                                </ul>
+                            </div>
+
+                    </div>
+                </div>
+
+        </div>
+
+
+
+
+</div>
+<!-- END Container -->
+
+</body>
+{% endblock body %}
+</html>

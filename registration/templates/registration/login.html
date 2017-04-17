@@ -1,39 +1,144 @@
-{% extends 'TestProject/base.html' %}
+{% extends 'TestProject/base-2.html' %}
 {% block title %}Личный кабинет{% endblock %}
+{% load staticfiles %}
 
-{% block content %}
+{% block body %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/2.4.1/core.js"></script> <!-- for IE and Android native browser support -->
 
-<h1>Авторизация</h1>
-{% if user.is_authenticated %}
-Что такое, {{ user.username }}? Вы же уже авторизорваны. 
-Впрочем, всегда можно <a href="{% url 'auth_logout' %}">выйти</a>.<br/><br/>
-{% else %}
+    <script src="bower_components/sweetalert2/dist/sweetalert2.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="bower_components/sweetalert2/dist/sweetalert2.min.css">
+    <body class=" login"
+  data-admin-utc-offset="21600">
 
-{% if form.non_field_errors %}
-{{ form.non_field_errors }}
-{% endif %}
+<!-- Container -->
+<div id="container">
 
-<form method="post" action="">{% csrf_token %}
-<dl class="register">   
-{% for field in form %}
-    <dt>{{ field.label_tag }}</dt>
-    <dd class="clearfix">{{ field }}
-    {% if field.help_text %}<div class="clearfix">{{ field.help_text }}</div>{% endif %}
-    {% if field.errors %}<div class="myerrors clearfix">{{ field.errors }}</div>{% endif %}
-    </dd>
-{% endfor %}
-</dl>
-<input type="submit" value="Вход" class="clearfix">
+
+    <!-- Header -->
+    <div id="header">
+        <div id="branding">
+<h1 id="site-name"><a href="/admin/">Авторизация TSQLR</a></h1>
+</div>
+
+    </div>
+    <!-- END Header -->
+    <!-- Content -->
+    <div id="content" class="colM">
+<div id="content-main">
+<form method="post" action="" id="login_form">
+    {% csrf_token %}
+    <dl class="register">
+        {% for field in form %}
+            <dt>{{ field.label_tag }}</dt>
+		    <dd class="clearfix">{{ field }}
+			    {% if field.help_text %}
+				    <div class="clearfix">{{ field.help_text }}</div>
+			    {% endif %}
+                {% if field.errors %}
+                    <div class="myerrors clearfix">{{ field.errors }}</div>
+                {% endif %}
+		    </dd>
+        {% endfor %}
+    </dl>
+    <div class="submit-row">
+        <label>&nbsp;</label>
+        <input type="submit" value="Войти" />
+    </div>
 </form>
-    
-<script type="text/javascript">
-document.getElementById('id_username').focus()
-</script>
 
- <br/><br/>
-<ul>
-    <li><a href="{% url 'auth_password_change' %}">Забыли пароль?</a></li>
-    <li><a href="{% url 'registration_register' %}">Регистрация</a></li>
-</ul>   
-{% endif %}
+</div>
+
+
+        <br class="clear" />
+    </div>
+    <!-- END Content -->
+
+    <div id="footer"></div>
+
+
+
+
+
+
+
+
+        <div class="related-popup-container scrollable">
+            <a href="#" class="related-popup-back">
+                <span class="related-popup-back-icon icon-arrow-left"></span>
+            </a>
+            <span class="icon-refresh loading-indicator"></span>
+        </div>
+
+        <div class="sidebar-header-wrapper sidebar-dependent">
+            <div class="sidebar-header sidebar-dependent">
+                <a href="#" class="sidebar-header-menu sidebar-toggle">
+                    <span class="sidebar-header-menu-icon icon-menu"></span>
+                    <span class="sidebar-header-menu-icon icon-cross"></span>
+                </a>
+            </div>
+        </div>
+        <div class="sidebar sidebar-dependent">
+            <div class="sidebar-wrapper scrollable">
+                <div class="sidebar-section">
+
+
+                        <a href="/" class="sidebar-link icon">
+                            <span class="sidebar-link-label">
+                                <span class="sidebar-link-icon icon-open-external"></span>
+                                Открыть сайт
+                            </span>
+                        </a>
+
+
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+
+
+</div>
+<!-- END Container -->
+
+</body>
+{#<h1>Авторизация</h1>#}
+{#{% if user.is_authenticated %}#}
+{#Что такое, {{ user.username }}? Вы же уже авторизорваны.#}
+{#Впрочем, всегда можно <a href="{% url 'auth_logout' %}">выйти</a>.<br/><br/>#}
+{#{% else %}#}
+{##}
+{#{% if form.non_field_errors %}#}
+{#{{ form.non_field_errors }}#}
+{#{% endif %}#}
+{##}
+{#<form method="post" action="">{% csrf_token %}#}
+{#<dl class="register">#}
+{#{% for field in form %}#}
+{#    <dt>{{ field.label_tag }}</dt>#}
+{#    <dd class="clearfix">{{ field }}#}
+{#    {% if field.help_text %}<div class="clearfix">{{ field.help_text }}</div>{% endif %}#}
+{#    {% if field.errors %}<div class="myerrors clearfix">{{ field.errors }}</div>{% endif %}#}
+{#    </dd>#}
+{#{% endfor %}#}
+{#</dl>#}
+{#<input type="submit" value="Вход" class="clearfix">#}
+{#</form>#}
+{##}
+{#<script type="text/javascript">#}
+{#document.getElementById('id_username').focus()#}
+{#</script>#}
+{##}
+{# <br/><br/>#}
+{#<ul>#}
+{#    <li><a href="{% url 'auth_password_change' %}">Забыли пароль?</a></li>#}
+{#    <li><a href="{% url 'registration_register' %}">Регистрация</a></li>#}
+{#</ul>#}
+{#{% endif %}#}
 {% endblock %}
