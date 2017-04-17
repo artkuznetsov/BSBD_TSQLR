@@ -1,4 +1,4 @@
-{% extends 'TestProject/base.html' %}
+{% extends 'TestProject/base-2.html' %}
 {% load staticfiles %}
 {% block title %}Личный кабинет{% endblock %}
 {% block content %}
@@ -83,24 +83,6 @@ function clearUserTable() {
 function fillUserTextarea(task) {
     document.getElementById("user_query").value = Answers['taskID '+task['id']];
 }
-function endTest() {
-{#        $.ajax({#}
-{#            beforeSend: function (jqXHR) {#}
-{#                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');#}
-{#            },#}
-{#            url: window.location.href,#}
-{#            data: JSON.stringify(Answers),#}
-{#            type: 'POST',#}
-{#            contentType: 'application/json',#}
-{#            success: function (data) {#}
-{#                if (data['status'] == 'ok') {#}
-{#                }#}
-{#            },#}
-{#            error: function (data) {#}
-{#                console.log(data);#}
-{#            }#}
-{#        });#}
-}
 function rememberAnswer(task_id) {
     if(Step == 0){
     window.onload = function () {
@@ -116,80 +98,37 @@ function rememberAnswer(task_id) {
     }
 }
 function trainerLoad() {
-console.log('iam loading trainer');
-    {#CurrentTask = 0;#}
-    {#CurrentTaskID = 0;#}
-    {#Step=0;#}
-    {#Answers = {};#}
-
-    // Hotkeys for text area
-    {#    shortcut.add("Alt+Enter", function() {#}
-    {#        FillUserTable();#}
-    {#    });#}
-console.log('iam start cycle for add Answers');
-    console.log('GTest =');
-    console.log(GTest);
     for (var i = 0; i < GTest.length; i++) {
-        {#        var task = {};#}
-        {#        task['id'] = GTest[i]['id'];#}
-        {#        task['name'] = GTest[i]['NameTask'];#}
-        {#        task['text'] = GTest[i]['TaskText'];#}
         Answers['taskID ' + GTest[i]['id']] = "";
     }
-    console.log('Answers is =');
-    console.log(Answers);
-    {#    {% for test in GTest %}#}
-    {#        #}
-    {#        task['id']={{ test.get_task.get_id }};#}
-    {#        task['name']='{{ test.get_task.get_name }}';#}
-    {#        task['text']='{{ test.get_task.get_tasktext }}';#}
-    {#        GTest.push(task);#}
-    {#        Answers['taskID '+ {{ test.get_task.get_id }}] = "";#}
-    {#    {% endfor %}#}
-    console.log('iam initialyzing task from GTest[0]');
     var task = GTest[0];
-    console.log('task = ');
-    console.log(task);
     CurrentTaskID = task['id'];
-    console.log(GTest);
     getTask(0, 0);
 }
 function FillTaskArea(task) {
-    console.log('iam in the FillTaskArea()');
     var task_area = document.getElementById("teacher");
-         console.log(task_area);
          task_area.value = null;
          task_area.value +="Задание:\r\n";
          task_area.value +=task['text'];
 }
 function FillTeacherTable(task) {
-{#    var data = {{ Monster | safe }};#}
     var table = task['table'];
     var columns = table[0];
-         console.log(table);
     var rows = table.length;
-    var new_table = "<thead id=\"teacher_table_head\"><tr id=\"teacher_table_head_tr\"></tr></thead><tbody id=\"teacher_table_tbody\"></tbody>";;
+    var new_table = "<thead id=\"teacher_table_head\"><tr id=\"teacher_table_head_tr\"></tr></thead><tbody id=\"teacher_table_tbody\"></tbody>";
     document.getElementById("teacher_table").innerHTML = "";
     document.getElementById("teacher_table").innerHTML = new_table;
 
     for(var i=0;i<columns.length;i++)
-    {
         document.getElementById("teacher_table_head_tr").innerHTML += "<td><b>"+columns[i]+"<b></td>";
-    }
     for(var j=1;j<table.length;j++)
     {
         document.getElementById("teacher_table_tbody").innerHTML += "<tr id=\"teacher_table_tr_"+j+"\"></tr>";
         for(var k=0;k<table[j].length;k++)
-        {
             document.getElementById("teacher_table_tr_"+j+"").innerHTML += "<td><i>"+table[j][k]+"<i></td>";
-        }
     }
 }
 function getTask(task_number,flag) {
-    console.log('task_number = '+task_number);
-    console.log(' BEFORE:: task[id] =' + CurrentTaskID);
-    console.log('task_number = '+task_number);
-    console.log('Step = ' + Step);
     rememberAnswer(CurrentTaskID);
     try {
         var button_test = document.getElementById("next_task");
@@ -220,21 +159,18 @@ function getTask(task_number,flag) {
             }
             );
         }else
-        if(button_test.value == "Закрыть тренажер" && flag == 1)
+        if(button_test.value === "Закрыть тренажер" && flag === 1)
             button_test.value  = "Следующее задание";
     }catch(e){}
 
-if(task_number!=GTest.length) {
+if(task_number!==GTest.length) {
     CurrentTask = task_number;
     var task;
     task = GTest[task_number];
     console.log('task = ' + task);
     CurrentTaskID = task['id'];
-    console.log(' AFTER:: task[id] =' + task['id']);
 
-    if (Step == 0) {
-{#        window.onload = function () {#}
-            console.log('h111111');
+    if (Step === 0) {
             FillTaskArea(task);
             //fill teacher_table from Monster
             FillTeacherTable(task);
@@ -270,10 +206,8 @@ if(task_number!=GTest.length) {
         $("#previous_task").show();
     }
 
-    console.log('GTest.lengt = ' + GTest.length);
     if (Step == GTest.length) {
         var right_button = document.getElementById("next_task").value = "Закрыть тренажер";
-        console.log(right_button)
     }
 }
 
@@ -282,12 +216,10 @@ if(task_number!=GTest.length) {
 function FillUserTable() {
     var user_query = document.getElementById("user_query").value;
     var request = {};
-{#    request[CurrentTaskID] = user_query;#}
     request['id'] = CurrentTaskID;
     request['user_query'] = user_query;
     request['start_test'] = "False";
     request['check_task'] = "True";
-    console.log(user_query);
 
     $.ajax({
             beforeSend : function(jqXHR) {
@@ -298,38 +230,68 @@ function FillUserTable() {
             type: 'POST',
             contentType: 'application/json',
             success: function (data) {
-
-                if(data['status']=='ok'){
+                if(data['status']==='ok'){
                     var new_table = "<thead id=\"user_table_thead\"><tr id=\"user_table_thead_tr\"></tr></thead><tbody id=\"user_table_tbody\"></tbody>";
                     document.getElementById("user_table").innerHTML = "";
                     document.getElementById("user_table").innerHTML = new_table;
-{#                    alert('Кнопка работает нормально');#}
                     var table = data['table'];
                     var columns = data['table'][0];
-                        console.log(table);
 
                     var rows = table.length;
                     for(var i=0;i<columns.length;i++)
-                     {
                          document.getElementById("user_table_thead_tr").innerHTML += "<td><b>"+columns[i]+"<b></td>";
-                     }
+
                      for(var j=1;j<table.length;j++)
                      {
                          document.getElementById("user_table_tbody").innerHTML += "<tr id=\"user_table_tr_"+j+"\"></tr>";
                          for(var k=0;k<table[j].length;k++)
-                         {
                              document.getElementById("user_table_tr_"+j+"").innerHTML += "<td><i>"+table[j][k]+"<i></td>";
-                         }
+                     }
+                     var user_result = document.getElementById('user_table').textContent;
+                     var teacher_result = document.getElementById('teacher_table').textContent;
+                     if(user_result === teacher_result){
+                         swal({
+                             title: "Отлично!",
+                             text: "Задание выполнено успешно.",
+                             imageUrl: "{% static 'images/thumbs-up.jpg' %}"
+                         });
                      }
                 }
 
             },
             error: function (data) {
-                console.log(data);
             }
         });
 }
-</script>
+function getDBSchema() {
+    var request = {};
+    request['GetDBSchema'] = CurrentTaskID;
+    request['check_task'] = 'False';
+    request['start_test'] = 'False';
+
+    $.ajax({
+            beforeSend : function(jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(request),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+              var raw = data['image'];
+
+              var image = new Image();
+              image.src = "data:image/jpg;base64," + raw.substring(2,raw.length-1);
+
+              var new_tab = window.open("");
+
+              new_tab.document.write(image.outerHTML);
+              new_tab.document.title = "Обзор схемы БД";
+            },
+            error: function (data) {}
+        });
+}
+    </script>
 
 
 
@@ -368,6 +330,7 @@ function FillUserTable() {
     <tr class="tr_1" height=45%>
         <td id='left_top' class="task_area">
             <textarea id="teacher" spellcheck="false" readonly></textarea>
+            <button class="btn_view_database_schema" onclick="getDBSchema()">Обзор схемы Базы Данных</button>
         </td>
         <td id='right_top' class="user_area">
            <textarea id="user_query" class="input_u reser_query" spellcheck="false" placeholder="Введите ваш запрос и нажмите Alt+Enter для его выполнения..." required autofocus></textarea>

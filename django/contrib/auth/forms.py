@@ -152,12 +152,12 @@ class AuthenticationForm(forms.Form):
     """
     username = UsernameField(
         max_length=254,
-        widget=forms.TextInput(attrs={'autofocus': ''}),
+        widget=forms.TextInput(attrs={'autofocus': '','class': 'login_username_field'}),
     )
     password = forms.CharField(
         label=_("Password"),
         strip=False,
-        widget=forms.PasswordInput,
+        widget=forms.PasswordInput(attrs={'class':'login_password_field'}),
     )
 
     error_messages = {

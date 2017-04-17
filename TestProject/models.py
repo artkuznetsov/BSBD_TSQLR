@@ -66,6 +66,9 @@ class ConnectDataBase(models.Model):
 	def __str__(self):
 		return self.NameConnection
 
+	def get_connection_string(self):
+		return self.ConnectionString
+
 
 class Test(models.Model):
 	Name = models.CharField(max_length = 30)

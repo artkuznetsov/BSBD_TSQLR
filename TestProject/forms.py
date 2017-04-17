@@ -15,13 +15,13 @@ class TestForm(forms.Form):
             required=True,
 			initial = '\"Тест\"'
         )
-	DateActivate = forms.DateTimeField\
-		(
-			label="Дата активации",
-			input_formats=['%d-%m-%Y %H:%M'],
-			required=True,
-			help_text = 'YYYY-MM-DD HH:MM'
-		)
+	# DateActivate = forms.DateTimeField\
+	# 	(
+	# 		label="Дата активации",
+	# 		input_formats=['%d-%m-%Y %H:%M'],
+	# 		required=True,
+	# 		help_text = 'YYYY-MM-DD HH:MM'
+	# 	)
 	Time = forms.IntegerField\
 		(
 			label="Время на прохождение",

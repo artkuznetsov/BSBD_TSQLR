@@ -5,7 +5,7 @@ import TestProject
 from . import views
 
 urlpatterns = [
-  url(r'^$', TestProject.views.home),
+  url(r'^$', TestProject.views.tests),
   #url(r'^users/(?P<LoginUser>[^/]+)/profile$', views.TestsUser, name='TestUser'),
   url(r'^tests/$', views.tests),
   url(r'create_test/$', views.CreateTest, name = 'create_test'),

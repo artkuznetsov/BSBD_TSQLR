@@ -2,10 +2,15 @@
 # from django.shortcuts import render_to_response
 from django.utils.safestring import mark_safe
 from django.contrib.auth.models import *
+
+from PIL import Image
+from wsgiref.util import FileWrapper
+from TestApp import settings
 from .forms import *
 from .models import models
 from django.http import *
 from django.shortcuts import *
+from django.http import FileResponse
 # from django.contrib.auth.models import User, Group
 import random, json
 from django.contrib.auth.decorators import login_required
@@ -13,20 +18,41 @@ import re
 import pyodbc
 from datetime import *
 from pytz import timezone
+import eralchemy
+from eralchemy import render_er
+import base64
 
 
-
+@login_required(login_url='/accounts/login/')
 def tests(request):
-    if request.user.is_superuser:
-        result = {}
-        keys = []
-        for group in GP.objects.all():
-            students = MyUser.objects.filter(GP=group)
-            result[group.NameGP] = students
-        keys = ["username", "first_name", "last_name"]
-        return render(request, 'TestProject/tests.html', {'students_list': result, 'keys': keys})
+    if request.is_ajax():
+        data = json.loads(request.read().decode("utf-8"))
+        user = MyUser.objects.get(id=request.user.id)
+        print(request.user.id)
+        print(user)
+        # user.set_password()
+        user.set_password(data['Password'][1])
+        print(data['Password'][1])
+        user.save()
+        return JsonResponse({'status': 'error'}, charset="utf-8",safe=True)
+    else:
+        subscribe = TestPerson.objects.filter(Person=request.user.id)
+        with_mark = []
+        without_mark = []
+        tz = timezone('Asia/Omsk')
+        for sub in subscribe:
+            if sub.get_mark() != None:
+                with_mark.append(sub)
+            else:
+                if sub.Test.DateActivate <= datetime.now(tz):
+                    without_mark.append(sub)
+        return render(request, "TestProject/base-2.html",
+                      {
+                          "completed_tests": with_mark, "uncompleted_tests": without_mark
+                      })
+    # return render(request,'TestProject/base-2.html')
 
-
+@login_required(login_url='/accounts/login/')
 def home(request):
     return render(request, 'TestProject/home.html')
 
@@ -136,46 +162,49 @@ def AddUsers(request):
     else:
         return redirect("/404")
 '''
+
+
 def AddUsers(request):
     """Создание группы и пользоваетлей, которые входят в неё"""
     if request.user.is_superuser:
-    	if (request.method == "POST"):
-    		Groups = request.POST['Group']
-    		if Groups != "":
-    			group = GP(NameGP=Groups)
-    			group.save()
-    			users = request.POST['users']
-    			if users != '':
-    				users = users.split('\n')
-    				count = 0
-    				for i in users:
-    					user = i.split(' ')
-    					person = MyUser.objects.create_user(
-							username=Groups +"-"+ str(count),
-	                        email=None,
-	                        password='Qwerty123' + str(count),
-	                        last_name=user[0],
-	                        first_name=user[1],
-	                        GP=group
-	                    )
-    					count += 1
-    					person.save()
-    				return redirect("/admin")
-    			else:
-    				return redirect("/admin")
+        if (request.method == "POST"):
+            Groups = request.POST['Group']
+            if Groups != "":
+                group = GP(NameGP=Groups)
+                group.save()
+                users = request.POST['users']
+                if users != '':
+                    users = users.split('\n')
+                    count = 0
+                    for i in users:
+                        user = i.split(' ')
+                        person = MyUser.objects.create_user(
+                            username=Groups + "-" + str(count),
+                            email=None,
+                            password='Qwerty123' + str(count),
+                            last_name=user[0],
+                            first_name=user[1],
+                            GP=group
+                        )
+                        count += 1
+                        person.save()
+                    return redirect("/admin")
+                else:
+                    return redirect("/admin")
 
-    		else:
-    			return redirect("/admin")
-    	else:
+            else:
+                return redirect("/admin")
+        else:
             return render(request, "admin/generate_users.html")
     else:
-    	return redirect("/404")
+        return redirect("/404")
+
 
 def CreateTest(request):
     """Cоздание теста с вариантами"""
+    global date_activate
     if request.user.is_superuser:
         if request.is_ajax():
-
             if (request.POST.get("check") == 'True'):
                 """Get categories and count of tasks in him"""
                 form = TestForm(request.POST)
@@ -199,7 +228,6 @@ def CreateTest(request):
                 database = ConnectDataBase.objects.get(NameConnection=data['ConnectDataBase'])
                 task = Task.objects.filter(ConnectDataBase=database)
                 category = Category.objects.all()
-
                 answers = {}
                 for i in re.findall(r'\d\d*', str(re.findall(r'categoryID\s\d\d*', str(data)))):
                     answers[i] = data['categoryID ' + i]
@@ -295,11 +323,25 @@ def GoTest(request, testid, var):
 # Проверка студентом написанного запроса
         data = json.loads(request.read().decode("utf-8"))
         if len(data) == 1:
-            # Здесь нужно обрабатывать запросы о проверки
+            # Здесь нужно обрабатывать запросы о проверке ...
             test = Test.objects.get(id=int(testid))
             personForTest = TestPerson.objects.get(Person=request.user.id, Test=test, Variant=int(var))
             connectdb = TestConnectDataBase.objects.get(Test=test)
             connectStr = ConnectDataBase.objects.get(NameConnection=connectdb.ConnectDataBase).ConnectionString
+            for i in data:
+                # ... или получении схемы БД
+                if data[i] == 'GetDBSchema':
+                    host = re.search(r'\w*SERVER=\w*', connectStr).group(0)[7:]
+                    user = re.search(r'\w*UID=\w*', connectStr).group(0)[4:]
+                    password = re.search(r'\w*PWD=\w*', connectStr).group(0)[4:]
+                    database = re.search(r'\w*DATABASE=\w*', connectStr).group(0)[9:]
+
+                    render_er('mysql+pymysql://' + user + ':' + password + '@' + host + '/' + database + '',
+                              '' + host + '->' + database + '.png')
+
+                    response = base64.b64encode(open(host + '->' + database + '.png', "rb").read())
+
+                    return JsonResponse({'status': 'ok', 'image': str(response)}, safe=True)
             Connect = pyodbc.connect(connectStr)
             taskid = 0
             for i in data:
@@ -331,8 +373,8 @@ def GoTest(request, testid, var):
                     if dbname is not None:
                         result = result.replace(str(dbname.group(0)[1::1]), "")
                     if re.match(r'^You have an error in your SQL syntax', result) is not None:
-                        fail = re.search(r'\'\w*[^\']*',result).group(0)
-                        result = "<p>В вашем SQL запросе были найдены ошибки! </p><p>Проверьте правильность написания слов <div id=\"fail_text\">"+ fail + '\'</div></p>'
+                        fail = re.search(r'\'\w*[^\']*', result).group(0)
+                        result = "<p>В вашем SQL запросе были найдены ошибки! </p><p>Проверьте правильность написания слов <div id=\"fail_text\">" + fail + '\'</div></p>'
                     # table.append(error)
                     return JsonResponse({'status': 'error', 'error': result}, charset="utf-8", safe=True)
             return JsonResponse({'status': 'ok', 'table': table, 'task': taskid}, charset="utf-8", safe=True)
@@ -371,9 +413,7 @@ def GoTest(request, testid, var):
                     Shadowcurs = ConnectShadow.cursor()
                     Shadowcurs.execute(str(task.get(id=int(temp)).WTask))
                     sl1 = [row for row in Shadowcurs]
-
                     if l1 == l and sl1 == sl:
-
                         answ += task.get(id=temp).Weight
                         weight += task.get(id=temp).Weight
                     else:
@@ -447,8 +487,6 @@ def GoTest(request, testid, var):
 
         else:
             return redirect("/404")
-
-
 
 
 def TakeAnswer(request):
@@ -538,6 +576,7 @@ def DeleteSubscribe(request):
                 return JsonResponse({'status': 'ok', "result": result}, charset="utf-8", safe=True)
     return render(request, 'admin/delete_subscribe.html', {'answers': Answers.objects.all()})
 
+
 @login_required(login_url='/accounts/login/')
 def Trainer(request):
     if request.is_ajax():
@@ -545,7 +584,7 @@ def Trainer(request):
         if data['start_test'] == "True":
             tasks = []
             for i in data['checked_categories']:
-                subtasks = Task.objects.filter(Category=Category.objects.get(Name=i), Vision= True)
+                subtasks = Task.objects.filter(Category=Category.objects.get(Name=i), Vision=True)
                 if (subtasks.count() != 0):
                     for task in subtasks:
                         di = {}
@@ -590,8 +629,25 @@ def Trainer(request):
             except:
                 table.append("error")
             return JsonResponse({'status': 'ok', 'table': table, 'task': task.id}, charset="utf-8", safe=True)
+        if data['GetDBSchema'] != 'False':
+            connection_string = Task.objects.get(
+                id=int(data['GetDBSchema'])).get_connectdatabase().get_connection_string()
+
+            host = re.search(r'\w*SERVER=\w*', connection_string).group(0)[7:]
+            user = re.search(r'\w*UID=\w*', connection_string).group(0)[4:]
+            password = re.search(r'\w*PWD=\w*', connection_string).group(0)[4:]
+            database = re.search(r'\w*DATABASE=\w*', connection_string).group(0)[9:]
+
+            render_er('mysql+pymysql://' + user + ':' + password + '@' + host + '/' + database + '',
+                      '' + host + '->' + database + '.png')
+
+            response = base64.b64encode(open(host + '->' + database + '.png', "rb").read())
+
+            return JsonResponse({'status': 'ok', 'image': str(response)}, safe=True)
+
     categories = Category.objects.all()
     return render(request, 'TestProject/trainer.html', {'categories': categories})
+
 
 def ShowUsers(request):
     if request.user.is_superuser:

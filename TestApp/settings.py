@@ -17,7 +17,6 @@ pymysql.install_as_MySQLdb()
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
@@ -28,8 +27,6 @@ SECRET_KEY = 'dx!$ska&+anps@+=%^mel1-7*5-g3*i@oo_-p3yg*qf9i4+^bg'
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
-
 
 AUTH_USER_MODEL = 'TestProject.MyUser'
 INSTALLED_APPS = [
@@ -44,7 +41,6 @@ INSTALLED_APPS = [
     'TestProject',
     'registration',
 ]
-
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -77,19 +73,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'TestApp.wsgi.application'
 
-
-
 DATABASES = {
     'default': {
-    'ENGINE': 'django.db.backends.mysql',
-    'NAME': 'testbsbd',
-    'USER': 'root',
-    'PASSWORD': '12345',
-    'HOST': '127.0.0.1',
-    'PORT': '3306',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'testbsbd',
+        'USER': 'root',
+        'PASSWORD': '12345',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
     }
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -106,8 +99,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-
 LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'Asia/Omsk'
@@ -118,7 +109,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-
-
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+# SESSION_COOKIE_SECURE = "True"
