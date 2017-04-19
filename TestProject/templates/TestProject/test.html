@@ -36,7 +36,7 @@
               closeOnConfirm: false
                 },
             function(){
-                window.location = '/accounts/profile/';
+                window.location = '/';
             });
         }
             var clock = document.getElementById('clock');
@@ -100,6 +100,9 @@ GTest = [];
         task['text']='{{ test.get_task.get_tasktext }}';
         GTest.push(task);
         Answers['taskID '+ {{ test.get_task.get_id }}] = "";
+    {% endfor %}
+    {% for key,value in answers.items %}
+        Answers['taskID ' + {{ key }}]= '{{ value }}';
     {% endfor %}
 var task = GTest[0];
 CurrentTaskID = task['id'];
@@ -168,7 +171,7 @@ function getTask(task_number,flag) {
                   confirmButtonText: "Ok",
                   closeOnConfirm: false},
                 function(){
-                    window.location = '/accounts/profile/';
+                    window.location = '/';
                 });
             }
             );
@@ -355,7 +358,8 @@ function getDBSchema() {
           <tr id="user_table_thead_tr"></tr>
 
         </thead>
-        <tbody id="user_table_tbody"></tbody>
+        <tbody id="user_table_tbody">
+        </tbody>
       </table>
     </td>
   </tr>

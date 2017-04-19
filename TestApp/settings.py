@@ -112,4 +112,17 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-# SESSION_COOKIE_SECURE = "True"
+# SESSION_COOKIE_SECURE = True
+# Параметры от модуля SecurityMiddleware
+# Все пояснение по каждому параметру тут -> https://djbook.ru/rel1.9/ref/middleware.html#django.middleware.security.SecurityMiddleware
+
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True # https://djbook.ru/rel1.9/ref/middleware.html#django.middleware.security.SecurityMiddleware
+SECURE_BROWSER_XSS_FILTER = True # https://djbook.ru/rel1.9/ref/settings.html#std:setting-SECURE_BROWSER_XSS_FILTER
+SECURE_CONTENT_TYPE_NOSNIFF = True # Проверка типа загружаемых файлов https://djbook.ru/rel1.9/ref/settings.html#std:setting-SECURE_CONTENT_TYPE_NOSNIFF
+SECURE_HSTS_SECONDS = 0 # Нужно еще изучить https://djbook.ru/rel1.9/ref/settings.html#std:setting-SECURE_HSTS_SECONDS
+SECURE_SSL_REDIRECT = False # включает доступ только по HTTPS
+
+
+SECURE_PROXY_SSL_HEADER = False
+# CSRF_COOKIE_HTTPONLY = True # https://djbook.ru/rel1.9/ref/settings.html
+SESSION_COOKIE_AGE = 86400 # Время жизни куки (секунды)

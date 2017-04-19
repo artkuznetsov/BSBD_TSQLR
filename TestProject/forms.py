@@ -12,34 +12,29 @@ class TestForm(forms.Form):
         (
             label='Название теста',
             max_length=30,
-            required=True,
-			initial = '\"Тест\"'
+            required=True
         )
-	# DateActivate = forms.DateTimeField\
-	# 	(
-	# 		label="Дата активации",
-	# 		input_formats=['%d-%m-%Y %H:%M'],
-	# 		required=True,
-	# 		help_text = 'YYYY-MM-DD HH:MM'
-	# 	)
 	Time = forms.IntegerField\
 		(
 			label="Время на прохождение",
 			min_value=0,
 			initial=0,
-			help_text="(мин)"
+			help_text="(мин)",
+			required=True
 		)
 	Variants = forms.IntegerField\
     	(
     		label = "Необходимое количество вариантов",
 			min_value=0,
-			initial=0
+			initial=0,
+			required=True
     	)
 	ConnectDataBase = forms.ModelChoiceField\
 		(
 			label="База данных",
 			queryset=ConnectDataBase.objects.all(),
 			empty_label='Выбрать...',
+			required=True
 		)
 
 

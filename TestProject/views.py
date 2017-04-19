@@ -21,6 +21,7 @@ from pytz import timezone
 import eralchemy
 from eralchemy import render_er
 import base64
+import hashlib
 
 
 @login_required(login_url='/accounts/login/')
@@ -28,15 +29,12 @@ def tests(request):
     if request.is_ajax():
         data = json.loads(request.read().decode("utf-8"))
         user = MyUser.objects.get(id=request.user.id)
-        print(request.user.id)
-        print(user)
-        # user.set_password()
         user.set_password(data['Password'][1])
-        print(data['Password'][1])
         user.save()
-        return JsonResponse({'status': 'error'}, charset="utf-8",safe=True)
+        return JsonResponse({'status': 'ok'}, charset="utf-8",safe=True)
     else:
         subscribe = TestPerson.objects.filter(Person=request.user.id)
+
         with_mark = []
         without_mark = []
         tz = timezone('Asia/Omsk')
@@ -48,7 +46,8 @@ def tests(request):
                     without_mark.append(sub)
         return render(request, "TestProject/base-2.html",
                       {
-                          "completed_tests": with_mark, "uncompleted_tests": without_mark
+                          "completed_tests": with_mark,
+                          "uncompleted_tests": without_mark
                       })
     # return render(request,'TestProject/base-2.html')
 
@@ -320,7 +319,7 @@ def Add_TestPerson(request):
 
 def GoTest(request, testid, var):
     if request.is_ajax():
-# Проверка студентом написанного запроса
+        # Проверка студентом написанного запроса
         data = json.loads(request.read().decode("utf-8"))
         if len(data) == 1:
             # Здесь нужно обрабатывать запросы о проверке ...
@@ -347,13 +346,16 @@ def GoTest(request, testid, var):
             for i in data:
                 taskid = int(i)
                 try:
-                    ans = Answers.objects.get(TestPerson = personForTest, TestTask = TestTask.objects.get(Task = Task.objects.get(id=taskid), Test = test))
+                    ans = Answers.objects.get(TestPerson=personForTest,
+                                              TestTask=TestTask.objects.get(Task=Task.objects.get(id=taskid),
+                                                                            Test=test))
                     ans.Answer = data[i]
                     ans.save()
                 except:
-                    ans = Answers.objects.create(TestPerson = personForTest,
-                                                TestTask = TestTask.objects.get(Task = Task.objects.get(id=taskid), Test = test),
-                                                Answer = data[i])
+                    ans = Answers.objects.create(TestPerson=personForTest,
+                                                 TestTask=TestTask.objects.get(Task=Task.objects.get(id=taskid),
+                                                                               Test=test),
+                                                 Answer=data[i])
                 curs = Connect.cursor()
                 table = []
                 try:
@@ -380,7 +382,7 @@ def GoTest(request, testid, var):
             return JsonResponse({'status': 'ok', 'table': table, 'task': taskid}, charset="utf-8", safe=True)
         else:
 
-# Проверка ответов студента и их сохранение в базу, после нажатия на кнопку завершения
+            # Проверка ответов студента и их сохранение в базу, после нажатия на кнопку завершения
             test = Test.objects.get(id=int(testid))
             task = Task.objects.all()
             personForTest = TestPerson.objects.get(Person=request.user.id, Test=test, Variant=int(var))
@@ -393,25 +395,31 @@ def GoTest(request, testid, var):
             for i in data:
                 temp = i.split(" ")[1]
                 try:
-                    ans = Answers.objects.get(TestPerson = personForTest, TestTask = TestTask.objects.get(Task = Task.objects.get(id=temp), Test = test))
+                    ans = Answers.objects.get(TestPerson=personForTest,
+                                              TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test))
                     ans.Answer = data[i]
                     ans.save()
                 except:
-                    ans = Answers.objects.create(TestPerson = personForTest,
-                                                TestTask = TestTask.objects.get(Task = Task.objects.get(id=temp), Test = test),
-                                                Answer = data[i])
+                    ans = Answers.objects.create(TestPerson=personForTest,
+                                                 TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp),
+                                                                               Test=test),
+                                                 Answer=data[i])
                 try:
                     curs = Connect.cursor()
                     curs.execute(data[i])
+		    #print(hash(curs))
                     l = [row for row in curs]
                     curs = Connect.cursor()
                     curs.execute(str(task.get(id=int(temp)).WTask))
+		    #print(hash(curs))
                     l1 = [row for row in curs]
                     Shadowcurs = ConnectShadow.cursor()
                     Shadowcurs.execute(data[i])
+		    #print(hash(Shadowcurs))
                     sl = [row for row in Shadowcurs]
                     Shadowcurs = ConnectShadow.cursor()
                     Shadowcurs.execute(str(task.get(id=int(temp)).WTask))
+		    #print(hash(Shadowcurs))
                     sl1 = [row for row in Shadowcurs]
                     if l1 == l and sl1 == sl:
                         answ += task.get(id=temp).Weight
@@ -428,8 +436,8 @@ def GoTest(request, testid, var):
             return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
 
     else:
-# Формирование страниц для теста
-#Определение теста, студента, который проходит тест     
+        # Формирование страниц для теста
+        # Определение теста, студента, который проходит тест
         tests = Test.objects.get(id=int(testid))
         task = Task.objects.all()
         connectdb = TestConnectDataBase.objects.get(Test=tests)
@@ -438,14 +446,14 @@ def GoTest(request, testid, var):
         personForTest = TestPerson.objects.get(Person=request.user.id, Test=tests, Variant=int(var))
         test = TestTask.objects.filter(Test=tests, Variant=int(var))
         CheckAnswer = False
-#Проверка наличия ответов на этот тест
+        # Проверка наличия ответов на этот тест
         for q in test:
-            if len(Answers.objects.filter(TestPerson = personForTest, TestTask = q)) ==0:
+            if len(Answers.objects.filter(TestPerson=personForTest, TestTask=q)) == 0:
                 CheckAnswer = False
             else:
                 CheckAnswer = True
                 continue
-# Запуск таймера
+                # Запуск таймера
         tz = timezone('Asia/Omsk')
         if personForTest.Mark == None and tests.DateActivate <= datetime.now(tz):
             if (personForTest.StartTest == None):
@@ -454,9 +462,9 @@ def GoTest(request, testid, var):
                 personForTest.save()
             else:
                 time = personForTest.StartTest
-#Если ответов нет, то отдаётся страница с пустыми полями для заполнения
-            
-            
+            # Если ответов нет, то отдаётся страница с пустыми полями для заполнения
+
+
             table = []
 
             finalMonster = {}
@@ -481,10 +489,13 @@ def GoTest(request, testid, var):
             else:
                 answers = {}
                 for w in test:
-                    answers[i.get_task().get_id()]= Answers.objects.get(TestPerson = personForTest, TestTask = w).get_answer()
-                return render(request, "TestProject/test.html", {"GTest": test, "time": time, 'Monster': finalMonster, "answers" : answers})
-
-
+                    answers[w.get_task().get_id()] = Answers.objects.get(TestPerson=personForTest,
+                                                                         TestTask=w).get_answer()
+                return render(request, "TestProject/test.html",
+                              {"GTest": test,
+                               "time": time,
+                               'Monster': finalMonster,
+                               "answers": answers})
         else:
             return redirect("/404")
 

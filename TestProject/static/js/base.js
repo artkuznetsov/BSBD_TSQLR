@@ -35,12 +35,11 @@ function changePassword(csrf_token) {
                     contentType: 'application/json',
                     success: function (data) {
                         if (data['status'] === 'ok') {
-                            swal({
-                                title: 'Отлично!',
-                                html: 'Ваш пароль изменен.',
-                                confirmButtonText: 'OK',
-                                showCancelButton: false
-                            })
+                            swal(
+                              'Отлично!',
+                              'Ваш пароль изменен.',
+                              'success'
+                            )
                         }
                         if (data['status'] === 'error') {
                             swal(

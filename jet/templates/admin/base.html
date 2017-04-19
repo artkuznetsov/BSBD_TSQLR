@@ -1,4 +1,5 @@
 {% load i18n static jet_tags %}<!DOCTYPE html>
+{% load staticfiles %}
 {% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
 {% jet_get_current_theme as THEME %}
 {% jet_get_current_version as JET_VERSION %}
@@ -23,6 +24,9 @@
     var TIME_FORMAT = "{% jet_get_time_format %}";
     var DATETIME_FORMAT = "{% jet_get_datetime_format %}";
 </script>
+        <script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
+
+<script type="text/javascript" src="{% static 'js/admin.js'%}"></script>
 <script type="text/javascript" src="{% url 'jet:jsi18n' %}"></script>
 <script src="{% static "jet/js/build/bundle.min.js" as url %}{{ url|jet_append_version }}"></script>
 
@@ -60,7 +64,7 @@
                 {% if user.is_active and user.is_staff %}
                     {% url 'django-admindocs-docroot' as docsroot %}
                     {% if docsroot %}
-                        <a href="{{ docsroot }}">{% trans 'Documentation' %}</a> /
+                        <a href="{{ docsroot }}">Документация Django</a> /
                     {% endif %}
                 {% endif %}
                 {% if user.has_usable_password %}
@@ -268,47 +272,36 @@
                     {% endif %}
 
                     <div class="sidebar-section last">
-                        <div class="dialog-confirm" id="bookmarks-add-dialog" title="{% trans "Add bookmark" %}">
-                            <form action="{% url "jet:add_bookmark" %}" method="POST" id="bookmarks-add-form">
-                                {% csrf_token %}
-                                <p>{% trans "Title" %}:</p>
-                                <input type="text" name="title" class="fill_width">
-                                <p>{% trans "URL" %}:</p>
-                                <input type="text" name="url" class="fill_width">
-                            </form>
-                        </div>
-                        <form action="{% url "jet:remove_bookmark" %}" method="POST" id="bookmarks-remove-form">
-                            {% csrf_token %}
-                            <input type="hidden" name="id">
-                        </form>
-                        <div class="dialog-confirm" id="bookmarks-remove-dialog" title="{% trans "Delete bookmark" %}">
-                            <p>{% trans "Are you sure want to delete this bookmark?" %}</p>
-                        </div>
-
-                        <div class="sidebar-title">
-                            <span class="sidebar-right">
-                                <a href="#" class="sidebar-right-plus bookmarks-add" title="{% trans "Add bookmark" %}"{% if title %} data-title="{{ title }}"{% endif %}><span class="icon-add"></span></a>
-                            </span>
-                            {% trans 'bookmarks' %}
-                        </div>
-
-                        <div class="bookmarks-list">
-                            {% jet_get_bookmarks user as bookmarks %}
-                            {% for bookmark in bookmarks %}
-                                <a href="{{ bookmark.url }}" class="sidebar-link bookmark-item">
-                                    <span class="sidebar-right collapsible">
-                                        <span class="sidebar-right-remove bookmarks-remove" data-bookmark-id="{{ bookmark.pk }}">{% trans "Remove" %}</span>
-                                    </span>
-                                    <span class="sidebar-link-label">{{ bookmark.title }}</span>
-                                </a>
-                            {% endfor %}
-                            <a class="sidebar-link bookmark-item clone">
-                                <span class="sidebar-right collapsible">
-                                    <span class="sidebar-right-remove bookmarks-remove">{% trans "Remove" %}</span>
-                                </span>
-                                <span class="sidebar-link-label"></span>
-                            </a>
-                        </div>
+                        {#                        Создать тест#}
+                        <a href="/create_test" class="sidebar-link bookmark-item">
+{#                            <span class="sidebar-link-label">Пройти тренажер</span>#}
+                            <span class="sidebar-link-label" ><p><img src={% static 'images/create_test_modified_white.png' %}> <strong>Создать тест</strong></p></span>
+                        </a>
+{#                        Сгенерировать пользователей#}
+                        <a href="/generate_users" class="sidebar-link bookmark-item">
+{#                            <span class="sidebar-link-label">Пройти тренажер</span>#}
+                            <span class="sidebar-link-label" ><p><img src={% static 'images/generate_users_3_white.png' %}> <strong>Добавить студентов</strong></p></span>
+                        </a>
+                        {#                        Назначить тестирование#}
+                        <a href="/add_subscribe" class="sidebar-link bookmark-item">
+{#                            <span class="sidebar-link-label">Пройти тренажер</span>#}
+                            <span class="sidebar-link-label" ><p><img src={% static 'images/add_subscribe_modified_white.png' %}>   <strong>Назначить тест</strong></p></span>
+                        </a>
+                        {#                        Просмотре ответов#}
+                        <a href="/answer_user" class="sidebar-link bookmark-item">
+{#                            <span class="sidebar-link-label">Пройти тренажер</span>#}
+                            <span class="sidebar-link-label" ><p><img src={% static 'images/answer_user_modified_white.png' %}> <strong>Посмотреть ответы</strong></p></span>
+                        </a>
+                        {#                        Просмотре ответов#}
+                        <a href="/delete_subscribe" class="sidebar-link bookmark-item">
+{#                            <span class="sidebar-link-label">Пройти тренажер</span>#}
+                            <span class="sidebar-link-label" ><p><img src={% static 'images/delete_subscribe_modified_white.png' %}>    <strong>Результаты</strong></p></span>
+                        </a>
+                        {#                        Студенты#}
+                        <a href="/show_users" class="sidebar-link bookmark-item">
+{#                            <span class="sidebar-link-label">Пройти тренажер</span>#}
+                            <span class="sidebar-link-label" ><p><img src={% static 'images/show_users_modified_white.png' %}>    <strong>Студенты</strong></p></span>
+                        </a>
                     </div>
                 {% endif %}
             </div>
