@@ -17,15 +17,22 @@
     CurrentTaskID = 0;
     Step=0;
     Answers = {};
-    forminputs = document.getElementsByTagName('input');
+
     function select_all(name, value) {
-        for (i = 0; i < forminputs.length; i++) {
-          // regex here to check name attribute
-          var regex = new RegExp(name, "i");
-          if (regex.test(forminputs[i].getAttribute('name'))) {
-            forminputs[i].checked = value === '1';
-          }
+        var forminputs = document.getElementsByName('category');
+        for(var i=0;i<forminputs.length;i++){
+            if(value===1){
+                forminputs[i].checked = true;
+            }
+            else
+                forminputs[i].checked = false;
         }
+{#        for (var i = 0; i < forminputs.length; i++) {#}
+{#          var regex = new RegExp(name, "i");#}
+{#          if (regex.test(forminputs[i].getAttribute('name'))) {#}
+{#            forminputs[i].checked = value === '1';#}
+{#          }#}
+{#        }#}
     }
     function startTrainer() {
         $("#first_field").hide();
@@ -238,23 +245,21 @@ function FillUserTable() {
                     for(var i=0;i<columns.length;i++)
                          document.getElementById("user_table_thead_tr").innerHTML += "<td><b>"+columns[i]+"<b></td>";
 
-                     for(var j=1;j<table.length;j++)
+                    for(var j=1;j<table.length;j++)
                      {
                          document.getElementById("user_table_tbody").innerHTML += "<tr id=\"user_table_tr_"+j+"\"></tr>";
                          for(var k=0;k<table[j].length;k++)
                              document.getElementById("user_table_tr_"+j+"").innerHTML += "<td><i>"+table[j][k]+"<i></td>";
                      }
-                     var user_result = document.getElementById('user_table').textContent;
-                     var teacher_result = document.getElementById('teacher_table').textContent;
-                     if(user_result === teacher_result){
+
+                     if(data['isEquals']==='True')
                          swal({
                              title: "Отлично!",
                              text: "Задание выполнено успешно.",
                              imageUrl: "{% static 'images/thumbs-up.jpg' %}"
                          });
-                     }
-                }
 
+                }
             },
             error: function (data) {
             }

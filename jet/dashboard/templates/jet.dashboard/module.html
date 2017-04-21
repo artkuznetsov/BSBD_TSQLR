@@ -21,7 +21,24 @@
             {% if module.title_url %}
                 <a href="{{ module.title_url }}">{{ module.title }}</a>
             {% else %}
-                {{ module.title }}
+                {% if module.model.id == 1 %}
+                    Быстрые ссылки
+                {% endif %}
+                {% if module.model.id == 2 %}
+                    Панель навигации
+                {% endif %}
+                {% if module.model.id == 3 %}
+                    Пользователи и группы
+                {% endif %}
+                {% if module.model.id == 4 %}
+                    Последние действия
+                {% endif %}
+                {% if module.model.id == 5 %}
+                    Документация по Django
+                {% endif %}
+                {% if module.model.id == 6 %}
+                    Поддержка
+                {% endif %}
             {% endif %}
         </span>
         <div class="cf"></div>

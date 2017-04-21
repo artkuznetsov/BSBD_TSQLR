@@ -44,6 +44,7 @@ def tests(request):
             else:
                 if sub.Test.DateActivate <= datetime.now(tz):
                     without_mark.append(sub)
+                    
         return render(request, "TestProject/base-2.html",
                       {
                           "completed_tests": with_mark,
@@ -54,8 +55,184 @@ def tests(request):
 @login_required(login_url='/accounts/login/')
 def home(request):
     return render(request, 'TestProject/home.html')
+@login_required(login_url='/accounts/login/')
+def some_test(request, testid, var):
+    if request.is_ajax():
+        # Проверка студентом написанного запроса
+        data = json.loads(request.read().decode("utf-8"))
+        if len(data) == 1:
+            # Здесь нужно обрабатывать запросы о проверке ...
+            test = Test.objects.get(id=int(testid))
+            personForTest = TestPerson.objects.get(Person=request.user.id, Test=test, Variant=int(var))
+            connectdb = TestConnectDataBase.objects.get(Test=test)
+            connectStr = ConnectDataBase.objects.get(NameConnection=connectdb.ConnectDataBase).ConnectionString
+            for i in data:
+                # ... или получении схемы БД
+                if data[i] == 'GetDBSchema':
+                    host = re.search(r'\w*SERVER=\w*', connectStr).group(0)[7:]
+                    user = re.search(r'\w*UID=\w*', connectStr).group(0)[4:]
+                    password = re.search(r'\w*PWD=\w*', connectStr).group(0)[4:]
+                    database = re.search(r'\w*DATABASE=\w*', connectStr).group(0)[9:]
+
+                    render_er('mysql+pymysql://' + user + ':' + password + '@' + host + '/' + database + '',
+                              '' + host + '->' + database + '.png')
+
+                    response = base64.b64encode(open(host + '->' + database + '.png', "rb").read())
+
+                    return JsonResponse({'status': 'ok', 'image': str(response)}, safe=True)
+            Connect = pyodbc.connect(connectStr)
+            taskid = 0
+            for i in data:
+                taskid = int(i)
+                try:
+                    ans = Answers.objects.get(TestPerson=personForTest,
+                                              TestTask=TestTask.objects.get(Task=Task.objects.get(id=taskid),
+                                                                            Test=test))
+                    ans.Answer = data[i]
+                    ans.save()
+                except:
+                    ans = Answers.objects.create(TestPerson=personForTest,
+                                                 TestTask=TestTask.objects.get(Task=Task.objects.get(id=taskid),
+                                                                               Test=test),
+                                                 Answer=data[i])
+                curs = Connect.cursor()
+                table = []
+                try:
+                    curs.execute(data[i])
+                    l = [row for row in curs]
+                    col = [column[0] for column in curs.description]
+                    table.append(col)
+                    a = []
+                    for i in l:
+                        for j in i:
+                            a.append(j)
+                        table.append(a)
+                        a = []
+                except Exception as exception:
+                    result = re.search(r']\w[^(]*', str(exception)).group(0)[1::1]
+                    dbname = re.search(r'\'\w*\.', result)
+                    if dbname is not None:
+                        result = result.replace(str(dbname.group(0)[1::1]), "")
+                    if re.match(r'^You have an error in your SQL syntax', result) is not None:
+                        fail = re.search(r'\'\w*[^\']*', result).group(0)
+                        result = "<p>В вашем SQL запросе были найдены ошибки! </p><p>Проверьте правильность написания слов <div id=\"fail_text\">" + fail + '\'</div></p>'
+                    # table.append(error)
+                    return JsonResponse({'status': 'error', 'error': result}, charset="utf-8", safe=True)
+            return JsonResponse({'status': 'ok', 'table': table, 'task': taskid}, charset="utf-8", safe=True)
+        else:
+
+            # Проверка ответов студента и их сохранение в базу, после нажатия на кнопку завершения
+            test = Test.objects.get(id=int(testid))
+            task = Task.objects.all()
+            personForTest = TestPerson.objects.get(Person=request.user.id, Test=test, Variant=int(var))
+            connectdb = TestConnectDataBase.objects.get(Test=test)
+            connectStr = ConnectDataBase.objects.get(NameConnection=connectdb.ConnectDataBase)
+            Connect = pyodbc.connect(connectStr.ConnectionString)
+            ConnectShadow = pyodbc.connect(connectStr.ShadowConnectionString)
+            answ = 0
+            weight = 0
+            for i in data:
+                temp = i.split(" ")[1]
+                try:
+                    ans = Answers.objects.get(TestPerson=personForTest,
+                                              TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test))
+                    ans.Answer = data[i]
+                    ans.save()
+                except:
+                    ans = Answers.objects.create(TestPerson=personForTest,
+                                                 TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp),
+                                                                               Test=test),
+                                                 Answer=data[i])
+                try:
+                    curs = Connect.cursor()
+                    curs.execute(data[i])
+                    l = [row for row in curs]
+                    curs = Connect.cursor()
+                    curs.execute(str(task.get(id=int(temp)).WTask))
+                    l1 = [row for row in curs]
+                    Shadowcurs = ConnectShadow.cursor()
+                    Shadowcurs.execute(data[i])
+                    sl = [row for row in Shadowcurs]
+                    Shadowcurs = ConnectShadow.cursor()
+                    Shadowcurs.execute(str(task.get(id=int(temp)).WTask))
+                    sl1 = [row for row in Shadowcurs]
+                    if l1 == l and sl1 == sl:
+                        answ += task.get(id=temp).Weight
+                        weight += task.get(id=temp).Weight
+                    else:
+
+                        weight += task.get(id=temp).Weight
+                except:
+
+                    weight += task.get(id=temp).Weight
+
+            personForTest.Mark = round(float(100 * answ / weight))
+            personForTest.save()
+            return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
+
+    else:
+        # Формирование страниц для теста
+        # Определение теста, студента, который проходит тест
+        tests = Test.objects.get(id=int(testid))
+        task = Task.objects.all()
+        connectdb = TestConnectDataBase.objects.get(Test=tests)
+        connectStr = ConnectDataBase.objects.get(NameConnection=connectdb.ConnectDataBase)
+        Connect = pyodbc.connect(connectStr.ConnectionString)
+        personForTest = TestPerson.objects.get(Person=request.user.id, Test=tests, Variant=int(var))
+        test = TestTask.objects.filter(Test=tests, Variant=int(var))
+        CheckAnswer = False
+        # Проверка наличия ответов на этот тест
+        for q in test:
+            if len(Answers.objects.filter(TestPerson=personForTest, TestTask=q)) == 0:
+                CheckAnswer = False
+            else:
+                CheckAnswer = True
+                continue
+                # Запуск таймера
+        tz = timezone('Asia/Omsk')
+        if personForTest.Mark == None and tests.DateActivate <= datetime.now(tz):
+            if (personForTest.StartTest == None):
+                time = datetime.now(tz)
+                personForTest.StartTest = time
+                personForTest.save()
+            else:
+                time = personForTest.StartTest
+            # Если ответов нет, то отдаётся страница с пустыми полями для заполнения
 
 
+            table = []
+
+            finalMonster = {}
+            for i in test:
+                curs = Connect.cursor()
+                curs.execute(i.get_task().WTask)
+                l = [row for row in curs]
+                col = [column[0] for column in curs.description]
+                table.append(col)
+                a = []
+                for j in l:
+                    for k in j:
+                        a.append(str(k))
+                    table.append(a)
+                    a = []
+
+                finalMonster[i.get_task().get_id()] = table
+
+                table = []
+            if CheckAnswer == False:
+                return render(request, "TestProject/tests.html", {"GTest": test, "time": time, 'Monster': finalMonster})
+            else:
+                answers = {}
+                for w in test:
+                    answers[w.get_task().get_id()] = Answers.objects.get(TestPerson=personForTest,
+                                                                         TestTask=w).get_answer()
+                return render(request, "TestProject/tests.html",
+                              {"GTest": test,
+                               "time": time,
+                               'Monster': finalMonster,
+                               "answers": answers})
+        else:
+            return redirect("/404")
 def register(request):
     return render_to_response('registration/registration_form.html')
 
@@ -92,7 +269,7 @@ def TestsUser(request):
         else:
             if sub.Test.DateActivate <= datetime.now(tz):
                 without_mark.append(sub)
-    return render(request, "TestProject/profile.html",
+    return render(request, "TestProject/base-2.html",
                   {
                       "completed_tests": with_mark, "uncompleted_tests": without_mark
                   })
@@ -407,19 +584,15 @@ def GoTest(request, testid, var):
                 try:
                     curs = Connect.cursor()
                     curs.execute(data[i])
-		    #print(hash(curs))
                     l = [row for row in curs]
                     curs = Connect.cursor()
                     curs.execute(str(task.get(id=int(temp)).WTask))
-		    #print(hash(curs))
                     l1 = [row for row in curs]
                     Shadowcurs = ConnectShadow.cursor()
                     Shadowcurs.execute(data[i])
-		    #print(hash(Shadowcurs))
                     sl = [row for row in Shadowcurs]
                     Shadowcurs = ConnectShadow.cursor()
                     Shadowcurs.execute(str(task.get(id=int(temp)).WTask))
-		    #print(hash(Shadowcurs))
                     sl1 = [row for row in Shadowcurs]
                     if l1 == l and sl1 == sl:
                         answ += task.get(id=temp).Weight
@@ -626,9 +799,14 @@ def Trainer(request):
             Connect = pyodbc.connect(task.ConnectDataBase.ConnectionString)
             curs = Connect.cursor()
             table = []
+            l=[]
+            l2 = []
+            isEquals = 'False'
             try:
                 curs.execute(data['user_query'])
                 l = [row for row in curs]
+                curs.execute(str(task.WTask))
+                l2 = [row for row in curs]
                 col = [column[0] for column in curs.description]
                 table.append(col)
                 a = []
@@ -639,7 +817,9 @@ def Trainer(request):
                     a = []
             except:
                 table.append("error")
-            return JsonResponse({'status': 'ok', 'table': table, 'task': task.id}, charset="utf-8", safe=True)
+            if l == l2:
+                isEquals='True'
+            return JsonResponse({'status': 'ok', 'table': table, 'task': task.id,'isEquals':isEquals}, charset="utf-8", safe=True)
         if data['GetDBSchema'] != 'False':
             connection_string = Task.objects.get(
                 id=int(data['GetDBSchema'])).get_connectdatabase().get_connection_string()

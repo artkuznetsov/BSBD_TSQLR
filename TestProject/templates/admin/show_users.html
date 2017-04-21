@@ -18,8 +18,13 @@
             type: 'POST',
             contentType: 'application/json',
             success: function (data) {
-                if (data['status'] == 'ok') {
-                    window.location = window.location.href;
+                if (data['status'] === 'ok') {
+                    swal(
+                      'Отлично!',
+                      'Пароль был изменен.',
+                      'success'
+                    );
+{#                    window.location = window.location.href;#}
 
                 }
 
@@ -35,6 +40,8 @@
     <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
     <script src="{% static 'js/livesearch.js' %}"></script>
     <script src="{% static 'js/demo.js' %}"></script>
+    <script src="{% static 'js/sweetalert2.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}">
     <style>
          body { background-color:#fafafa;}
          </style>

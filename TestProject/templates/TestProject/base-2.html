@@ -67,10 +67,50 @@
     <!-- Content -->
         {% block content %}
             <div id="content" class="colM">
-                <div class="dashboard-container columns_3 cf">
+                <div class="dashboard-container columns_2 cf">
                     <div class="dashboard-column-wrapper">
                         <div class="dashboard-column first">
-
+{#                Новости#}
+                            <div class="dashboard-item-header ui-sortable-handle">
+                                <span class="dashboard-item-header-title">
+                                    Новости о курсе
+                                </span>
+                                <div class="cf"></div>
+                            </div>
+                            <div style="height: auto;" class="dashboard-item-content">
+                                <ul>
+                                    <li>
+                                        <span class="float-right dim">4 апреля 2017 г.</span>
+                                        <a href="#" target="_blank" class="nowrap">
+                                            <span class="icon-open-external"></span>Любич А.С: Пары отменяются
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <span class="float-right dim">1 апреля 2017 г.</span>
+                                        <a href="#" target="_blank" class="nowrap">
+                                            <span class="icon-open-external"></span>Важные новости.
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <span class="float-right dim">30 марта 2017 г.</span>
+                                        <a href="#" target="_blank" class="nowrap">
+                                            <span class="icon-open-external"></span> Нужно сдать 1,2 лабораторные работы
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <span class="float-right dim">21 марта 2017 г.</span>
+                                            <a href="#" target="_blank" class="nowrap">
+                                                <span class="icon-open-external"></span> Любич А.С: Я приболел =(
+                                            </a>
+                                    </li>
+                                    <li>
+                                        <span class="float-right dim">1 марта 2017 г.</span>
+                                            <a href="#" target="_blank" class="nowrap">
+                                                <span class="icon-open-external"></span> Приветствую на курсе БСБД!
+                                            </a>
+                                    </li>
+                                </ul>
+                            </div>
                             {#                            ДОСТУПНЫЕ ТЕСТЫ#}
                             <div class="dashboard-item-header ui-sortable-handle">
 
@@ -124,56 +164,29 @@
 
                         <div class="padding center">
 
-                            <canvas height="196" width="392" id="chart_8" style="width: 392px; height: 196px;">
-                                <div class="chart-fillColor"></div>
-                                <div class="chart-strokeColor"></div>
-                                <div class="chart-pointColor"></div>
-                                <div class="chart-pointHighlightFill"></div>
-                                <div class="chart-scaleGridLineColor"></div>
-                                <div class="chart-scaleLineColor"></div>
-                                <div class="chart-scaleFontColor"></div>
-                                <div class="chart-data">
-
-                                        <div class="chart-data-item" data-date="11/04" data-value="47"></div>
-
-                                        <div class="chart-data-item" data-date="12/04" data-value="34"></div>
-
-                                        <div class="chart-data-item" data-date="13/04" data-value="33"></div>
-
-                                        <div class="chart-data-item" data-date="14/04" data-value="26"></div>
-
-                                        <div class="chart-data-item" data-date="15/04" data-value="24"></div>
-
-                                        <div class="chart-data-item" data-date="16/04" data-value="27"></div>
-
-                                        <div class="chart-data-item" data-date="17/04" data-value="23"></div>
-
-                                </div>
-                            </canvas>
-
+                            <canvas style="width: 100%;" id="chart_8"></canvas>
                             <script>
-                                var ctx = document.getElementById('chart_8').getContext('2d');
-                                var myChart = new Chart(ctx, {
-                                  type: 'line',
-                                  data: {
-                                    labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+                                var labels = [];
+                                var data = [];
+                                {% for test in completed_tests %}
+                                    labels.push('{{ test.get_start_test_dm}}');
+                                    data.push({{ test.get_mark }});
+                                {% endfor %}
+                                var LineChart = {
+                                    labels: labels,
                                     datasets: [{
-                                      label: 'apples',
-                                      data: [12, 19, 3, 17, 6, 3, 7],
-                                      backgroundColor: "rgba(0,0,0,0.4)"
-                                    }, {
-                                      label: 'oranges',
-                                      data: [2, 29, 5, 5, 2, 3, 10],
-                                      backgroundColor: "rgba(255,153,0,0.4)"
+                                        fillColor: "rgba(99, 154, 245, 0.25)",
+                                        strokeColor: "rgb(99, 154, 245)",
+                                        pointColor: "rgb(255, 255, 255)",
+                                        pointHighlightFill: "rgb(99, 154, 245)",
+                                        scaleGridLineColor: "rgba(0, 0, 0, 0.1)",
+                                        scaleLineColor: "rgba(0, 0, 0, 0.1)",
+                                        scaleFontColor: "rgb(255, 255, 255)",
+                                        data: data
                                     }]
-                                  }
-                                });
-
+                                };
+                                var myLineChart = new Chart(document.getElementById("chart_8").getContext("2d")).Line(LineChart, {scaleFontColor : "#ffff"});
                             </script>
-
-
-
-
                         </div>
 
                     </div>
@@ -189,26 +202,30 @@
                                     <span class="dashboard-item-header-title">Ответы</span>
                                     <div class="cf"></div>
                                 </div>
-                                <div class="dashboard-item-content">
+                                <div class="dashboard-item-content" id="delete me" style=" position: relative; max-height: 550px; overflow-x: hidden; ">
 
-                                    <table>
+                                    <table id="table_completed_tests">
 
                                         <thead>
                                             <tr>
-                                                <th align="center" width="1">Тест</th>
-                                                <th align="center" width="1">Выполнено</th>
-                                                <th align="center" width="1">Дата и время</th>
+                                                <th>Тест</th>
+                                                <th>Выполнено</th>
+                                                <th>Дата и время</th>
                                             </tr>
                                         </thead>
                                         {% for test in completed_tests %}
                                         <tbody>
                                                 <tr>
-                                                    <th align="center" width="1">{{ test.get_test }}</th>
-                                                    <td align="center" width="1">{{ test.get_mark }}%</td>
-                                                    <td align="center" width="1">{{ test.get_start_test_without_time }}</td>
+                                                    <th>{{ test.get_test }}</th>
+                                                    <td>{{ test.get_mark }}%</td>
+                                                    <td>{{ test.get_start_test_without_time }}</td>
                                                 </tr>
                                                 {% empty %}
-                                                    <div style="height: auto;" class="dashboard-item-content contrast">
+                                                <script type="text/javascript">
+                                                    document.getElementById('delete me').innerHTML="";
+
+                                                </script>
+                                                    <div style="" class="dashboard-item-content contrast">
                                                         <div class="padding center">
                                                             <h2>Вы не прошли еще ни одного теста</h2>
                                                         </div>
@@ -222,49 +239,6 @@
                     </div>
                     <div class="dashboard-column-wrapper">
                         <div class="dashboard-column">
-                {#                Новости#}
-                            <div class="dashboard-item-header ui-sortable-handle">
-                                <span class="dashboard-item-header-title">
-                                    Новости о курсе
-                                </span>
-                                <div class="cf"></div>
-                            </div>
-                            <div style="height: auto;" class="dashboard-item-content">
-                                <ul>
-                                    <li>
-                                        <span class="float-right dim">4 апреля 2017 г.</span>
-                                        <a href="#" target="_blank" class="nowrap">
-                                            <span class="icon-open-external"></span>Любич А.С: Пары отменяются
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <span class="float-right dim">1 апреля 2017 г.</span>
-                                        <a href="#" target="_blank" class="nowrap">
-                                            <span class="icon-open-external"></span>Важные новости.
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <span class="float-right dim">30 марта 2017 г.</span>
-                                        <a href="#" target="_blank" class="nowrap">
-                                            <span class="icon-open-external"></span> Нужно сдать 1,2 лабораторные работы
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <span class="float-right dim">21 марта 2017 г.</span>
-                                            <a href="#" target="_blank" class="nowrap">
-                                                <span class="icon-open-external"></span> Любич А.С: Я приболел =(
-                                            </a>
-                                    </li>
-                                    <li>
-                                        <span class="float-right dim">1 марта 2017 г.</span>
-                                            <a href="#" target="_blank" class="nowrap">
-                                                <span class="icon-open-external"></span> Приветствую на курсе БСБД!
-                                            </a>
-                                    </li>
-                                </ul>
-                            </div>
-
-
                         </div>
                     </div>
                 </div>
@@ -312,36 +286,7 @@
                         </a>
                     </div>
                     <div class="sidebar-section last">
-{#                        Создать тест#}
-{#                        <a href="/create_test" class="sidebar-link bookmark-item">#}
-{#                            <span class="sidebar-link-label">Пройти тренажер</span>#}
-{#                            <span class="sidebar-link-label" ><p><img src={% static 'images/create_test_modified_white.png' %}> <strong>Создать тест</strong></p></span>#}
-{#                        </a>#}
-{#                        Сгенерировать пользователей#}
-{#                        <a href="/generate_users" class="sidebar-link bookmark-item">#}
-{#                            <span class="sidebar-link-label">Пройти тренажер</span>#}
-{#                            <span class="sidebar-link-label" ><p><img src={% static 'images/generate_users_3_white.png' %}> <strong>Добавить студентов</strong></p></span>#}
-{#                        </a>#}
-                        {#                        Назначить тестирование#}
-{#                        <a href="/add_subscribe" class="sidebar-link bookmark-item">#}
-{#                            <span class="sidebar-link-label">Пройти тренажер</span>#}
-{#                            <span class="sidebar-link-label" ><p><img src={% static 'images/add_subscribe_modified_white.png' %}>   <strong>Назначить тест</strong></p></span>#}
-{#                        </a>#}
-                        {#                        Просмотре ответов#}
-{#                        <a href="/answer_user" class="sidebar-link bookmark-item">#}
-{#                            <span class="sidebar-link-label">Пройти тренажер</span>#}
-{#                            <span class="sidebar-link-label" ><p><img src={% static 'images/answer_user_modified_white.png' %}> <strong>Посмотреть ответы</strong></p></span>#}
-{#                        </a>#}
-                        {#                        Просмотре ответов#}
-{#                        <a href="/delete_subscribe" class="sidebar-link bookmark-item">#}
-{#                            <span class="sidebar-link-label">Пройти тренажер</span>#}
-{#                            <span class="sidebar-link-label" ><p><img src={% static 'images/delete_subscribe_modified_white.png' %}>    <strong>Результаты</strong></p></span>#}
-{#                        </a>#}
-                        {#                        Студенты#}
-{#                        <a href="/show_users" class="sidebar-link bookmark-item">#}
-{#                            <span class="sidebar-link-label">Пройти тренажер</span>#}
-{#                            <span class="sidebar-link-label" ><p><img src={% static 'images/show_users_modified_white.png' %}>    <strong>Студенты</strong></p></span>#}
-{#                        </a>#}
+
                     </div>
                 </div>
 

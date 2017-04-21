@@ -46,5 +46,5 @@ urlpatterns = [
     url(r'^password/reset/done/$',
         auth_views.password_reset_done,
         name='auth_password_reset_done'),
-    # url(r'^profile/$', views.TestsUser, name='TestUser')
+    url(r'^profile/$', views.tests, name='TestUser')
 ]

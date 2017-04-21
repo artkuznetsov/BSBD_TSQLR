@@ -1,46 +1,324 @@
-{% extends "admin/base.html" %}
-{% load i18n %}
-{% block title %} Создать тест {% endblock %}
-{% load static %}
-{% block content %}
-<head>
-    <script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
-    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-    <script src="{% static 'js/livesearch.js' %}"></script>
-    <script src="{% static 'js/demo.js' %}"></script>
-    <style>
-         body { background-color:#fafafa;}
-         </style>
-</head>
-	<body>
-		<section class="content">
-			<div class="container">
-            <h1>Введите название группы, студента или его логин</h1>
-				<div class="input-group">
-					<span class="input-group-addon"><i class="fa fa-search"></i></span>
-					<input style="width: 95%" class="form-control" id="livesearch" placeholder="Find a user" type="text" />
-                    <p></p>
-				</div>
-				<table class="table" id="users" style="width: 97%; ">
-					<tr>
-						<th class="hidden-xs">Группа</th>
-						<th class="hidden-xs">Логин</th>
-						<th class="hidden-xs">Имя</th>
-                        <th class="hidden-xs">Последняя дата посещения</th>
-					</tr>
-					{% for group,students in students_list.items %}
-                        {% for s in students %}
-                            <tr><td>{{ group }}</td>
-                            {% for key in s.values %}
-                                <td>{{ key }}</td>
-                            {% endfor %}
-                            </tr>
-                        {% endfor %}
-                    {% endfor %}
-				</table>
-			</div><!-- /.container -->
-		</section>
-	</body>
+{% load staticfiles %}
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
+    <link rel="stylesheet" type="text/css" href="/static/jet/css/vendor.css?v=1.0.5" />
+    <link rel="stylesheet" type="text/css" href="/static/jet/css/icons/style.css?v=1.0.5" />
+    <link rel="stylesheet" type="text/css" href="/static/jet/css/themes/default/base.css?v=1.0.5" class="base-stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/static/jet/css/themes/default/select2.theme.css?v=1.0.5" class="select2-stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/static/jet/css/themes/default/jquery-ui.theme.css?v=1.0.5" class="jquery-ui-stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/dashboard.css" />
+    <script src="{% static 'js/base.js' %}"></script>
+    <script src="{% static 'js/core.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'css/tests.css' %}" />
+<script src="{% static 'js/sweetalert2.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}">
+<script src="{% static 'js/sweet-alert.min.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'css/sweet-alert.css' %}" />
+<script type="text/javascript" src="{% static 'js/shortcut.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/cookie.js' %}"></script>
+    <script type="text/javascript" charset="utf-8">
+        var DATE_FORMAT = "%d.%m.%Y";
+        var TIME_FORMAT = "%H:%M:%S";
+        var DATETIME_FORMAT = "%d.%m.%Y %H:%M:%S";
+    </script>
+    <script type="text/javascript" src="/jet/jsi18n/"></script>
+    <script src="/static/jet/js/build/bundle.min.js?v=1.0.5"></script>
+    <script src="/static/jet/js/i18n/jquery-ui/datepicker-ru.js?v=1.0.5"></script>
+    <script src="/static/jet/js/i18n/jquery-ui-timepicker/jquery.ui.timepicker-ru.js?v=1.0.5"></script>
+    <script src="/static/jet/js/i18n/select2/ru.js?v=1.0.5"></script>
+        <script src="{% static 'js/Chart.bundle.js' %}"></script>
+        <script src="{% static 'js/Chart.js' %}"></script>
 
-{% endblock %}
+    <meta name="robots" content="NONE,NOARCHIVE" />
+<div class="main">
+  <div class="header">
+    <div class="brending">
+        <p style="vertical-align: middle;">Тест на контрольную точку №2</p>
+    </div>
+    <div class="clock" style="padding-top: 12px;">
+        <p><img src="{% static 'images/clock_white_flaticon.png' %}"><a id="clock" style="color: #ffffff;"> 20:20</a></p>
+    </div>
+    <div class="step"></div>
+      <p style="color: #ffffff; text-align: center; padding-top: 12px;"><img src="{% static 'images/steps_white_flaticon_32.png' %}"> 1/14</p>
+  </div>
+  <div class="sidebar2">
+    <div class="task_area">
+        <table class="task_area" style="position: relative; height: 99%; width: 100px;">
+            <thead>
+                <th style="text-align: center; width: 100%;">Задания</th>
+            </thead>
+            <tbody>
+                <tr><td><input style="text-align: left; max-width: 234px;" type="button" class="task" value="1. Простая выборка данных." title="1. Работа с оператором LIKE и INNER JOIN"></td></tr>
+                <tr><td><input style="text-align: left; max-width: 234px;" type="button" class="task" value="2. Объединение таблиц" title="1. Работа с оператором LIKE и INNER JOIN"></td></tr>
+                <tr><td><input style="text-align: left; max-width: 234px;" type="button" class="task" value="3. Select" title="1. Работа с оператором LIKE и INNER JOIN"></td></tr>
+                <tr><td><input style="text-align: left; max-width: 234px;" type="button" class="task" value="4. Поиск через LIKE" title="1. Работа с оператором LIKE и INNER JOIN"></td></tr>
+                <tr><td><input style="text-align: left; max-width: 234px;" type="button" class="task" value="5. Выборка первых 10 студентов" title="1. Работа с оператором LIKE и INNER JOIN"></td></tr>
+                <tr><td><input style="text-align: left; max-width: 234px;" type="button" class="task" value="6. Функция count()" title="1. Работа с оператором LIKE и INNER JOIN"></td></tr>
+                <tr><td><input style="text-align: left; max-width: 234px;" type="button" class="task" value="7. Функция avg()" title="1. Работа с оператором LIKE и INNER JOIN"></td></tr>
+                <tr><td><input style="text-align: left; max-width: 234px;" type="button" class="task" value="8. Функция min()" title="1. Работа с оператором LIKE и INNER JOIN"></td></tr>
+                <tr><td><input style="text-align: left; max-width: 234px;" type="button" class="task" value="9. Работа с датой" title="1. Работа с оператором LIKE и INNER JOIN"></td></tr>
+                <tr><td><input style="text-align: left; max-width: 234px;" type="button" class="task" value="10. Функция max()" title="1. Работа с оператором LIKE и INNER JOIN"></td></tr>
+                <tr><td><input style="text-align: left; max-width: 234px;" type="button" class="task" value="1. Сортировка по дате" title="1. Работа с оператором LIKE и INNER JOIN"></td></tr>
+                <tr><td><input style="text-align: left; max-width: 234px;" type="button" class="task" value="1. Группировка" title="1. Работа с оператором LIKE и INNER JOIN"></td></tr>
 
+            </tbody>
+        </table>
+{#        <img src="{% static 'images/task_button.png' %}" class="task" tex>#}
+{#        <div class="task" border="5" onclick="alert('hello');">#}
+{#          <p style="vertical-align: middle; text-align: left; color: #ffffff;">#}
+{#              1. Работа с оператором LIKE и INNER JOIN#}
+{#          </p>#}
+{#        </div>#}
+
+
+    </div>
+    <div class="btn_endTest">
+        <button id="btn_endTest" class="button" type="submit" name="index" value="0" style="text-align: center;">Завершить тест</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="first_col">
+      <div class="first_row">
+        <div class="ta_teacher">
+          <textarea id="teacher_textarea" readonly>Выберите всех студентов из таблицы students.</textarea>
+        </div>
+        <div class="btn">
+        <input type="button" value="Обзор схемы БД" id="viewSchema">
+        </div>
+      </div>
+      <div class="second_row">
+       <table id="teacher_table">
+           <thead>
+           <th>id</th>
+           <th>first_name</th>
+           <th>last_name</th>
+           <th>birthday</th>
+           </thead>
+           <tbody>
+           <tr>
+               <td>1</td>
+               <td>Артем</td>
+               <td>Кузнецов</td>
+               <td>21.07.1995</td>
+           </tr>
+           <tr>
+               <td>2</td>
+               <td>Павел</td>
+               <td>Мальцев</td>
+               <td>20.04.1995</td>
+           </tr>
+           <tr>
+               <td>3</td>
+               <td>Александр</td>
+               <td>Спиридон</td>
+               <td>2.01.1998</td>
+           </tr>
+           <tr>
+               <td>4</td>
+               <td>Иван</td>
+               <td>Иванов</td>
+               <td>1.12.1997</td>
+           </tr>
+           <tr>
+               <td>5</td>
+               <td>Петр</td>
+               <td>Петров</td>
+               <td>12.10.1995</td>
+           </tr>
+           <tr>
+               <td>6</td>
+               <td>Сидр</td>
+               <td>Сидоров</td>
+               <td>6.02.1990</td>
+           </tr>
+           <tr>
+               <td>7</td>
+               <td>Никита</td>
+               <td>Гриб</td>
+               <td>9.05.1991</td>
+           </tr>
+           <tr>
+               <td>8</td>
+               <td>Юлия</td>
+               <td>Алексеева</td>
+               <td>1.11.1994</td>
+           </tr>
+           <tr>
+               <td>9</td>
+               <td>Мария</td>
+               <td>Гречко</td>
+               <td>17.07.1998</td>
+           </tr>
+           </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="second_col">
+      <div class="first_row">
+        <div class="ta_teacher">
+          <textarea id="teacher_textarea"></textarea>
+        </div>
+        <div class="btn">
+        <input type="button" value="Ответить" id="viewSchema">
+        </div>
+      </div>
+      <div class="second_row">
+       <table id="user_table">
+           <thead>
+           <th>id</th>
+           <th>first_name</th>
+           <th>last_name</th>
+           <th>birthday</th>
+           </thead>
+           <tbody>
+           <tr>
+               <td>1</td>
+               <td>Артем</td>
+               <td>Кузнецов</td>
+               <td>21.07.1995</td>
+           </tr>
+           <tr>
+               <td>2</td>
+               <td>Павел</td>
+               <td>Мальцев</td>
+               <td>20.04.1995</td>
+           </tr>
+           <tr>
+               <td>3</td>
+               <td>Александр</td>
+               <td>Спиридон</td>
+               <td>2.01.1998</td>
+           </tr>
+           <tr>
+               <td>4</td>
+               <td>Иван</td>
+               <td>Иванов</td>
+               <td>1.12.1997</td>
+           </tr>
+           <tr>
+               <td>5</td>
+               <td>Петр</td>
+               <td>Петров</td>
+               <td>12.10.1995</td>
+           </tr>
+           <tr>
+               <td>6</td>
+               <td>Сидр</td>
+               <td>Сидоров</td>
+               <td>6.02.1990</td>
+           </tr>
+           <tr>
+               <td>7</td>
+               <td>Никита</td>
+               <td>Гриб</td>
+               <td>9.05.1991</td>
+           </tr>
+           <tr>
+               <td>8</td>
+               <td>Юлия</td>
+               <td>Алексеева</td>
+               <td>1.11.1994</td>
+           </tr>
+           <tr>
+               <td>9</td>
+               <td>Мария</td>
+               <td>Гречко</td>
+               <td>17.07.1998</td>
+           </tr>
+           </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<script>
+    {% load tz %}
+    {{ value|localtime }}
+    CurrentTask = 0;
+    CurrentTaskID = 0;
+    Step=0;
+    Answers = {};
+    GTest = [];
+    fillBrowserData();
+    var intervalID = window.setInterval(function () {
+        var user_start = new Date("{{ time | date:"c" }}").getTime();
+        var TestTime = 0;
+        {% for test in GTest %}
+            TestTime = {{ test.get_test.get_time }};
+        {% endfor %}
+        TestTime = TestTime * 60000;
+        var now = new Date().getTime();
+        var new_new = new Date(user_start + TestTime - now);
+        if (new_new.getTime() < 0) {
+            clearInterval(intervalID);
+            endTest();
+            swal({
+                    title: "Упс!",
+                    text: "Время прохождения теста истекло.",
+                    type: "error",
+                    showCancelButton: false,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Ok",
+                    closeOnConfirm: false
+                },
+                function () {
+                    window.location = '/';
+                });
+        }
+        var clock = document.getElementById('clock');
+        clock.innerText = " "+new_new.getMinutes() + ":" + new_new.getSeconds();
+    }, 1000);
+    function endTest() {
+    var saved_cookies = document.cookie;
+    var split_saved_cookies = saved_cookies.split(";");
+    for(var i=0;i<split_saved_cookies.length;i++){
+        split_saved_cookies[i] = split_saved_cookies[i].substring(0,split_saved_cookies[i].indexOf('='));
+        if(split_saved_cookies[i]!=='csrftoken')
+        deleteCookie(split_saved_cookies[i]);
+    }
+        $.ajax({
+            beforeSend: function (jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(Answers),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+                if (data['status'] === 'ok') {
+                }
+
+            },
+            error: function (data) {
+                console.log(data.body);
+            }
+        });
+}
+    function clearUserTable() {
+    document.getElementById("user_table").innerHTML = "";
+}
+    function fillUserTextarea(task) {
+    document.getElementById("user_query").value = Answers['taskID '+task['id']];
+}
+    function fillBrowserData() {
+        {% for test in GTest %}
+        var task = {};
+        task['id']={{ test.get_task.get_id }};
+        task['name']='{{ test.get_task.get_name }}';
+        task['text']='{{ test.get_task.get_tasktext }}';
+        GTest.push(task);
+        Answers['taskID '+ {{ test.get_task.get_id }}] = "";
+        if(getCookie('task '+{{ test.get_task.get_id }}))
+            Answers['taskID '+{{ test.get_task.get_id }}]=getCookie('task '+ {{ test.get_task.get_id }});
+        else
+            Answers['taskID '+ {{ test.get_task.get_id }}] = "";
+    {% endfor %}
+    }
+</script>
