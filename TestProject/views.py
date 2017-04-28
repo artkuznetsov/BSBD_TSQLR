@@ -22,6 +22,27 @@ import eralchemy
 from eralchemy import render_er
 import base64
 import hashlib
+from django.db.models import Q
+
+
+def get_news(user):
+    news_array = []
+    try:
+        for i in New.objects.filter(Q(Group=GP.objects.get(id=user.GP.id)) | Q(Group__isnull=True)):
+            news_array.append(i)
+    except:
+        news_array = []
+    return news_array
+
+
+@login_required(login_url='/accounts/login/')
+def News(request, newid):
+    new_required = New.objects.get(id=newid)
+    for new in get_news(MyUser.objects.get(id=request.user.id)):
+        if new_required == new:
+            return render(request, "TestProject/new.html", {'new': new})
+    return redirect("/404")
+
 
 
 @login_required(login_url='/accounts/login/')
@@ -31,9 +52,10 @@ def tests(request):
         user = MyUser.objects.get(id=request.user.id)
         user.set_password(data['Password'][1])
         user.save()
-        return JsonResponse({'status': 'ok'}, charset="utf-8",safe=True)
+        return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
     else:
         subscribe = TestPerson.objects.filter(Person=request.user.id)
+        user = MyUser.objects.get(id=request.user.id)
 
         with_mark = []
         without_mark = []
@@ -44,17 +66,21 @@ def tests(request):
             else:
                 if sub.Test.DateActivate <= datetime.now(tz):
                     without_mark.append(sub)
-                    
+
         return render(request, "TestProject/base-2.html",
                       {
                           "completed_tests": with_mark,
-                          "uncompleted_tests": without_mark
+                          "uncompleted_tests": without_mark,
+                          "news": get_news(user)
                       })
-    # return render(request,'TestProject/base-2.html')
+        # return render(request,'TestProject/base-2.html')
+
 
 @login_required(login_url='/accounts/login/')
 def home(request):
     return render(request, 'TestProject/home.html')
+
+
 @login_required(login_url='/accounts/login/')
 def some_test(request, testid, var):
     if request.is_ajax():
@@ -78,8 +104,8 @@ def some_test(request, testid, var):
                               '' + host + '->' + database + '.png')
 
                     response = base64.b64encode(open(host + '->' + database + '.png', "rb").read())
-
                     return JsonResponse({'status': 'ok', 'image': str(response)}, safe=True)
+
             Connect = pyodbc.connect(connectStr)
             taskid = 0
             for i in data:
@@ -87,13 +113,15 @@ def some_test(request, testid, var):
                 try:
                     ans = Answers.objects.get(TestPerson=personForTest,
                                               TestTask=TestTask.objects.get(Task=Task.objects.get(id=taskid),
-                                                                            Test=test))
+                                                                            Test=test, 
+                                                                            Variant=var))
                     ans.Answer = data[i]
                     ans.save()
                 except:
                     ans = Answers.objects.create(TestPerson=personForTest,
                                                  TestTask=TestTask.objects.get(Task=Task.objects.get(id=taskid),
-                                                                               Test=test),
+                                                                               Test=test, 
+                                                                               Variant=var),
                                                  Answer=data[i])
                 curs = Connect.cursor()
                 table = []
@@ -116,11 +144,9 @@ def some_test(request, testid, var):
                     if re.match(r'^You have an error in your SQL syntax', result) is not None:
                         fail = re.search(r'\'\w*[^\']*', result).group(0)
                         result = "<p>В вашем SQL запросе были найдены ошибки! </p><p>Проверьте правильность написания слов <div id=\"fail_text\">" + fail + '\'</div></p>'
-                    # table.append(error)
                     return JsonResponse({'status': 'error', 'error': result}, charset="utf-8", safe=True)
             return JsonResponse({'status': 'ok', 'table': table, 'task': taskid}, charset="utf-8", safe=True)
         else:
-
             # Проверка ответов студента и их сохранение в базу, после нажатия на кнопку завершения
             test = Test.objects.get(id=int(testid))
             task = Task.objects.all()
@@ -133,38 +159,40 @@ def some_test(request, testid, var):
             weight = 0
             for i in data:
                 temp = i.split(" ")[1]
-                try:
-                    ans = Answers.objects.get(TestPerson=personForTest,
-                                              TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test))
-                    ans.Answer = data[i]
-                    ans.save()
-                except:
-                    ans = Answers.objects.create(TestPerson=personForTest,
-                                                 TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp),
-                                                                               Test=test),
-                                                 Answer=data[i])
-                try:
-                    curs = Connect.cursor()
-                    curs.execute(data[i])
-                    l = [row for row in curs]
-                    curs = Connect.cursor()
-                    curs.execute(str(task.get(id=int(temp)).WTask))
-                    l1 = [row for row in curs]
-                    Shadowcurs = ConnectShadow.cursor()
-                    Shadowcurs.execute(data[i])
-                    sl = [row for row in Shadowcurs]
-                    Shadowcurs = ConnectShadow.cursor()
-                    Shadowcurs.execute(str(task.get(id=int(temp)).WTask))
-                    sl1 = [row for row in Shadowcurs]
-                    if l1 == l and sl1 == sl:
-                        answ += task.get(id=temp).Weight
+                if temp == "Test":
+                    continue
+                else:
+                    try:
+                        ans = Answers.objects.get(TestPerson=personForTest,
+                                                  TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test,
+                                                                                Variant=var))
+                        ans.Answer = data[i]
+                        ans.save()
+                    except:
+                        ans = Answers.objects.create(TestPerson=personForTest,
+                                                     TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp),
+                                                                                   Test=test, Variant=var),
+                                                     Answer=data[i])
+                    try:
+                        curs = Connect.cursor()
+                        curs.execute(data[i])
+                        l = [row for row in curs]
+                        curs = Connect.cursor()
+                        curs.execute(str(task.get(id=int(temp)).WTask))
+                        l1 = [row for row in curs]
+                        Shadowcurs = ConnectShadow.cursor()
+                        Shadowcurs.execute(data[i])
+                        sl = [row for row in Shadowcurs]
+                        Shadowcurs = ConnectShadow.cursor()
+                        Shadowcurs.execute(str(task.get(id=int(temp)).WTask))
+                        sl1 = [row for row in Shadowcurs]
+                        if l1 == l and sl1 == sl:
+                            answ += task.get(id=temp).Weight
+                            weight += task.get(id=temp).Weight
+                        else:
+                            weight += task.get(id=temp).Weight
+                    except:
                         weight += task.get(id=temp).Weight
-                    else:
-
-                        weight += task.get(id=temp).Weight
-                except:
-
-                    weight += task.get(id=temp).Weight
 
             personForTest.Mark = round(float(100 * answ / weight))
             personForTest.save()
@@ -223,9 +251,9 @@ def some_test(request, testid, var):
                 return render(request, "TestProject/tests.html", {"GTest": test, "time": time, 'Monster': finalMonster})
             else:
                 answers = {}
-                for w in test:
-                    answers[w.get_task().get_id()] = Answers.objects.get(TestPerson=personForTest,
-                                                                         TestTask=w).get_answer()
+                # for w in test:
+                # answers[w.get_task().get_id()] = Answers.objects.get(TestPerson=personForTest,
+                #                                                      TestTask=w).get_answer()
                 return render(request, "TestProject/tests.html",
                               {"GTest": test,
                                "time": time,
@@ -233,6 +261,8 @@ def some_test(request, testid, var):
                                "answers": answers})
         else:
             return redirect("/404")
+
+
 def register(request):
     return render_to_response('registration/registration_form.html')
 
@@ -420,26 +450,26 @@ def CreateTest(request):
                 connectdatabase.save()
 
                 for i in range(int(data['Variants'])):
-                	tasks = []
-                	for j in answers:
-                		count = 0
-                		t = []
-                		for q in task.filter(Category=category.get(id=j)):
-                			t.append(q.id)
-                		r = [q for q in t]
-                		testlist = [w for w in r if w not in tasks]
-                		if len(testlist)>=int(answers[j]):
-                			while count != int(answers[j]):
-                				RandomId = random.choice(r)
-                				Check = RandomId in tasks
-                				if Check == False:
-                					tasks.append(RandomId)
-                					test_task = TestTask.objects.create(Test=test, Task=task.get(id=RandomId),
-                                                                    Variant=i + 1)
-                					count += 1
-                		else:
-                			Test.objects.filter(Name=data['TestName']).delete()
-                			return JsonResponse({'status': 'error'}, charset="utf-8", safe=True)
+                    tasks = []
+                    for j in answers:
+                        count = 0
+                        t = []
+                        for q in task.filter(Category=category.get(id=j)):
+                            t.append(q.id)
+                        r = [q for q in t]
+                        testlist = [w for w in r if w not in tasks]
+                        if len(testlist) >= int(answers[j]):
+                            while count != int(answers[j]):
+                                RandomId = random.choice(r)
+                                Check = RandomId in tasks
+                                if Check == False:
+                                    tasks.append(RandomId)
+                                    test_task = TestTask.objects.create(Test=test, Task=task.get(id=RandomId),
+                                                                        Variant=i + 1)
+                                    count += 1
+                        else:
+                            Test.objects.filter(Name=data['TestName']).delete()
+                            return JsonResponse({'status': 'error'}, charset="utf-8", safe=True)
                 return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
 
         else:
@@ -799,7 +829,7 @@ def Trainer(request):
             Connect = pyodbc.connect(task.ConnectDataBase.ConnectionString)
             curs = Connect.cursor()
             table = []
-            l=[]
+            l = []
             l2 = []
             isEquals = 'False'
             try:
@@ -818,8 +848,9 @@ def Trainer(request):
             except:
                 table.append("error")
             if l == l2:
-                isEquals='True'
-            return JsonResponse({'status': 'ok', 'table': table, 'task': task.id,'isEquals':isEquals}, charset="utf-8", safe=True)
+                isEquals = 'True'
+            return JsonResponse({'status': 'ok', 'table': table, 'task': task.id, 'isEquals': isEquals},
+                                charset="utf-8", safe=True)
         if data['GetDBSchema'] != 'False':
             connection_string = Task.objects.get(
                 id=int(data['GetDBSchema'])).get_connectdatabase().get_connection_string()

@@ -32,6 +32,7 @@ AUTH_USER_MODEL = 'TestProject.MyUser'
 INSTALLED_APPS = [
     'jet.dashboard',
     'jet',
+    'tinymce',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

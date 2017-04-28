@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from tinymce.models import HTMLField
 
 from django.contrib.auth.models import AbstractUser
 
@@ -12,6 +13,25 @@ class MyUser(AbstractUser):
 
     def get_group(self):
         return self.GP.__str__()
+
+
+class New(models.Model):
+    Title = models.CharField(max_length=50)
+    Text = HTMLField()
+    Date = models.DateTimeField()
+    Group = models.ManyToManyField('GP', blank=True, null=True)
+
+    def __str__(self):
+        return self.Title
+
+    def get_text(self):
+        return self.Text
+
+    def get_date(self):
+        return self.Date.date()
+
+    def get_id(self):
+        return self.id.__str__()
 
 
 class GP(models.Model):

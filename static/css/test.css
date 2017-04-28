@@ -1,0 +1,178 @@
+pre{
+    overflow: scroll;
+
+}
+#left_top{
+    width: 50%;
+}
+#right_top{
+    width: 50%;
+}
+.tr_1{
+    display: table-row;
+    table-layout: fixed;
+}
+.tr_2{
+    height: 50%;
+}
+
+.input_user_query{
+    height: 100%;
+    width: 100%;
+    table-layout: fixed;
+    display: flex;
+    resize: none;
+}
+
+.teacher_textarea{
+    position: inherit;
+    height: 80%;
+    width: 100%;
+}
+.btn_view_database_schema{
+    position: inherit;
+    height: 20%;
+    width: 100%;
+}
+#table1{
+    height: 100%;
+    width: 100%;
+    display: table;
+    table-layout: fixed;
+}
+
+
+    .scrolling-table {
+    width: 100%;
+        height: 100%;
+    border: none;
+    }
+
+    .scrolling-table th {
+    color: #1e44e9;
+    border-bottom: 1px solid #9b93e9;
+    }
+
+    .scrolling-table tr td {
+    width: 50%;
+    padding: 2px 5px;
+    border-right: 1px solid #1e44e9;
+    border-bottom: 1px solid #1e44e9;
+    text-align: center;
+    color: #666;
+    }
+
+    .scrolling-table tr td:last-child {
+    border-right: none;
+    }
+
+    .scrolling-table tr:last-child td {
+    border-bottom: none;
+    }
+
+    .scrolling-table tbody {
+          display: block;
+          height: 350px;
+          width: 100%;
+          overflow: hidden;
+          overflow-y: auto;
+    }
+
+    .scrolling-table tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+
+    #shadow_td{
+        border: 0px;
+    }
+
+    #taskbutton{
+        position: absolute; width: 30%;
+        height: 100%;
+        top: 100%;
+    }
+
+
+
+    .buttons {
+        position: inherit;
+        overflow: auto;
+        text-align: center;
+        font-size: 1.0em;
+        font-weight: bold;
+        line-height: 100%;
+        height: 100%;
+        width: 100%;
+
+    }
+
+.buttons input
+{
+   display: inline-block;
+   width: 100%;       /* set to 100% */
+   height: 100%;      /* set to 100% */
+   margin-bottom: 0.5em;
+   padding-top: .6em;
+   padding-bottom: .6em;
+   color: #fffefa;
+   background-color: #11bb00;
+   border-radius: 5px;
+   border: solid #7d7e79 1px;
+   box-shadow: 2px 2px 1px #2e2e31;
+   clear:right;
+   float:right;
+    text-align-all: center;
+}
+
+.buttons input:active
+{
+    box-shadow: 1px 1px 0px #880e0c;
+}
+
+.button_task{
+    text-align: center;
+    font-family: Georgia;
+    font-size: 100%;
+}
+
+#clock{
+	color: #0071D0;
+	font-weight: bold;
+	font-size: 20px;
+}
+
+#error_text{
+    color: #cd0a0a;
+    font-family: 'Ubuntu', 'Lucida Grande', 'Lucida Sans Unicode', 'Geneva', 'Verdana', sans-serif;
+}
+
+#fail_text{
+    color: #1e44e9;
+}
+
+#previous_task{
+    position: inherit;
+    width: 100%
+    height:100%;
+}
+
+#next_task{
+    position: inherit;
+    width: 100%
+    height:100%;
+}
+
+#header{
+    position: inherit;
+    width: 100%;
+    height: 100%;
+}
+
+#header_tr{
+    position: inherit;
+    width: 100%
+    height: 100%;
+}

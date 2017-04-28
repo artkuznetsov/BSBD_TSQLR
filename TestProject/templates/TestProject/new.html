@@ -1,0 +1,16 @@
+{% extends 'TestProject/base-2.html' %}
+{% load staticfiles %}
+<script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/test.css' %}">
+<script src="{% static 'js/sweet-alert.min.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'css/sweet-alert.css' %}" />
+<script type="text/javascript" src="{% static 'js/shortcut.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/cookie.js' %}"></script>
+
+{% block content %}
+<div id="main">
+    <div id="title"><h1 style="text-align: center;">{{ new }}</h1></div>
+    <div id="date"><h3 style="text-align: right; padding-right: 2%;">{{ new.get_date }}</h3></div>
+    <div id="text" style="padding-left: 2%;">{{ new.get_text | safe }}</div>
+</div>
+{% endblock %}
