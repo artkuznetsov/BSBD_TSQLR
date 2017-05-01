@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 from tinymce.models import HTMLField
+from datetime import *
+from pytz import timezone
 
 from django.contrib.auth.models import AbstractUser
 
@@ -18,7 +20,7 @@ class MyUser(AbstractUser):
 class New(models.Model):
     Title = models.CharField(max_length=50)
     Text = HTMLField()
-    Date = models.DateTimeField()
+    Date = models.DateTimeField(editable=False, default=datetime.now(timezone('Asia/Omsk')))
     Group = models.ManyToManyField('GP', blank=True, null=True)
 
     def __str__(self):
@@ -125,6 +127,9 @@ class TestPerson(models.Model):
 
     def get_mark(self):
         return self.Mark
+
+    def get_mark_for_graphics(self):
+        return int(self.Mark)
 
     def get_test(self):
         return self.Test

@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="ru-RU" >
-{% autoescape on %}
     <head>
-    <title>Тестирование SQL запросов</title>
+
+    <title>{% block title %}Тестирование SQL запросов{% endblock %}</title>
+
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     {% load staticfiles %}
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -73,8 +74,8 @@
                                 <div class="cf"></div>
                             </div>
                             <div style="height: auto;" class="dashboard-item-content">
-                                <ul>
-                                {% for new in news%}
+                                <ul style="overflow: scroll; overflow-x: hidden; overflow-y: auto; max-height: 150px;">
+                                {% for new in news reversed %}
                                     <li>
                                         <span class="float-right dim">{{ new.get_date }}</span>
                                         <a href="newid={{ new.id }}" target="_blank" class="nowrap">
@@ -102,25 +103,23 @@
 
                             </div>
                                     {% for test in uncompleted_tests %}
-                                        <p><img src={% static 'images/exam3.png' %}></p>
-                                        <ul class="inline bordered">
-                                                <li>
-                                                    <div class="big">{{ test.get_test }}</div>
-                                                    <div class="dim">Название</div>
-                                                </li>
+                                        <p><img src={% static 'images/exam_64px_flaticon_white.png' %}>
 
-                                                <li>
-                                                    <div class="big">{{ test.get_test.get_time }} минут</div>
-                                                    <div class="dim">Длительность</div>
-                                                </li>
-{#                                                <li>#}
-{#                                                    <div class="big">{{ test.get_variant }}</div>#}
-{#                                                    <div class="dim">Вариант</div>#}
-{#                                                </li>#}
+                                            <ul class="inline bordered">
+                                                    <li>
+                                                        <div class="big">{{ test.get_test|truncatechars:"30" }}</div>
+                                                        <div class="dim">Название</div>
+                                                    </li>
 
-                                        </ul>
-                                        <p></p>
-                                        <a href=../../testid={{ test.get_test.get_id}}&var={{ test.get_variant }}><button class="button" type="submit" title="Начать тест"  id="btnStartTest">Начать</button></a>
+                                                    <li>
+                                                        <div class="big">{{ test.get_test.get_time }} минут(ы)</div>
+                                                        <div class="dim">Длительность</div>
+                                                    </li>
+
+
+                                            </ul>
+                                        </p>
+                                        <a href=../../testid={{ test.get_test.get_id}}&var={{ test.get_variant }}><button style="position: relative; width: 100%;" class="button" type="submit" title="Начать тест"  id="btnStartTest">Начать</button></a>
                                         {% empty %}
                                             <h2>Сейчас нет тестов, которые вы можете пройти</h2>
                                     {% endfor %}
@@ -147,7 +146,7 @@
                                 var data = [];
                                 {% for test in completed_tests %}
                                     labels.push('{{ test.get_start_test_dm}}');
-                                    data.push({{ test.get_mark }});
+                                    data.push({{ test.get_mark_for_graphics }});
                                 {% endfor %}
                                 var LineChart = {
                                     labels: labels,
@@ -190,8 +189,9 @@
                                                 <th>Дата и время</th>
                                             </tr>
                                         </thead>
+                                        <tbody style="overflow: scroll; overflow-x: hidden; overflow-y: auto; max-height: 10px;">
                                         {% for test in completed_tests %}
-                                        <tbody>
+
                                                 <tr>
                                                     <th>{{ test.get_test }}</th>
                                                     <td>{{ test.get_mark }}%</td>
@@ -248,7 +248,7 @@
                                 <span class="sidebar-link-icon icon-data"></span>
                                 Панель администратора
                                 {% else %}
-                                    <a href="/trainer/" class="sidebar-link icon">
+                                    <a href=".." class="sidebar-link icon" onclick="openTrainer()">
                                     <span class="sidebar-link-label">
                                         <span class="sidebar-link-icon icon-data"></span>
                                         Открыть тренажер
@@ -279,4 +279,9 @@
 {% endblock body %}
 </html>
 
-{% endautoescape %}
+<script>
+    function openTrainer() {
+        var new_tab = window.open("/trainer/");
+{#        new_tab.document.title = "Обзор схемы БД";#}
+    }
+</script>

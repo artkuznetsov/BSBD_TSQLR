@@ -1,0 +1,74 @@
+{#{% extends 'TestProject/base-2.html' %}#}
+    {% block content %}
+        {% load staticfiles %}
+
+        <title>Тренажер | Выбор категорий</title>
+        <link rel="stylesheet" type="text/css" href="{% static 'css/trainer_category.css' %}" />
+
+        <h2>Выберите категории заданий</h2>
+        <p>
+            <input type="button" value="Выбрать все" onclick="seeleect('cb',1)">
+            <input type="button" value="Сбросить все" onclick="seeleect('cb',0)">
+        </p>
+        {% for category in categories %}
+            <input type="checkbox" name="cb" id='{{ category.id }}' class="check"/>
+            <label for="{{ category.id }}">{{ category }}</label>
+        {% endfor %}
+        <p>
+            <button class="button" type="submit" name="index" value="0" onclick="startTrainer()">Начать</button>
+        </p>
+
+
+
+        <script>
+        function startTrainer() {
+            var checked = [];
+            $('input:checkbox:checked').each(function(){
+                alert(this.id);
+                checked.push(this.id);
+            });
+            var request={};
+            request['checked_categories'] = checked;
+            request['start_test'] = "True";
+            $.ajax({
+                beforeSend : function(jqXHR) {
+                    jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+                },
+                url: window.location.href,
+                data: JSON.stringify(request),
+                type: 'POST',
+                contentType: 'application/json',
+                success: function (data) {
+                    if(data['status']==='ok'){
+                        alert('good');
+                        var tasks = data['tasks'];
+
+                        for(var i = 0;i<tasks.length;i++){
+                            var tmp = {};
+                            console.log(tasks[i]['table']);
+                            var table = tasks[i]['table'];
+                            console.log('table = ');
+                            console.log(table);
+                            tmp['text'] = tasks[i]['text'];
+                            tmp['name'] = tasks[i]['name'];
+                            tmp['id'] = tasks[i]['id'];
+                            tmp['table'] = table;
+                            tmp['table'] = tasks[i]['table'];
+                            GTest.push(tmp);
+                        }
+                        console.log('iam load Trainer...');
+                        trainerLoad();
+                    }
+                },
+                error: function (data) {}
+            });
+
+        }
+        function seeleect(name, value) {
+            var forminputs = document.getElementsByName(name);
+            for(var i=0;i<forminputs.length;i++){
+                forminputs[i].checked = value === 1;
+            }
+        }
+</script>
+{% endblock %}

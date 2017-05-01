@@ -27,12 +27,6 @@
             else
                 forminputs[i].checked = false;
         }
-{#        for (var i = 0; i < forminputs.length; i++) {#}
-{#          var regex = new RegExp(name, "i");#}
-{#          if (regex.test(forminputs[i].getAttribute('name'))) {#}
-{#            forminputs[i].checked = value === '1';#}
-{#          }#}
-{#        }#}
     }
     function startTrainer() {
         $("#first_field").hide();
@@ -355,7 +349,6 @@ function getDBSchema() {
             <table class="scrolling-table" id="user_table">
               <thead id="user_table_thead">
               <tr id="user_table_thead_tr">
-
               </tr>
 
               </thead>

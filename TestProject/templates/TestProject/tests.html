@@ -85,7 +85,7 @@
         </div>
       </div>
       <div class="second_row">
-       <table id="teacher_table">
+       <table id="teacher_table" class="data_table">
            <thead>
            <tr  id="teacher_table_head"></tr>
            </thead>
@@ -107,12 +107,17 @@
         </div>
       </div>
       <div class="second_row">
-       <table id="user_table">
-           <thead >
-            <tr id="user_table_head"></tr>
+{#        <table class="test_table">#}
+{#            <thead>#}
+{#            </thead>#}
+{##}
+{#        </table>#}
+       <table id="user_table" class="data_table">
+           <thead>
+            <tr id="user_table_head">
+            </tr>
            </thead>
            <tbody id="user_table_body">
-
            </tbody>
         </table>
       </div>
@@ -159,6 +164,9 @@
     FillUserTextArea();
     FillTestName();
     ActivateTaskButton();
+    shortcut.add("Alt+Enter", function() {
+        FillUserTable();
+    });
 
 
     //clock function
@@ -209,13 +217,24 @@
     //initials functions
     function fillBrowserData() {
         {% for test in GTest %}
-            Answers['taskID '+ {{ test.get_task.get_id }}] = "";
+            //Answers
             if(getCookie('task '+{{ test.get_task.get_id }}))
                 Answers['taskID '+{{ test.get_task.get_id }}]=getCookie('task '+ {{ test.get_task.get_id }});
             else
                 Answers['taskID '+ {{ test.get_task.get_id }}] = "";
+
+            //Flags
+            if(getCookie('task_' + {{ test.get_task.get_id }} + '_is_flag')) {
+                FlagTasks.push({{ test.get_task.get_id }});
+                markTaskFlag({{ test.get_task.get_id }});
+            }
+
+            //Completed tasks
+            if(getCookie('task_'+ {{ test.get_task.get_id }} +'_is_completed'))
+                CompletedTasks.push({{ test.get_task.get_id }});
         {% endfor %}
-        CountOfCompletedTasks.innerHTML = ' 0/'+flags.length;
+
+        CountOfCompletedTasks.innerHTML = CompletedTasks.length+'/'+flags.length;
     }
     function FillInitialTask() {
         {% for test in GTest reversed%}
@@ -245,10 +264,15 @@
             UserTextArea.value = "";
         {% for test in GTest %}
             if ({{ test.get_task.get_id }} === task_id){
-                CurrentTaskID = task_id;
-                FillTeacherTextArea(task_id);
-                FillTeacherTable(task_id);
-                FillUserTextArea();
+                if(task_id !== CurrentTaskID) {
+                    ClearUserTable();
+                    CurrentTaskID = task_id;
+                    FillTeacherTextArea(task_id);
+                    FillTeacherTable(task_id);
+                    FillUserTextArea();
+
+                }
+
             }
         {% endfor %}
     }
@@ -326,12 +350,15 @@
                 if(flags[i].style.visibility === "hidden") {
                     flags[i].style.visibility = 'visible';
                     FlagTasks.push(task_id);
+                    setCookie('task_'+task_id+'_is_flag','True');
                 }
                 else {
                     flags[i].style.visibility = 'hidden';
                     for(var j=0;j<FlagTasks.length;j++)
-                        if(FlagTasks[j] === task_id)
+                        if(FlagTasks[j] === task_id) {
                             FlagTasks[j] = "";
+                            deleteCookie('task_'+task_id+'_is_flag')
+                        }
                 }
         FillCountOfReallyCompletedTasks();
     }
@@ -340,8 +367,10 @@
         for(var i=0;i<CompletedTasks.length;i++)
             if(CompletedTasks[i] === task_id)
                 taskIsCompleted=1;
-        if(taskIsCompleted === 0)
+        if(taskIsCompleted === 0) {
             CompletedTasks.push(task_id);
+            setCookie('task_'+task_id+'_is_completed','True');
+        }
         FillCountOfReallyCompletedTasks();
     }
     function FillCountOfReallyCompletedTasks() {
@@ -359,7 +388,8 @@
     function FillTeacherTextArea(task_id) {
         {% for test in GTest %}
             if( {{ test.get_task.get_id }}==task_id){
-                TeacherTextArea.textContent = '{{ test.get_task.get_tasktext }}';
+                TeacherTextArea.textContent = '{{ test.get_task.get_name }}:\r\n';
+                TeacherTextArea.textContent += '{{ test.get_task.get_tasktext }}';
             }
         {% endfor %}
     }

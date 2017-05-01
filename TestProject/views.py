@@ -790,7 +790,6 @@ def DeleteSubscribe(request):
                 return JsonResponse({'status': 'ok', "result": result}, charset="utf-8", safe=True)
     return render(request, 'admin/delete_subscribe.html', {'answers': Answers.objects.all()})
 
-
 @login_required(login_url='/accounts/login/')
 def Trainer(request):
     if request.is_ajax():
@@ -798,7 +797,7 @@ def Trainer(request):
         if data['start_test'] == "True":
             tasks = []
             for i in data['checked_categories']:
-                subtasks = Task.objects.filter(Category=Category.objects.get(Name=i), Vision=True)
+                subtasks = Task.objects.filter(Category=Category.objects.get(id=i), Vision=True)
                 if (subtasks.count() != 0):
                     for task in subtasks:
                         di = {}
@@ -823,6 +822,9 @@ def Trainer(request):
                         di['table'] = table
                         table = []
                         tasks.append(di)
+            if len(tasks) == 0:
+                return JsonResponse({'status': 'error', 'error_message':'В выбранных категориях нет доступных заданий. Обратитесь к администратору системы.'}, charset="utf-8", safe=True)
+
             return JsonResponse({'status': 'ok', 'tasks': tasks}, charset="utf-8", safe=True)
         if data['check_task'] == "True":
             task = Task.objects.get(id=int(data['id']))
@@ -835,9 +837,9 @@ def Trainer(request):
             try:
                 curs.execute(data['user_query'])
                 l = [row for row in curs]
+                col = [column[0] for column in curs.description]
                 curs.execute(str(task.WTask))
                 l2 = [row for row in curs]
-                col = [column[0] for column in curs.description]
                 table.append(col)
                 a = []
                 for i in l:
@@ -845,9 +847,17 @@ def Trainer(request):
                         a.append(j)
                     table.append(a)
                     a = []
-            except:
-                table.append("error")
-            if l == l2:
+            except Exception as exception:
+                result = re.search(r']\w[^(]*', str(exception)).group(0)[1::1]
+                dbname = re.search(r'\'\w*\.', result)
+                if dbname is not None:
+                    result = result.replace(str(dbname.group(0)[1::1]), "")
+                if re.match(r'^You have an error in your SQL syntax', result) is not None:
+                    fail = re.search(r'\'\w*[^\']*', result).group(0)
+                    result = "<p>В вашем SQL запросе были найдены ошибки! </p><p>Проверьте правильность написания слов <div id=\"fail_text\">" + fail + '\'</div></p>'
+                # table.append(error)
+                return JsonResponse({'status': 'error', 'error': result}, charset="utf-8", safe=True)
+            if l == l2 and table[0] != "error":
                 isEquals = 'True'
             return JsonResponse({'status': 'ok', 'table': table, 'task': task.id, 'isEquals': isEquals},
                                 charset="utf-8", safe=True)
@@ -868,7 +878,7 @@ def Trainer(request):
             return JsonResponse({'status': 'ok', 'image': str(response)}, safe=True)
 
     categories = Category.objects.all()
-    return render(request, 'TestProject/trainer.html', {'categories': categories})
+    return render(request, 'TestProject/trainer-2.html', {'categories': categories})
 
 
 def ShowUsers(request):

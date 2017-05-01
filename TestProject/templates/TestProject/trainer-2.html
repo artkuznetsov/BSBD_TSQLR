@@ -1,0 +1,555 @@
+<head>
+    {% load staticfiles %}
+    <META charset="UTF-8">
+    <title>Тренажер | TSQLR</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
+    <link rel="stylesheet" type="text/css" href="/static/jet/css/vendor.css?v=1.0.5" />
+    <link rel="stylesheet" type="text/css" href="/static/jet/css/icons/style.css?v=1.0.5" />
+{#    <link rel="stylesheet" type="text/css" href="/static/jet/css/themes/default/base.css?v=1.0.5" class="base-stylesheet" />#}
+    <link rel="stylesheet" type="text/css" href="/static/jet/css/themes/default/select2.theme.css?v=1.0.5" class="select2-stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/static/jet/css/themes/default/jquery-ui.theme.css?v=1.0.5" class="jquery-ui-stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/dashboard.css" />
+{#    <script src="{% static 'js/base.js' %}"></script>#}
+    <script src="{% static 'js/core.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'css/trainer.css' %}" />
+<script src="{% static 'js/sweetalert2.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}">
+<script src="{% static 'js/sweet-alert.min.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'css/sweet-alert.css' %}" />
+<script type="text/javascript" src="{% static 'js/shortcut.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/trainer_category.css' %}" />
+    <script type="text/javascript" src="/jet/jsi18n/"></script>
+    <script src="/static/jet/js/build/bundle.min.js?v=1.0.5"></script>
+    <script src="/static/jet/js/i18n/jquery-ui/datepicker-ru.js?v=1.0.5"></script>
+    <script src="/static/jet/js/i18n/jquery-ui-timepicker/jquery.ui.timepicker-ru.js?v=1.0.5"></script>
+    <script src="/static/jet/js/i18n/select2/ru.js?v=1.0.5"></script>
+        <script src="{% static 'js/Chart.bundle.js' %}"></script>
+        <script src="{% static 'js/Chart.js' %}"></script>
+    <meta name="robots" content="NONE,NOARCHIVE" />
+</head>
+<body>
+<div id="choose_categories">
+    <h2>Выберите категории заданий</h2>
+        <p>
+            <input type="button" value="Выбрать все" onclick="seeleect('cb',1)">
+            <input type="button" value="Сбросить все" onclick="seeleect('cb',0)">
+        </p>
+        {% for category in categories %}
+            <input type="checkbox" name="cb" id='{{ category.id }}' class="check"/>
+            <label for="{{ category.id }}">{{ category }}</label>
+        {% endfor %}
+        <p>
+            <button class="button" type="submit" name="index" value="0" onclick="startTrainer()">Начать</button>
+        </p>
+</div>
+<div id="main" style="display: none;">
+  <div class="header">
+    <div class="brending">
+            <p style="vertical-align: middle;" id="test_name">Тренажер</p>
+    </div>
+    <div class="clock" style="padding-top: 12px;">
+        <p>
+            <img src="{% static 'images/clock_white_flaticon.png' %}">
+            <a id="clock" style="color: #ffffff; font-size: x-large;"> ∞</a>
+        </p>
+    </div>
+    <div class="step"></div>
+        <p style="color: #ffffff; text-align: center; padding-top: 12px;">
+            <img src="{% static 'images/steps_white_flaticon_32.png' %}">
+            <a id="step" style="color: #ffffff;"> 0/0</a>
+        </p>
+  </div>
+  <div class="sidebar2">
+    <div class="task_area" style="position: relative; height: 100%;">
+        <table class="scrolling-table" id="task_table">
+            <thead>
+            <tr>
+                <th style="text-align: center; width: 100%;">Задания</th>
+            </tr>
+            </thead>
+            <tbody class="tbody_tasks">
+
+            </tbody>
+        </table>
+    </div>
+  </div>
+  <div class="content">
+    <div class="first_col">
+      <div class="first_row">
+        <div class="ta_teacher">
+          <textarea id="teacher_textarea" readonly></textarea>
+        </div>
+        <div class="btn">
+        <input type="button" value="Обзор схемы БД" id="viewSchema" onclick="GetDBSchema()">
+        </div>
+      </div>
+      <div class="second_row">
+       <table id="teacher_table" class="data_table">
+           <thead>
+           <tr  id="teacher_table_head"></tr>
+           </thead>
+           <tbody id="teacher_table_body">
+
+           </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="second_col">
+      <div class="first_row">
+        <div class="ta_teacher">
+            <textarea id="teacher_textarea" class="user_textarea"></textarea>
+        </div>
+        <div class="btn">
+            <input type="button" value="Выполнить (Alt+Enter)" id="take_answer" onclick="FillUserTable()">
+            <input type="button" value="Отметить задание" id="MarkAsFlag" onclick="markTaskFlag(CurrentTaskID)">
+
+        </div>
+      </div>
+      <div class="second_row">
+       <table id="user_table" class="data_table">
+           <thead >
+            <tr id="user_table_head"></tr>
+           </thead>
+           <tbody id="user_table_body">
+
+           </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+<script>
+    var TasksFromChooseCategories=[];
+    //working variables
+    var CurrentTaskID = 0;
+    var Answers = {};
+    var CompletedTasks=[];
+    var FlagTasks=[];
+    var TaskButton; //document.getElementsByClassName('task');
+    var flags;// = document.getElementsByClassName('flag');
+
+    //teacher_elements
+    var TeacherTextArea;// = document.getElementById('teacher_textarea');
+    var TeacherTable;/// = document.getElementById('teacher_table');
+    var TeacherTableHead;// = document.getElementById('teacher_table_head');
+    var TeacherTableBody;// = document.getElementById('teacher_table_body');
+    var ButtonDBSchema;// = document.getElementById('viewSchema');
+
+    //user_elements
+    var UserTextArea = document.getElementsByClassName('user_textarea')[0];
+    var UserTable;// = document.getElementById('user_table');
+    var UserTableHead;// = document.getElementById('user_table_head');
+    var UserTableBody;// = document.getElementById('user_table_body');
+    var TakeAnswer;// = document.getElementById('take_answer');
+    var TestName;// = document.getElementById('test_name');
+    var CountOfCompletedTasks;// = document.getElementById('step');;
+
+    function seeleect(name, value) {
+        var forminputs = document.getElementsByName(name);
+        for(var i=0;i<forminputs.length;i++)
+            forminputs[i].checked = value === 1;
+    }
+    function startTrainer() {
+        var checked = [];
+        $('input:checkbox:checked').each(function(){
+            checked.push(this.id);
+        });
+        if( checked.length === 0 ) {
+            swal({
+              title: "Упс...",
+              text: "Вы не выбрали ни одной категории",
+              type: "warning",
+              showCancelButton: false,
+              confirmButtonColor: "#dd6b55",
+              confirmButtonText: "ОК",
+              closeOnConfirm: true
+            });
+        }
+        else{
+            var request = {};
+            request['checked_categories'] = checked;
+            request['start_test'] = "True";
+            $.ajax({
+                beforeSend: function (jqXHR) {
+                    jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+                },
+                url: window.location.href,
+                data: JSON.stringify(request),
+                type: 'POST',
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data['status'] === 'ok') {
+                        $("#choose_categories").hide();
+                        $("#main").show();
+                        var tasks = data['tasks'];
+                        for (var i = 0; i < tasks.length; i++) {
+                            var tmp = {};
+                            console.log(tasks[i]['table']);
+                            var table = tasks[i]['table'];
+                            console.log('table = ');
+                            console.log(table);
+                            tmp['text'] = tasks[i]['text'];
+                            tmp['name'] = tasks[i]['name'];
+                            tmp['id'] = tasks[i]['id'];
+                            tmp['table'] = table;
+                            tmp['table'] = tasks[i]['table'];
+                            TasksFromChooseCategories.push(tmp);
+                        }
+                        console.log('iam load Trainer...');
+                        initialTrainerVariables();
+                        FillTaskTable();
+                        FillInitialTask();
+                        FillCountOfReallyCompletedTasks();
+                    }
+                    if (data['status'] === 'error'){
+                        swal({
+                        title: "Упс...",
+                        text: data['error_message'],
+                        type: "warning",
+                        showCancelButton: false,
+                        confirmButtonColor: "#dd6b55",
+                        confirmButtonText: "ОК",
+                        closeOnConfirm: true
+                        });
+                    }
+                },
+                error: function (data) {
+                }
+            });
+        }
+
+    }
+    function initialTrainerVariables() {
+        CurrentTaskID = 0;
+        Answers = {};
+        CompletedTasks=[];
+        FlagTasks=[];
+        TaskButton = document.getElementsByClassName('task');
+        flags = document.getElementsByClassName('flag');
+
+        //teacher_elements
+        TeacherTextArea = document.getElementById('teacher_textarea');
+        TeacherTable = document.getElementById('teacher_table');
+        TeacherTableHead = document.getElementById('teacher_table_head');
+        TeacherTableBody = document.getElementById('teacher_table_body');
+        ButtonDBSchema = document.getElementById('viewSchema');
+
+        //user_elements
+        UserTextArea = document.getElementsByClassName('user_textarea')[0];
+        UserTable = document.getElementById('user_table');
+        UserTableHead = document.getElementById('user_table_head');
+        UserTableBody = document.getElementById('user_table_body');
+        TakeAnswer = document.getElementById('take_answer');
+        TestName = document.getElementById('test_name');
+        CountOfCompletedTasks = document.getElementById('step');
+    }
+    function FillInitialTask() {
+        CurrentTaskID=TasksFromChooseCategories[0]['id'];
+        FillTeacherTextArea(CurrentTaskID);
+        FillTeacherTable(CurrentTaskID);
+        UserTextArea.value = " ";
+{#        alert(CurrentTaskID);#}
+{#        {% for test in GTest reversed%}#}
+{#            CurrentTaskID = {{ test.get_task.get_id }};#}
+{#            FillTeacherTextArea({{ test.get_task.get_id }});#}
+{#            FillTeacherTable({{ test.get_task.get_id }});#}
+{##}
+{#        {% endfor %}#}
+    }
+
+    shortcut.add("Alt+Enter", function() {
+        FillUserTable();
+    });
+    UserTextArea.onkeypress = function (e) {
+            e = e || event;
+            var chr = getChar(e);
+            if(chr) {
+                Answers['taskID '+CurrentTaskID] = UserTextArea.value + chr;
+            }
+        };
+
+    //teacher's functions
+    function FillTeacherTextArea(task_id) {
+        for(var i=0;i<TasksFromChooseCategories.length;i++)
+            if(TasksFromChooseCategories[i]['id'] === task_id) {
+                TeacherTextArea.textContent = TasksFromChooseCategories[i]['name']+':\r\n';
+                TeacherTextArea.textContent += TasksFromChooseCategories[i]['text'];
+                break;
+            }
+{#        {% for test in GTest %}#}
+{#            if( {{ test.get_task.get_id }}==task_id){#}
+{#                TeacherTextArea.textContent = '{{ test.get_task.get_tasktext }}';#}
+{#            }#}
+{#        {% endfor %}#}
+    }
+    function FillTeacherTable(task_id) {
+{#        var data = {{ Monster | safe }};#}
+        var table;
+        var columns;
+        var rows;
+        for(var i=0;i<TasksFromChooseCategories.length;i++)
+            if(TasksFromChooseCategories[i]['id'] === task_id)
+            {
+                table=TasksFromChooseCategories[i]['table'];
+                columns = table[0];
+                rows =table.length;
+            }
+        ClearTeacherTable();
+
+        for(var i=0;i<columns.length;i++)
+            TeacherTableHead.innerHTML += "<th>"+columns[i]+"</th>";
+        for(var j=1;j<table.length;j++){
+            TeacherTableBody.innerHTML += "<tr id=\"teacher_table_tr_"+j+"\"></tr>";
+            var row = document.getElementById('teacher_table_tr_'+j);
+            for(var k=0;k<table[j].length;k++)
+                row.innerHTML += "<td>"+table[j][k]+"</td>";
+        }
+    }
+    function ClearTeacherTable() {
+        TeacherTableHead.innerHTML="";
+        TeacherTableBody.innerHTML="";
+    }
+    function getChar(event) {
+        if (event.which === null) {
+            if (event.keyCode < 32) return null;
+            return String.fromCharCode(event.keyCode)
+        }
+
+        if (event.which !== 0 && event.charCode !== 0) {
+            if (event.which < 32) return null;
+            return String.fromCharCode(event.which)
+        }
+        return null;
+    }
+
+    function FillUserTable() {
+        var request = {};
+        request['user_query'] = UserTextArea.value;
+        request['id'] = CurrentTaskID;
+        request['start_test'] = "False";
+        request['check_task'] = "True";
+        request['GetDBSchema'] = "False";
+
+        $.ajax({
+            beforeSend : function(jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(request),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+                if(data['status']==='ok'){
+                    markTaskCompleted(CurrentTaskID);
+                    FillCountOfReallyCompletedTasks();
+                    ClearUserTable();
+                    var table = data['table'];
+                    var columns = data['table'][0];
+
+                    var rows = table.length;
+                    for(var i=0;i<columns.length;i++)
+                        UserTableHead.innerHTML += "<th>"+columns[i]+"</th>";
+
+                    for(var j=1;j<table.length;j++)
+                    {
+                        UserTableBody.innerHTML += "<tr id=\"user_table_tr_"+j+"\"></tr>";
+                        var row = document.getElementById('user_table_tr_'+j);
+                        for(var k=0;k<table[j].length;k++)
+                            row.innerHTML += "<td>"+table[j][k]+"</td>";
+                    }
+                    if(data['isEquals']==='True')
+                         swal({
+                             title: "Отлично!",
+                             text: "Задание выполнено успешно.",
+                             imageUrl: "{% static 'images/thumbs-up.jpg' %}"
+                         });
+                }
+                else if (data['status'] === 'error'){
+                    var error_text = data['error'];
+                    UserTableHead.innerHTML = "<th>Ошибка</th>";
+                    UserTableBody.innerHTML = "<td><h2 id=\"error_text\">"+error_text+"</h2></td>";
+                }
+            },
+            error: function (data) {
+                console.log(data);
+            }
+            });
+
+    }
+    function markTaskCompleted(task_id) {
+        var taskIsCompleted = false;
+        for(var i=0;i<CompletedTasks.length;i++)
+            if(CompletedTasks[i] === task_id) {
+                taskIsCompleted = true;
+                break;
+            }
+        if(!taskIsCompleted) {
+            CompletedTasks.push(task_id);
+        }
+        FillCountOfReallyCompletedTasks();
+    }
+    function FillCountOfReallyCompletedTasks() {
+        var common = 0;
+        for(var i=0;i<CompletedTasks.length;i++)
+            for(var j=0;j<FlagTasks.length;j++)
+                if(FlagTasks[j] !== "")
+                    if(FlagTasks[j] === CompletedTasks[i])
+                        common ++;
+        var really_count_of_completed_tasks = CompletedTasks.length-common;
+        CountOfCompletedTasks.innerHTML = ' '+really_count_of_completed_tasks+'/'+TasksFromChooseCategories.length;
+    }
+    function ClearUserTable() {
+        UserTableHead.innerHTML = "";
+        UserTableBody.innerHTML = "";
+    }
+    function FillTaskTable() {
+        var tbody = document.getElementsByClassName('tbody_tasks')[0];
+        for(var i=0;i<TasksFromChooseCategories.length;i++)
+            tbody.innerHTML += '<tr><td style="position: relative;"><input id="id_'+TasksFromChooseCategories[i]['id']+'" style="text-align: left; max-width: 234px;" type="button" class="task" value="'+TasksFromChooseCategories[i]['name']+'" title="'+TasksFromChooseCategories[i]['name']+'" onclick="getTask('+TasksFromChooseCategories[i]['id']+')"><img class="flag" id="flag_id_'+TasksFromChooseCategories[i]['id']+'" src="{% static 'images/flag.png' %}" style="position: absolute; left: 91%; top: 17px; visibility: hidden;"></td></tr>'
+    }
+    //working functions
+    function getTask(task_id) {
+        Answers['taskID '+CurrentTaskID]=UserTextArea.value;
+
+
+        if(Answers['taskID '+task_id] !== "") {
+            UserTextArea.value = "";
+            UserTextArea.value = Answers['taskID ' + task_id];
+        }
+        else
+            UserTextArea.value = "";
+        for(var i=0;i<TasksFromChooseCategories.length;i++){
+            if(TasksFromChooseCategories[i]['id'] === task_id){
+                if(task_id!==CurrentTaskID) {
+                    CurrentTaskID = task_id;
+                    FillTeacherTextArea(task_id);
+                    FillTeacherTable(task_id);
+                    FillUserTextArea();
+                    ClearUserTable();
+                }
+
+            }
+
+        }
+    }
+{#        {% for test in GTest %}#}
+{#            if ({{ test.get_task.get_id }} === task_id){#}
+{#                CurrentTaskID = task_id;#}
+{#                FillTeacherTextArea(task_id);#}
+{#                FillTeacherTable(task_id);#}
+{#                FillUserTextArea();#}
+{#            }#}
+{#        {% endfor %}#}
+    function GetDBSchema() {
+    var request = {};
+    request['GetDBSchema'] = CurrentTaskID;
+    request['check_task'] = 'False';
+    request['start_test'] = 'False';
+
+    $.ajax({
+            beforeSend : function(jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(request),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+              var raw = data['image'];
+
+              var image = new Image();
+              image.src = "data:image/jpg;base64," + raw.substring(2,raw.length-1);
+
+              var new_tab = window.open("");
+
+              new_tab.document.write(image.outerHTML);
+              new_tab.document.title = "Обзор схемы БД";
+            },
+            error: function (data) {}
+        });
+}
+
+function markTaskFlag(task_id) {
+        for(var i=0;i<flags.length;i++)
+            if(flags[i].id === 'flag_id_'+task_id)
+                if(flags[i].style.visibility === "hidden") {
+                    flags[i].style.visibility = 'visible';
+                    FlagTasks.push(task_id);
+{#                    setCookie('task_'+task_id+'_is_flag','True');#}
+                }
+                else {
+                    flags[i].style.visibility = 'hidden';
+                    for(var j=0;j<FlagTasks.length;j++)
+                        if(FlagTasks[j] === task_id) {
+                            FlagTasks[j] = "";
+{#                            deleteCookie('task_'+task_id+'_is_flag')#}
+                        }
+                }
+        FillCountOfReallyCompletedTasks();
+    }
+    function preEndTest() {
+        swal({
+              title: "Вы уверены, что хотите завершить тест?",
+              text: "У вас не будет возможности пройти его заново.",
+              type: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#dd6b55",
+              confirmButtonText: "Да, завершить.",
+                cancelButtonText: "Отмена",
+              closeOnConfirm: false
+            },
+            function(){
+                endTest();
+                swal({
+                  title: "Спасибо!",
+                  text: "Ваши ответы отправлены.",
+                  type: "success",
+                  showCancelButton: false,
+                  confirmButtonColor: "#DD6B55",
+                  confirmButtonText: "Ok",
+                  closeOnConfirm: false},
+                function(){
+                    window.location = '/';
+                });
+            }
+            );
+    }
+    function endTest() {
+            var saved_cookies = document.cookie;
+            var split_saved_cookies = saved_cookies.split(";");
+            for(var i=0;i<split_saved_cookies.length;i++){
+            split_saved_cookies[i] = split_saved_cookies[i].substring(0,split_saved_cookies[i].indexOf('='));
+            if(split_saved_cookies[i]!=='csrftoken')
+                deleteCookie(split_saved_cookies[i]);
+            Answers['end Test']='True';
+        }
+                $.ajax({
+                    beforeSend: function (jqXHR) {
+                        jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+                    },
+                    url: window.location.href,
+                    data: JSON.stringify(Answers),
+                    type: 'POST',
+                    contentType: 'application/json',
+                    success: function (data) {
+                        if (data['status'] === 'ok') {
+                        }
+                    },
+                    error: function (data) {
+                    }
+                });
+    }
+    function FillUserTextArea() {
+        if(Answers['taskID '+CurrentTaskID])
+            UserTextArea.value=Answers['taskID '+CurrentTaskID];
+        else
+            UserTextArea.value=" ";
+    }
+
+        </script>
+
