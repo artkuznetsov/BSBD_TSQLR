@@ -50,11 +50,11 @@ def tests(request):
     if request.is_ajax():
         data = json.loads(request.read().decode("utf-8"))
         user = MyUser.objects.get(id=request.user.id)
-        user.set_password(data['Password'][1])
+        user.set_password(data['Password'])
         user.save()
         return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
     else:
-        subscribe = TestPerson.objects.filter(Person=request.user.id)
+        subscribe = TestPerson.objects.filter(Person=request.user.id).order_by('Test__DateActivate')
         user = MyUser.objects.get(id=request.user.id)
 
         with_mark = []

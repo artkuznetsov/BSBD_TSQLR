@@ -23,7 +23,7 @@ function changePassword(csrf_token) {
             }
             else {
                 request['ChangePassword'] = 'True';
-                request['Password'] = result;
+                request['Password'] = result[0];
                 swal.resetDefaults();
                 $.ajax({
                     beforeSend: function (jqXHR) {

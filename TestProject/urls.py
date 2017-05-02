@@ -19,6 +19,5 @@ urlpatterns = [
   url(r'trainer/$', views.Trainer, name='Trainer'),
   url(r'show_users/$', views.ShowUsers, name='ShowUsers'),
   url(r'some_test/$', views.some_test, name='SomeTest'),
-  url(r'newid=(?P<newid>[0-9]+)/$', views.News, name='News'),
-  url(r'trainer_category/',views.TrainerCategory, name='TrainerCategory')
+  url(r'newid=(?P<newid>[0-9]+)/$', views.News, name='News')
 ]
