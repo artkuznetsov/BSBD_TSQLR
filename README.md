@@ -10,7 +10,7 @@ sudo apt-get install mysql-server
 Create Database for Application (see configuration TestApp/settings.py). Default: testbsbd
 
 mysql -u root -p
-mysql>create database testbsbd;
+mysql>create database testbsbd charset=utf8;
 mysql>exit;
 
 sudo apt-get install python3-setuptools
@@ -23,6 +23,7 @@ sudo pip3 install sqlalchemy
 sudo apt-get install graphviz libgraphviz-dev pkg-config
 sudo pip3 install pygraphviz --install-option="--include-path=/usr/include/graphviz" --install-option="--library-path=/usr/lib/graphviz/"
 sudo pip3 install eralchemy
+sudo pip3 install django-tinymce
 
 Install libraries for working with images:
 
