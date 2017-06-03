@@ -36,6 +36,11 @@ class TestForm(forms.Form):
 			empty_label='Выбрать...',
 			required=True
 		)
+	HardCheck = forms.BooleanField\
+		(
+			label="test",
+			required=False
+		)
 
 
 class TestPersonForm(forms.Form):

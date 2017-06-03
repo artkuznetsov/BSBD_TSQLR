@@ -157,43 +157,115 @@ def some_test(request, testid, var):
             ConnectShadow = pyodbc.connect(connectStr.ShadowConnectionString)
             answ = 0
             weight = 0
-            for i in data:
-                temp = i.split(" ")[1]
-                if temp == "Test":
-                    continue
-                else:
-                    try:
-                        ans = Answers.objects.get(TestPerson=personForTest,
-                                                  TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test,
-                                                                                Variant=var))
-                        ans.Answer = data[i]
-                        ans.save()
-                    except:
-                        ans = Answers.objects.create(TestPerson=personForTest,
-                                                     TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp),
-                                                                                   Test=test, Variant=var),
-                                                     Answer=data[i])
-                    try:
-                        curs = Connect.cursor()
-                        curs.execute(data[i])
-                        l = [row for row in curs]
-                        curs = Connect.cursor()
-                        curs.execute(str(task.get(id=int(temp)).WTask))
-                        l1 = [row for row in curs]
-                        Shadowcurs = ConnectShadow.cursor()
-                        Shadowcurs.execute(data[i])
-                        sl = [row for row in Shadowcurs]
-                        Shadowcurs = ConnectShadow.cursor()
-                        Shadowcurs.execute(str(task.get(id=int(temp)).WTask))
-                        sl1 = [row for row in Shadowcurs]
-                        if l1 == l and sl1 == sl:
-                            answ += task.get(id=temp).Weight
+            if test.HardCheck == False:
+                
+                for i in data:
+                    temp = i.split(" ")[1]
+                    if temp == "Test":
+                        continue
+                    else:
+                        try:
+                            ans = Answers.objects.get(TestPerson=personForTest,
+                                                      TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test,
+                                                                                    Variant=var))
+                            ans.Answer = data[i]
+                            ans.save()
+                        except:
+                            ans = Answers.objects.create(TestPerson=personForTest,
+                                                         TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp),
+                                                                                       Test=test, Variant=var),
+                                                         Answer=data[i])
+                        try:
+                            curs = Connect.cursor()
+                            curs.execute(data[i])
+                            l = [row for row in curs]
+                            curs = Connect.cursor()
+                            curs.execute(str(task.get(id=int(temp)).WTask))
+                            l1 = [row for row in curs]
+                            Shadowcurs = ConnectShadow.cursor()
+                            Shadowcurs.execute(data[i])
+                            sl = [row for row in Shadowcurs]
+                            Shadowcurs = ConnectShadow.cursor()
+                            Shadowcurs.execute(str(task.get(id=int(temp)).WTask))
+                            sl1 = [row for row in Shadowcurs]
+                            if l1 == l and sl1 == sl:
+                                answ += task.get(id=temp).Weight
+                                weight += task.get(id=temp).Weight
+                            else:
+                                weight += task.get(id=temp).Weight
+                        except:
                             weight += task.get(id=temp).Weight
-                        else:
-                            weight += task.get(id=temp).Weight
-                    except:
-                        weight += task.get(id=temp).Weight
+            else:
+                for i in data:
+                    temp = i.split(" ")[1]
+                    if temp == "Test":
+                        continue
+                    else:
+                        try:
+                            ans = Answers.objects.get(TestPerson=personForTest,
+                                                      TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test, Variant=var))
+                            ans.Answer = data[i]
+                            ans.save()
+                        except:
+                            ans = Answers.objects.create(TestPerson=personForTest,
+                                                         TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp),
+                                                                                       Test=test, Variant=var),
+                                                         Answer=data[i])
+                        try:
+                            l = []
+                            l1 = []
+                            sl = []
+                            sl1 = []
 
+                            curs = Connect.cursor()
+                            curs.execute(data[i]) 
+                            l = [row for row in curs]
+                            column_name = [row[0] for row in curs.description]
+
+                            curs1 = Connect.cursor()
+                            curs1.execute(str(task.get(id=int(temp)).WTask))
+                            l1 = [row for row in curs1]
+                            column_name_w = [row[0] for row in curs1.description]
+
+
+                            Shadowcurs = ConnectShadow.cursor()
+                            Shadowcurs.execute(data[i])
+                            sl = [row for row in Shadowcurs]
+                            column_name_shadow = [row[0] for row in Shadowcurs.description]
+
+
+                            Shadowcurs1 = ConnectShadow.cursor()
+                            Shadowcurs1.execute(str(task.get(id=int(temp)).WTask))
+                            sl1 = [row for row in Shadowcurs1]
+                            column_name_w_shadow = [row[0] for row in Shadowcurs1.description]
+
+                            dic_check_student_light_table = {}
+                            dic_check_student_shadow_table = {}
+                            dic_check_teacher_light_table = {}
+                            dic_check_teacher_shadow_table = {}
+
+                            for j in range(len(column_name)):
+                                dic_check_student_light_table[column_name[j]] = [row[j] for row in l]
+                            
+                            for j in range(len(column_name_shadow)):
+                                dic_check_student_shadow_table[column_name_shadow[j]] = [row[j] for row in sl]
+                            
+                            for j in range(len(column_name_w)):
+                                dic_check_teacher_light_table[column_name_w[j]] = [row[j] for row in l1]
+                            
+                            for j in range(len(column_name_w_shadow)):
+                                dic_check_teacher_shadow_table[column_name_w_shadow[j]] = [row[j] for row in sl1]
+
+
+
+                            #dic_check_student_light_table == dic_check_teacher_light_table and 
+                            if dic_check_student_shadow_table == dic_check_teacher_shadow_table:
+                                answ += task.get(id=temp).Weight
+                                weight += task.get(id=temp).Weight
+                            else:
+                                weight += task.get(id=temp).Weight
+                        except:
+                            weight += task.get(id=temp).Weight
             personForTest.Mark = round(float(100 * answ / weight))
             personForTest.save()
             return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
@@ -441,7 +513,8 @@ def CreateTest(request):
                 test = Test(
                     Name=data['TestName'],
                     DateActivate=data['DateActivate'],
-                    Time=data['Time']
+                    Time=data['Time'],
+                    HardCheck=data['HardCheck']
                 )
                 test.save()
 
@@ -507,13 +580,13 @@ def Add_TestPerson(request):
                     else:
                         mas.append(i.Variant)
                 for st in students:
-                    print(i)
+                    
                     tp = TestPerson.objects.filter(Person=st.id, Test=test)
-                    print(tp)
+                    
                     tpv = [q.Variant for q in tp]
-                    print(tpv)
+                    
                     t = [j for j in mas if ((j in tpv) == 0)]
-                    print(t)
+                    
                     choise = random.choice(t)
                     testperson = TestPerson.objects.create(Person=st, Test=test, Variant=choise)
                 return redirect("/admin")
@@ -599,44 +672,106 @@ def GoTest(request, testid, var):
             ConnectShadow = pyodbc.connect(connectStr.ShadowConnectionString)
             answ = 0
             weight = 0
-            for i in data:
-                temp = i.split(" ")[1]
-                try:
-                    ans = Answers.objects.get(TestPerson=personForTest,
-                                              TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test))
-                    ans.Answer = data[i]
-                    ans.save()
-                except:
-                    ans = Answers.objects.create(TestPerson=personForTest,
-                                                 TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp),
-                                                                               Test=test),
-                                                 Answer=data[i])
-                try:
-                    curs = Connect.cursor()
-                    curs.execute(data[i])
-                    l = [row for row in curs]
-                    curs = Connect.cursor()
-                    curs.execute(str(task.get(id=int(temp)).WTask))
-                    l1 = [row for row in curs]
-                    Shadowcurs = ConnectShadow.cursor()
-                    Shadowcurs.execute(data[i])
-                    sl = [row for row in Shadowcurs]
-                    Shadowcurs = ConnectShadow.cursor()
-                    Shadowcurs.execute(str(task.get(id=int(temp)).WTask))
-                    sl1 = [row for row in Shadowcurs]
-                    if l1 == l and sl1 == sl:
-                        answ += task.get(id=temp).Weight
-                        weight += task.get(id=temp).Weight
-                    else:
+            if test.HardCheck != 1:
+                for i in data:
+                    temp = i.split(" ")[1]
+                    try:
+                        ans = Answers.objects.get(TestPerson=personForTest,
+                                                  TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test))
+                        ans.Answer = data[i]
+                        ans.save()
+                    except:
+                        ans = Answers.objects.create(TestPerson=personForTest,
+                                                     TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp),
+                                                                                   Test=test),
+                                                     Answer=data[i])
+                    try:
+                        curs = Connect.cursor()
+                        curs.execute(data[i])
+                        l = [row for row in curs]
+                        curs = Connect.cursor()
+                        curs.execute(str(task.get(id=int(temp)).WTask))
+                        l1 = [row for row in curs]
+                        Shadowcurs = ConnectShadow.cursor()
+                        Shadowcurs.execute(data[i])
+                        sl = [row for row in Shadowcurs]
+                        Shadowcurs = ConnectShadow.cursor()
+                        Shadowcurs.execute(str(task.get(id=int(temp)).WTask))
+                        sl1 = [row for row in Shadowcurs]
+                        if l1 == l and sl1 == sl:
+                            answ += task.get(id=temp).Weight
+                            weight += task.get(id=temp).Weight
+                        else:
+
+                            weight += task.get(id=temp).Weight
+                    except:
 
                         weight += task.get(id=temp).Weight
-                except:
+                personForTest.Mark = round(float(100 * answ / weight))
+                personForTest.save()
+                return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
+            else:
+                for i in data:
+                    temp = i.split(" ")[1]
+                    try:
+                        ans = Answers.objects.get(TestPerson=personForTest,
+                                                  TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test))
+                        ans.Answer = data[i]
+                        ans.save()
+                    except:
+                        ans = Answers.objects.create(TestPerson=personForTest,
+                                                     TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp),
+                                                                                   Test=test),
+                                                     Answer=data[i])
+                    try:
+                        l = []
+                        l1 = []
+                        sl = []
+                        sl1 = []
+                        curs = Connect.cursor()
+                        curs.execute(data[i])
+                        l = [row for row in curs]
+                        column_name = [row[0] for row in curs.description]
+                        curs = Connect.cursor()
+                        curs.execute(str(task.get(id=int(temp)).WTask))
+                        l1 = [row for row in curs]
+                        column_name_w = [row[0] for row in curs.description]
+                        Shadowcurs = ConnectShadow.cursor()
+                        Shadowcurs.execute(data[i])
+                        sl = [row for row in Shadowcurs]
+                        column_name_shadow = [row[0] for row in curs.description]
+                        Shadowcurs = ConnectShadow.cursor()
+                        Shadowcurs.execute(str(task.get(id=int(temp)).WTask))
+                        sl1 = [row for row in Shadowcurs]
+                        column_name_w_shadow = [row[0] for row in curs.description]
 
-                    weight += task.get(id=temp).Weight
+                        dic_check_student_light_table = {}
+                        dic_check_student_shadow_table = {}
+                        dic_check_teacher_light_table = {}
+                        dic_check_teacher_shadow_table = {}
+                        for j in range(len(column_name)):
+                            dic_check_student_light_table[column_name[j]] = [row[j] for row in l]
+                        for j in range(len(column_name)):
+                            dic_check_student_shadow_table[column_name_shadow[j]] = [row[j] for row in l]
+                        for j in range(len(column_name)):
+                            dic_check_teacher_light_table[column_name_w[j]] = [row[j] for row in l]
+                        for j in range(len(column_name)):
+                            dic_check_teacher_shadow_table[column_name_w_shadow[j]] = [row[j] for row in l]
 
-            personForTest.Mark = round(float(100 * answ / weight))
-            personForTest.save()
-            return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
+
+
+                        if dic_check_student_light_table == dic_check_teacher_light_table and dic_check_student_shadow_table == dic_check_teacher_shadow_table:
+                            answ += task.get(id=temp).Weight
+                            weight += task.get(id=temp).Weight
+                        else:
+
+                            weight += task.get(id=temp).Weight
+                    except:
+
+                        weight += task.get(id=temp).Weight
+                personForTest.Mark = round(float(100 * answ / weight))
+                personForTest.save()
+                return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
 
     else:
         # Формирование страниц для теста
@@ -835,11 +970,18 @@ def Trainer(request):
             l2 = []
             isEquals = 'False'
             try:
+                dic_1 = {}
+                dic_2 = {}
                 curs.execute(data['user_query'])
                 l = [row for row in curs]
                 col = [column[0] for column in curs.description]
                 curs.execute(str(task.WTask))
                 l2 = [row for row in curs]
+                col2 = [column[0] for column in curs.description]
+                for j in range(len(col)):
+                    dic_1[col[j]] = [row[j] for row in l]
+                for j in range(len(col2)):
+                    dic_2[col2[j]] = [row[j] for row in l2]
                 table.append(col)
                 a = []
                 for i in l:
@@ -857,7 +999,7 @@ def Trainer(request):
                     result = "<p>В вашем SQL запросе были найдены ошибки! </p><p>Проверьте правильность написания слов <div id=\"fail_text\">" + fail + '\'</div></p>'
                 # table.append(error)
                 return JsonResponse({'status': 'error', 'error': result}, charset="utf-8", safe=True)
-            if l == l2 and table[0] != "error":
+            if dic_1 == dic_2 and table[0] != "error":
                 isEquals = 'True'
             return JsonResponse({'status': 'ok', 'table': table, 'task': task.id, 'isEquals': isEquals},
                                 charset="utf-8", safe=True)

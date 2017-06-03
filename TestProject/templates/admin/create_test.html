@@ -70,6 +70,7 @@
                                         return false;
                                     }
                     };
+
                     function getCategories() {
                         var DB = document.getElementById("select2-id_ConnectDataBase-container").title;
                         var dic = {};
@@ -110,13 +111,13 @@
                             swal('Что-то пошло не так','Вы не указали необходимо количество заданий. Пожалуйста, повторите попытку','error');
                             return false;
                         }
-
                         var TestName = document.getElementById('id_Name');
                         var DateActivate = document.getElementById('id_DateActivate_0').value;
                         var TimeActivate = document.getElementById('id_DateActivate_1').value;
                         var Time = document.getElementById('id_Time');
                         var Variants = document.getElementById('id_Variants');
                         var ConnectDateBase = document.getElementById('select2-id_ConnectDataBase-container').title;
+                        var HardCheck = document.getElementById('id_HardCheck');
                         var all_fields_is_not_null = 0;
                         if(TestName === "" || DateActivate==="" || TimeActivate==="" || Time.value===0 || Variants.value===0 || ConnectDateBase==="Выбрать...") {
                             all_fields_is_not_null = 1;
@@ -139,6 +140,14 @@
                                 dict['Variants'] = Variants.value;
                                 dict['ConnectDataBase'] = ConnectDateBase;
                                 dict['categoryID ' + inputs[i].id] = inputs[i].value;
+                                if (HardCheck.checked)
+                                {
+                                dict['HardCheck'] = true;
+                                }
+                                else
+                                {
+                                    dict['HardCheck'] = false;
+                                }
                             }
                             $.ajax({
                                 beforeSend: function (jqXHR) {
