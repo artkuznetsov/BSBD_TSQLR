@@ -258,8 +258,8 @@ def some_test(request, testid, var):
 
 
 
-                            #dic_check_student_light_table == dic_check_teacher_light_table and 
-                            if dic_check_student_shadow_table == dic_check_teacher_shadow_table:
+                             
+                            if dic_check_student_light_table == dic_check_teacher_light_table and dic_check_student_shadow_table == dic_check_teacher_shadow_table:
                                 answ += task.get(id=temp).Weight
                                 weight += task.get(id=temp).Weight
                             else:
