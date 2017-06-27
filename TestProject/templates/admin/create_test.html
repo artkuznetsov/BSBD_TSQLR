@@ -35,7 +35,7 @@
             </table>
                 <br><input id="save_button" type="button" onclick="save()" value="Создать">
                 <script>
-
+		    document.getElementById('id_HardCheck').display = True;
                     document.getElementById('id_Time').onkeypress = function (e) {
                         e = e || event;
 
@@ -142,10 +142,10 @@
                                 dict['categoryID ' + inputs[i].id] = inputs[i].value;
                                 if (HardCheck.checked)
                                 {
-                                    dict['HardCheck'] = "True";
+                                    dict['HardCheck'] = true;
                                 }
                                 else{
-                                    dict['HardCheck'] = "Fasle";
+                                    dict['HardCheck'] = false;
                                 }
                             }
                             $.ajax({

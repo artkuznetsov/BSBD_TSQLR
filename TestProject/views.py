@@ -197,7 +197,8 @@ def some_test(request, testid, var):
                 print(ConnectShadow)
             answ = 0
             weight = 0
-            if test.HardCheck == "False":
+            if test.HardCheck == 0:
+                print('HardCheck = False')
                 for i in data:
                     temp = i.split(" ")[1]
                     if temp == "Test":
@@ -209,7 +210,8 @@ def some_test(request, testid, var):
                                                                                 Variant=var))
                             ans.Answer = data[i]
                             ans.save()
-                        except:
+                        except Exception as e:
+                            print(e)
                             ans = Answers.objects.create(TestPerson=personForTest,
                                                      TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp),
                                                                                    Test=test, Variant=var),
@@ -254,23 +256,29 @@ def some_test(request, testid, var):
                                 weight += task.get(id=temp).Weight
                             #print('weight = ')
                             #print(weight)
-                        except:
+                        except Exception as e:
+                            print(e)
                         #print('exception!!!!!!')
                             weight += task.get(id=temp).Weight
                             with_exception = True
                         #print('weight = ')
                         #print(weight)
             else:
+                print('Hardcheck = True')
                 for i in data:
-                    temp = i.split(" ")[i]
+                    temp = i.split(" ")[1]
                     if temp == "Test":
                         continue
                     else:
                         try:
                             ans = Answers.objects.get(TestPerson = personForTest, TestTask = TestTask.objects.get(Task = Task.objects.get(id=temp), Test = test, Variant = var))
+                            print(ans)
                             ans.Answer = data[i]
+                            print(ans.Answer)
                             ans.save()
-                        except:
+                            print('this shit has been saved')
+                        except Exception as e:
+                            print(e)
                             ans = Answers.objects.create(TestPerson = personForTest, TestTask = TestTask.objects.get(Task=Task.objects.get(id=temp),Test=test, Variant=vat), Answer=data[i])
                         try:
                             l=[]
@@ -282,22 +290,30 @@ def some_test(request, testid, var):
                             curs.execute(data[i])
                             l = [row for row in curs]
                             column_name = [row[0] for row in curs.description]
-
+                            print('column_name')
+                            print(column_name)
                             curs1 = Connect.cursor()
-                            curs.execute(str(task.get(id=int(temp)).WTask))
+                            print('curs1')
+                            print(curs1)
+                            curs1.execute(str(task.get(id=int(temp)).WTask))
+                            print('curs1.execute(WTask)')
+                            print(curs1.execute(str(task.get(id=int(temp)).WTask)))
                             l1 = [row for row in curs1]
                             column_name_w = [row[0] for row in curs1.description]
-
+                            print('column_name_w')
+                            print(column_name_w)
                             Shadowcurs = Connect.cursor()
                             Shadowcurs.execute(data[i])
                             sl = [row for row in Shadowcurs]
                             column_name_shadow = [row[0] for row in Shadowcurs.description]
-
+                            print('column_name_shadow')
+                            print(column_name_shadow)
                             Shadowcurs1 = Connect.cursor()
                             Shadowcurs1.execute(str(task.get(id=int(temp)).WTask))
                             sl1 = [row for row in Shadowcurs1]
                             column_name_w_shadow = [row[0] for row in Shadowcurs1.description]
-
+                            print('column_name_w_shadow')
+                            print(column_name_w_shadow)
                             dic_check_student_light_table = {}
                             dic_check_student_shadow_table = {}
                             dic_check_teacher_light_table = {}
@@ -321,7 +337,9 @@ def some_test(request, testid, var):
                                 weight += task.get(id=temp).Weight
                             else:
                                 weight += task.get(id=temp).Weight
-                        except:
+                        except Exception as e:
+                            print('Im here!!!')
+                            print(e)
                             weight += task.get(id=temp).Weight
 
             personForTest.Mark = round(float(100 * answ / weight))
@@ -739,7 +757,7 @@ def GoTest(request, testid, var):
             ConnectShadow = pyodbc.connect(connectStr.ShadowConnectionString)
             answ = 0
             weight = 0
-            if test.HardCheck != 1:
+            if test.HardCheck != True:
                 for i in data:
                     temp = i.split(" ")[1]
                     try:
@@ -747,7 +765,8 @@ def GoTest(request, testid, var):
                                                 TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test))
                         ans.Answer = data[i]
                         ans.save()
-                    except:
+                    except Exception as e:
+                        print(e)
                         ans = Answers.objects.create(TestPerson=personForTest,
                                                     TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp),
                                                                                 Test=test),
@@ -771,8 +790,8 @@ def GoTest(request, testid, var):
                         else:
 
                             weight += task.get(id=temp).Weight
-                    except:
-
+                    except Exception as e:
+                        print(e)
                         weight += task.get(id=temp).Weight
 
                 personForTest.Mark = round(float(100 * answ / weight))
@@ -785,7 +804,8 @@ def GoTest(request, testid, var):
                         ans = Answers.objects.get(TestPerson=personForTest, TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test))
                         ans.Answer = data[i]
                         ans.save()
-                    except:
+                    except Exception as e:
+                        print(e)
                         ans = Answers.objects.create(TestPerson = personForTest, TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp),Test=test),Answer=data[i])
 
                     try:
@@ -832,7 +852,8 @@ def GoTest(request, testid, var):
                             weight += task.get(id=temp).Weight
                         else:
                             weight += task.get(id=temp).Weight
-                    except:
+                    except Exception as e:
+                        print(e)
                         weight += task.get(id=temp).Weight
                 personForTest.Mark = round(float(100*answ/weight))
                 personForTest.save()

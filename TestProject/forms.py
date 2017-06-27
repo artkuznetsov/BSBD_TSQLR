@@ -36,11 +36,16 @@ class TestForm(forms.Form):
 			empty_label='Выбрать...',
 			required=True
 		)
-		HardCheck = forms.BooleanField\
+	HardCheck = forms.BooleanField\
 		(
+			widget=forms.CheckboxInput(attrs={'class':'hardcheck','style':'display: yes;'}),
 			label = "Проверка по столбцам",
-			required = False
+			required = False,
+                        initial=True
 		)
+	def __init__(self,*args,**kwargs):
+		super(TestForm,self).__init__(*args,**kwargs)
+		self.fields['HardCheck'].widget.attrs['style']='display: inline;'
 
 class TestPersonForm(forms.Form):
 	Test = forms.ModelChoiceField\
