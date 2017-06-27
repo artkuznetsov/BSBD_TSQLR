@@ -138,6 +138,7 @@ def some_test(request, testid, var):
                                                                             Test=test, 
                                                                             Variant=var))
                     ans.Answer = data[i]
+                    ans.RightCheck = False
                     ans.save()
                 except:
                     ans = Answers.objects.create(TestPerson=personForTest,
@@ -209,13 +210,14 @@ def some_test(request, testid, var):
                                                   TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test,
                                                                                 Variant=var))
                             ans.Answer = data[i]
+                            ans.RightCheck = False
                             ans.save()
                         except Exception as e:
                             print(e)
                             ans = Answers.objects.create(TestPerson=personForTest,
                                                      TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp),
                                                                                    Test=test, Variant=var),
-                                                     Answer=data[i])
+                                                     Answer=data[i], RightCheck = False)
                         try:
                         #print('data = ')
                         #print(data)
@@ -248,6 +250,11 @@ def some_test(request, testid, var):
                                 answ += task.get(id=temp).Weight
                             #print('answ = ')
                             #print(answ)
+                                answer_right = Answers.objects.get(TestPerson=personForTest, TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test, Variant=var), Answer=data[i])
+                                print(answer_right)
+                                answer_right.RightCheck = True
+                                print(answer_right)
+                                answer_right.save()
                                 weight += task.get(id=temp).Weight
                             #print('weight = ')
                             #print(weight)
@@ -274,12 +281,13 @@ def some_test(request, testid, var):
                             ans = Answers.objects.get(TestPerson = personForTest, TestTask = TestTask.objects.get(Task = Task.objects.get(id=temp), Test = test, Variant = var))
                             print(ans)
                             ans.Answer = data[i]
+                            ans.RightCheck = False
                             print(ans.Answer)
                             ans.save()
                             print('this shit has been saved')
                         except Exception as e:
                             print(e)
-                            ans = Answers.objects.create(TestPerson = personForTest, TestTask = TestTask.objects.get(Task=Task.objects.get(id=temp),Test=test, Variant=vat), Answer=data[i])
+                            ans = Answers.objects.create(TestPerson = personForTest, TestTask = TestTask.objects.get(Task=Task.objects.get(id=temp),Test=test, Variant=var), Answer=data[i], RightCheck = False)
                         try:
                             l=[]
                             l1=[]
@@ -334,6 +342,9 @@ def some_test(request, testid, var):
 
                             if dic_check_student_shadow_table == dic_check_teacher_shadow_table and dic_check_student_shadow_table == dic_check_teacher_shadow_table:
                                 answ += task.get(id=temp).Weight
+                                right_check = Answers.objects.get(TestPerson=personForTest, TestTask = TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test, Variant=var), Answer=data[i])
+                                right_check.RightCheck = True
+                                right_check.save()
                                 weight += task.get(id=temp).Weight
                             else:
                                 weight += task.get(id=temp).Weight
@@ -963,6 +974,15 @@ def TakeAnswer(request):
                                 tmp.append(i.Task.TaskText)
                                 tmp.append(i.Task.WTask)
                                 tmp.append(Answers.objects.get(TestTask=i, TestPerson=tp).get_answer())
+                                right_check = Answers.objects.get(TestTask=i, TestPerson=tp).RightCheck
+                                if right_check == 0 or right_check == False:
+                                    tmp.append("Нет")
+                                else:
+                                    if right_check == 1 or right_check == True:
+                                        tmp.append("Да")
+                                    else:
+                                        tmp.append(right_check)
+                                print(tmp)
                                 answers.append(tmp)
                             return JsonResponse({'status': 'ok', "answers": answers}, charset="utf-8", safe=True)
         else:

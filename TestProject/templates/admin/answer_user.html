@@ -159,7 +159,7 @@
                     var table = document.getElementById("tbody_table");
                     for(var i=0;i<Answers.length;i++)
                     {
-                        table.innerHTML += "<tr><td>"+Answers[i][0]+"</td><td>"+Answers[i][2]+"</td></tr>"
+                        table.innerHTML += "<tr><td>"+Answers[i][0]+"</td><td>"+Answers[i][2]+"</td><td style='text-align: center;'>"+Answers[i][3]+"</td></tr>"
                     }
                 }
 {#                    window.location = '/accounts/profile/';}#}
@@ -178,6 +178,7 @@
         <tr style="text-align: center;">
             <td id="TaskText" style=""><b>Задание</b></td>
             <td id="Answer"><b>Ответ</b></td>
+            <td id="RightCheck"><b style="text-align: center;">Выполнено верно</b></td>
         </tr>
     <tbody id="tbody_table">
 

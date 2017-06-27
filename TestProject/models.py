@@ -175,6 +175,7 @@ class Answers(models.Model):
     TestTask = models.ForeignKey('TestTask')
     TestPerson = models.ForeignKey('TestPerson', default=None)
     Answer = models.TextField(max_length=30000)
+    RightCheck = models.BooleanField()
 
     def get_answer(self):
         return self.Answer

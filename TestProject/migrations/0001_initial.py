@@ -27,6 +27,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('Answer', models.TextField(max_length=30000)),
+                ('RightCheck',models.BooleanField()),
             ],
         ),
         migrations.CreateModel(
