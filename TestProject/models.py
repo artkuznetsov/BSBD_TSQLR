@@ -83,11 +83,16 @@ class Task(models.Model):
     def get_connectdatabase(self):
         return self.ConnectDataBase
 
+class DataBaseType(models.Model):
+    Name = models.CharField(max_length=50)
+    def __str__(self):
+        return self.Name
 
 class ConnectDataBase(models.Model):
-    NameConnection = models.CharField(max_length=10)
+    NameConnection = models.CharField(max_length=50)
     ConnectionString = models.TextField()
     ShadowConnectionString = models.TextField(default=None)
+    Type = models.ForeignKey('DataBaseType')
 
     def __str__(self):
         return self.NameConnection

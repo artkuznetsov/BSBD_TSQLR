@@ -85,14 +85,7 @@
         </div>
       </div>
       <div class="second_row">
-       <table id="teacher_table" class="data_table">
-           <thead>
-           <tr  id="teacher_table_head"></tr>
-           </thead>
-           <tbody id="teacher_table_body">
-
-           </tbody>
-        </table>
+       <h3 style="text-align: center">Предварительный результат недоступен для просмотра.</h3>
       </div>
     </div>
     <div class="second_col">
@@ -170,16 +163,34 @@
 
 
     //clock function
+    function getTimeRemaining(endtime){
+        var t = Date.parse(endtime) - Date.parse(new Date());
+        var seconds = Math.floor((t/1000)%60);
+        var minutes = Math.floor((t/1000/60) % 60);
+        var hours = Math.floor((t/(1000*60*60)) % 24);
+        var days = Math.floor(t/(1000*60*60*24));
+        return{
+            'total':t,
+            'days':days,
+            'hours':hours,
+            'minutes':minutes,
+            'seconds':seconds
+        };
+    }
     var intervalID = window.setInterval(function () {
-        var user_start = new Date("{{ time | date:"c" }}").getTime();
+        //var user_start = new Date("{{ time | date:"c" }}").getTime();
+        var user_start = new Date("{{ time | date:"c" }}")
         var TestTime = 0;
         {% for test in GTest %}
             TestTime = {{ test.get_test.get_time }};
         {% endfor %}
-        TestTime = TestTime * 60000;
-        var now = new Date().getTime();
-        var new_new = new Date(user_start + TestTime - now);
-        if (new_new.getTime() < 0) {
+        var endtime = new Date(user_start.getFullYear(), user_start.getMonth(), user_start.getDate(), user_start.getHours(), user_start.getMinutes() + TestTime, user_start.getSeconds(), user_start.getMilliseconds());
+        var new_new = getTimeRemaining(endtime);
+        //TestTime = TestTime * 60000;
+        //var now = new Date().getTime();
+        //var new_new = new Date(user_start + TestTime - now);
+        //if (new_new.getTime() < 0) {
+        if(new_new.hours === 0 && new_new.minutes === 0 && new_new.seconds === 0){
             clearInterval(intervalID);
             endTest();
             swal({
@@ -196,7 +207,7 @@
                 });
         }
         var clock = document.getElementById('clock');
-        clock.innerText = " "+new_new.getMinutes() + ":" + new_new.getSeconds();
+        clock.innerText = " "+new_new.hours+":"+new_new.minutes + ":" + new_new.seconds;
     }, 1000);
     UserTextArea.onkeypress = function (e) {
             e = e || event;
@@ -240,7 +251,7 @@
         {% for test in GTest reversed%}
             CurrentTaskID = {{ test.get_task.get_id }};
             FillTeacherTextArea({{ test.get_task.get_id }});
-            FillTeacherTable({{ test.get_task.get_id }});
+            //FillTeacherTable({{ test.get_task.get_id }});
 
         {% endfor %}
     }
@@ -268,7 +279,7 @@
                     ClearUserTable();
                     CurrentTaskID = task_id;
                     FillTeacherTextArea(task_id);
-                    FillTeacherTable(task_id);
+                    //FillTeacherTable(task_id);
                     FillUserTextArea();
 
                 }
@@ -441,6 +452,14 @@
     function FillUserTable() {
         var request = {};
         request[CurrentTaskID] = UserTextArea.value;
+        if(getCookie('task ' + CurrentTaskID)){
+            deleteCookie('task ' + CurrentTaskID);
+        }
+        var cookie_data = new Date();
+        var expire = cookie_data.toLocaleDateString('Omsk') + ' '+cookie_data.getHours()+1+';'+cookie_data.getMinutes()+';'+cookie_data.getSeconds();
+        
+        setCookie('task '+CurrentTaskID, UserTextArea.value,'expires='+expire);
+        Answers['taskID '+CurrentTaskID] = UserTextArea.value;
 
         $.ajax({
                 beforeSend : function(jqXHR) {
