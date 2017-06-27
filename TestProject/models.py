@@ -107,6 +107,7 @@ class Test(models.Model):
     Time = models.IntegerField()
     Task = models.ManyToManyField('Task', through='TestTask')
     TestPerson = models.ManyToManyField('MyUser', through='TestPerson')
+    HardCheck = models.BooleanField()
 
     def __str__(self):
         return self.Name

@@ -89,6 +89,7 @@ class Migration(migrations.Migration):
                 ('Name', models.CharField(max_length=30)),
                 ('DateActivate', models.DateTimeField()),
                 ('Time', models.IntegerField()),
+                ('HardCheck', models.BooleanField()),
             ],
         ),
         migrations.CreateModel(
@@ -136,8 +137,8 @@ class Migration(migrations.Migration):
                 ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.Permission', verbose_name='user permissions')),
             ],
             options={
-                'verbose_name_plural': 'users',
                 'verbose_name': 'user',
+                'verbose_name_plural': 'users',
                 'abstract': False,
             },
             managers=[
