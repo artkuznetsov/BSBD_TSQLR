@@ -70,6 +70,7 @@
                                         return false;
                                     }
                     };
+
                     function getCategories() {
                         var DB = document.getElementById("select2-id_ConnectDataBase-container").title;
                         var dic = {};
@@ -110,7 +111,6 @@
                             swal('Что-то пошло не так','Вы не указали необходимо количество заданий. Пожалуйста, повторите попытку','error');
                             return false;
                         }
-
                         var TestName = document.getElementById('id_Name');
                         var DateActivate = document.getElementById('id_DateActivate_0').value;
                         var TimeActivate = document.getElementById('id_DateActivate_1').value;

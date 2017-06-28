@@ -200,6 +200,7 @@ def some_test(request, testid, var):
             weight = 0
             if test.HardCheck == 1:
                 print('HardCheck = True OLD PROCESS')
+
                 for i in data:
                     temp = i.split(" ")[1]
                     if temp == "Test":
@@ -272,6 +273,7 @@ def some_test(request, testid, var):
                             #print(weight)
             else:
                 print('Hardcheck = false')
+
                 for i in data:
                     temp = i.split(" ")[1]
                     if temp == "Test":
@@ -322,6 +324,7 @@ def some_test(request, testid, var):
                             column_name_w_shadow = [row[0] for row in Shadowcurs1.description]
                             print('column_name_w_shadow')
                             print(column_name_w_shadow)
+
                             dic_check_student_light_table = {}
                             dic_check_student_shadow_table = {}
                             dic_check_teacher_light_table = {}
@@ -339,7 +342,6 @@ def some_test(request, testid, var):
                             for j in range(len(column_name_w_shadow)):
                                 dic_check_teacher_shadow_table[column_name_w_shadow[j]] = [row[j] for row in sl1]
 
-
                             if dic_check_student_shadow_table == dic_check_teacher_shadow_table and dic_check_student_shadow_table == dic_check_teacher_shadow_table:
                                 answ += task.get(id=temp).Weight
                                 right_check = Answers.objects.get(TestPerson=personForTest, TestTask = TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test, Variant=var), Answer=data[i])
@@ -353,6 +355,7 @@ def some_test(request, testid, var):
                             print('Im here!!!')
                             print(e)
                             weight += task.get(id=temp).Weight
+
 
             personForTest.Mark = round(float(100 * answ / weight))
             #print('personForTest.Mark = ')
@@ -677,13 +680,13 @@ def Add_TestPerson(request):
                     else:
                         mas.append(i.Variant)
                 for st in students:
-                    print(i)
+                    
                     tp = TestPerson.objects.filter(Person=st.id, Test=test)
-                    print(tp)
+                    
                     tpv = [q.Variant for q in tp]
-                    print(tpv)
+                    
                     t = [j for j in mas if ((j in tpv) == 0)]
-                    print(t)
+                    
                     choise = random.choice(t)
                     testperson = TestPerson.objects.create(Person=st, Test=test, Variant=choise)
                 return redirect("/admin")
@@ -800,12 +803,11 @@ def GoTest(request, testid, var):
                             answ += task.get(id=temp).Weight
                             weight += task.get(id=temp).Weight
                         else:
-
                             weight += task.get(id=temp).Weight
                     except Exception as e:
                         print(e)
                         weight += task.get(id=temp).Weight
-
+          
                 personForTest.Mark = round(float(100 * answ / weight))
                 personForTest.save()
                 return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
@@ -859,6 +861,7 @@ def GoTest(request, testid, var):
 
                         for j in range(len(column_name_shadow)):
                             dic_check_teacher_shadow_table[column_name_w_shadow[j]] = [row[j] for row in sl1]
+
 
                         if dic_check_student_light_table == dic_check_teacher_light_table and dic_check_student_shadow_table == dic_check_teacher_shadow_table:
                             answ += task.get(id=temp).Weight
@@ -1094,6 +1097,7 @@ def Trainer(request):
                 curs.execute(str(task.WTask))
                 l2 = [row for row in curs]
                 col2=[column[0] for column in curs.description]
+
                 for j in range(len(col)):
                     dic_1[col[j]] = [row[j] for row in l]
                 for j in range(len(col2)):
