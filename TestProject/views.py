@@ -198,8 +198,8 @@ def some_test(request, testid, var):
                 print(ConnectShadow)
             answ = 0
             weight = 0
-            if test.HardCheck == 0:
-                print('HardCheck = False')
+            if test.HardCheck == 1:
+                print('HardCheck = True OLD PROCESS')
                 for i in data:
                     temp = i.split(" ")[1]
                     if temp == "Test":
@@ -219,59 +219,59 @@ def some_test(request, testid, var):
                                                                                    Test=test, Variant=var),
                                                      Answer=data[i], RightCheck = False)
                         try:
-                        #print('data = ')
-                        #print(data)
+                            print('data = ')
+                            print(data)
                             curs = Connect.cursor()
-                        #print('curs = ')
-                        #print(curs)
-                        #print('data[i] = ')
-                        #print(data[i])
+                            print('curs = ')
+                            print(curs)
+                            print('data[i] = ')
+                            print(data[i])
                             curs.execute(data[i])
                             l = [row for row in curs]
-                        #print('l = ')
-                        #print(l)
+                            print('l = ')
+                            print(l)
                             curs = Connect.cursor()
                             curs.execute(str(task.get(id=int(temp)).WTask))
                             l1 = [row for row in curs]
-                        #print('l1= ')
-                        #print(l1)
+                            print('l1= ')
+                            print(l1)
                             Shadowcurs = ConnectShadow.cursor()
                             Shadowcurs.execute(data[i])
                             sl = [row for row in Shadowcurs]
-                        #print('sl = ')
-                        #print(sl)
+                            print('sl = ')
+                            print(sl)
                             Shadowcurs = ConnectShadow.cursor()
                             Shadowcurs.execute(str(task.get(id=int(temp)).WTask))
                             sl1 = [row for row in Shadowcurs]
-                        #print('sl1 = ')
-                        #print (sl1)
+                            print('sl1 = ')
+                            print (sl1)
                             if l1 == l and sl1 == sl:
-                            #print('l1 == l and sl1 == sl')
+                                print('l1 == l and sl1 == sl')
                                 answ += task.get(id=temp).Weight
-                            #print('answ = ')
-                            #print(answ)
+                                print('answ = ')
+                                print(answ)
                                 answer_right = Answers.objects.get(TestPerson=personForTest, TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test, Variant=var), Answer=data[i])
                                 print(answer_right)
                                 answer_right.RightCheck = True
                                 print(answer_right)
                                 answer_right.save()
                                 weight += task.get(id=temp).Weight
-                            #print('weight = ')
-                            #print(weight)
+                                print('weight = ')
+                                print(weight)
                             else:
-                            #print('ELSE FOR l1 == l and sl1 == sl')
+                                print('ELSE FOR l1 == l and sl1 == sl')
                                 weight += task.get(id=temp).Weight
-                            #print('weight = ')
-                            #print(weight)
+                                print('weight = ')
+                                print(weight)
                         except Exception as e:
                             print(e)
-                        #print('exception!!!!!!')
+                            print('exception!!!!!!')
                             weight += task.get(id=temp).Weight
                             with_exception = True
-                        #print('weight = ')
-                        #print(weight)
+                            #print('weight = ')
+                            #print(weight)
             else:
-                print('Hardcheck = True')
+                print('Hardcheck = false')
                 for i in data:
                     temp = i.split(" ")[1]
                     if temp == "Test":
@@ -345,6 +345,7 @@ def some_test(request, testid, var):
                                 right_check = Answers.objects.get(TestPerson=personForTest, TestTask = TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test, Variant=var), Answer=data[i])
                                 right_check.RightCheck = True
                                 right_check.save()
+
                                 weight += task.get(id=temp).Weight
                             else:
                                 weight += task.get(id=temp).Weight
@@ -768,7 +769,7 @@ def GoTest(request, testid, var):
             ConnectShadow = pyodbc.connect(connectStr.ShadowConnectionString)
             answ = 0
             weight = 0
-            if test.HardCheck != True:
+            if test.HardCheck == True:
                 for i in data:
                     temp = i.split(" ")[1]
                     try:
@@ -809,6 +810,7 @@ def GoTest(request, testid, var):
                 personForTest.save()
                 return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
             else:
+                #HardCheck is True!!!
                 for i in data:
                     temp = i.split(" ")[1]
                     try:
@@ -982,7 +984,7 @@ def TakeAnswer(request):
                                         tmp.append("Да")
                                     else:
                                         tmp.append(right_check)
-                                print(tmp)
+                                #print(tmp)
                                 answers.append(tmp)
                             return JsonResponse({'status': 'ok', "answers": answers}, charset="utf-8", safe=True)
         else:
