@@ -83,11 +83,16 @@ class Task(models.Model):
     def get_connectdatabase(self):
         return self.ConnectDataBase
 
+class DataBaseType(models.Model):
+    Name = models.CharField(max_length=50)
+    def __str__(self):
+        return self.Name
 
 class ConnectDataBase(models.Model):
-    NameConnection = models.CharField(max_length=10)
+    NameConnection = models.CharField(max_length=50)
     ConnectionString = models.TextField()
     ShadowConnectionString = models.TextField(default=None)
+    Type = models.ForeignKey('DataBaseType')
 
     def __str__(self):
         return self.NameConnection
@@ -103,6 +108,7 @@ class Test(models.Model):
     Task = models.ManyToManyField('Task', through='TestTask')
     TestPerson = models.ManyToManyField('MyUser', through='TestPerson')
     HardCheck = models.BooleanField()
+
     def __str__(self):
         return self.Name
 
@@ -169,6 +175,7 @@ class Answers(models.Model):
     TestTask = models.ForeignKey('TestTask')
     TestPerson = models.ForeignKey('TestPerson', default=None)
     Answer = models.TextField(max_length=30000)
+    RightCheck = models.BooleanField()
 
     def get_answer(self):
         return self.Answer
