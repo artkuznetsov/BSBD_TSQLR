@@ -108,6 +108,7 @@ class Test(models.Model):
     Task = models.ManyToManyField('Task', through='TestTask')
     TestPerson = models.ManyToManyField('MyUser', through='TestPerson')
     HardCheck = models.BooleanField()
+    ShowSUBDError = models.BooleanField()
 
     def __str__(self):
         return self.Name

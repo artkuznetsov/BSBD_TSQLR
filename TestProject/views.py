@@ -160,15 +160,23 @@ def some_test(request, testid, var):
                         table.append(a)
                         a = []
                 except Exception as exception:
-                    result = re.search(r']\w[^(]*', str(exception)).group(0)[1::1]
-                    dbname = re.search(r'\'\w*\.', result)
-                    if dbname is not None:
-                        result = result.replace(str(dbname.group(0)[1::1]), "")
-                    if re.match(r'^You have an error in your SQL syntax', result) is not None:
-                        fail = re.search(r'\'\w*[^\']*', result).group(0)
-                        result = "<p>В вашем SQL запросе были найдены ошибки! </p><p>Проверьте правильность написания слов <div id=\"fail_text\">" + fail + '\'</div></p>'
-                    return JsonResponse({'status': 'error', 'error': result}, charset="utf-8", safe=True)
-            return JsonResponse({'status': 'ok', 'table': table, 'task': taskid}, charset="utf-8", safe=True)
+                    if database_type.Name == "MySQL":
+                        result = re.search(r']\w[^(]*', str(exception)).group(0)[1::1]
+                        dbname = re.search(r'\'\w*\.', result)
+                        if dbname is not None:
+                            result = result.replace(str(dbname.group(0)[1::1]), "")
+                        if re.match(r'^You have an error in your SQL syntax', result) is not None:
+                            fail = re.search(r'\'\w*[^\']*', result).group(0)
+                            result = "<p>В вашем SQL запросе были найдены ошибки! </p><p>Проверьте правильность написания слов <div id=\"fail_text\">" + fail + '\'</div></p>'
+                        return JsonResponse({'status': 'error', 'error': result}, charset="utf-8", safe=True)
+                    else:
+                        if test.ShowSUBDError == True:
+                            print(test.ShowSUBDError)
+                            return JsonResponse({'status':'error', 'error':str(exception)}, charset="utf-8", safe=True)
+                        else:
+                            print(test.ShowSUBDError)
+                            return JsonResponse({'status':'error', 'error':'В Вашем запросе были найдены ошибки'}, charset='utf-8', safe=True)
+                return JsonResponse({'status': 'ok', 'table': table, 'task': taskid}, charset="utf-8", safe=True)
         else:
             # Проверка ответов студента и их сохранение в базу, после нажатия на кнопку завершения
             test = Test.objects.get(id=int(testid))
@@ -200,7 +208,6 @@ def some_test(request, testid, var):
             weight = 0
             if test.HardCheck == 1:
                 print('HardCheck = True OLD PROCESS')
-
                 for i in data:
                     temp = i.split(" ")[1]
                     if temp == "Test":
@@ -273,7 +280,6 @@ def some_test(request, testid, var):
                             #print(weight)
             else:
                 print('Hardcheck = false')
-
                 for i in data:
                     temp = i.split(" ")[1]
                     if temp == "Test":
@@ -614,7 +620,8 @@ def CreateTest(request):
                     Name=data['TestName'],
                     DateActivate=data['DateActivate'],
                     Time=data['Time'],
-                    HardCheck=data['HardCheck']
+                    HardCheck=data['HardCheck'],
+                    ShowSUBDError=data['ErrorCheck']
                 )
                 test.save()
 
@@ -1110,15 +1117,18 @@ def Trainer(request):
                     table.append(a)
                     a = []
             except Exception as exception:
-                result = re.search(r']\w[^(]*', str(exception)).group(0)[1::1]
-                dbname = re.search(r'\'\w*\.', result)
-                if dbname is not None:
-                    result = result.replace(str(dbname.group(0)[1::1]), "")
-                if re.match(r'^You have an error in your SQL syntax', result) is not None:
-                    fail = re.search(r'\'\w*[^\']*', result).group(0)
-                    result = "<p>В вашем SQL запросе были найдены ошибки! </p><p>Проверьте правильность написания слов <div id=\"fail_text\">" + fail + '\'</div></p>'
-                # table.append(error)
-                return JsonResponse({'status': 'error', 'error': result}, charset="utf-8", safe=True)
+                if task.ConnectDataBase.Type.Name == "MySQL":
+                    result = re.search(r']\w[^(]*', str(exception)).group(0)[1::1]
+                    dbname = re.search(r'\'\w*\.', result)
+                    if dbname is not None:
+                        result = result.replace(str(dbname.group(0)[1::1]), "")
+                    if re.match(r'^You have an error in your SQL syntax', result) is not None:
+                        fail = re.search(r'\'\w*[^\']*', result).group(0)
+                        result = "<p>В вашем SQL запросе были найдены ошибки! </p><p>Проверьте правильность написания слов <div id=\"fail_text\">" + fail + '\'</div></p>'
+                    # table.append(error)
+                    return JsonResponse({'status': 'error', 'error': result}, charset="utf-8", safe=True)
+                else:
+                    return JsonResponse({'status':'error','error':str(exception)}, charset="utf-8", safe=True)
             if dic_1 == dic_2 and table[0] != "error":
                 isEquals = 'True'
             return JsonResponse({'status': 'ok', 'table': table, 'task': task.id, 'isEquals': isEquals},

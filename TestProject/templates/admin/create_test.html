@@ -118,6 +118,7 @@
                         var Variants = document.getElementById('id_Variants');
                         var ConnectDateBase = document.getElementById('select2-id_ConnectDataBase-container').title;
                         var HardCheck = document.getElementById('id_HardCheck');
+                        var ShowSUBDError = document.getElementById('id_ShowSUBDError');
                         var all_fields_is_not_null = 0;
                         if(TestName === "" || DateActivate==="" || TimeActivate==="" || Time.value===0 || Variants.value===0 || ConnectDateBase==="Выбрать...") {
                             all_fields_is_not_null = 1;
@@ -147,6 +148,13 @@
                                 else{
                                     dict['HardCheck'] = false;
                                 }
+                                if (ShowSUBDError.checked)
+                                {
+                                    dict['ErrorCheck'] = true;
+                                }
+				else{
+				    dict['ErrorCheck'] = false;
+				}
                             }
                             $.ajax({
                                 beforeSend: function (jqXHR) {

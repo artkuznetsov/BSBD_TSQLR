@@ -91,6 +91,7 @@ class Migration(migrations.Migration):
                 ('DateActivate', models.DateTimeField()),
                 ('Time', models.IntegerField()),
                 ('HardCheck', models.BooleanField()),
+                ('ShowSUBDError', models.BooleanField()),
             ],
         ),
         migrations.CreateModel(
