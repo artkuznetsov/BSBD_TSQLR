@@ -39,7 +39,7 @@ class TestForm(forms.Form):
 	HardCheck = forms.BooleanField\
 		(
 			widget=forms.CheckboxInput(attrs={'class':'hardcheck','style':'display: yes;'}),
-			label = "Проверка по столбцам",
+			label = "Учитывать порядок столбцов",
 			required = False,
                         initial=True
 		)

@@ -982,7 +982,7 @@ def TakeAnswer(request):
                                         tmp.append("Да")
                                     else:
                                         tmp.append(right_check)
-                                print(tmp)
+                                #print(tmp)
                                 answers.append(tmp)
                             return JsonResponse({'status': 'ok', "answers": answers}, charset="utf-8", safe=True)
         else:
