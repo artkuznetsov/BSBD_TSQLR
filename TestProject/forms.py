@@ -56,46 +56,6 @@ class TestForm(forms.Form):
         self.fields['HardCheck'].widget.attrs['style']='display: inline;'
         self.fields['ShowSUBDError'].widget.attrs['style']='display: inline;'
 
-=======
-	Name = forms.CharField\
-        (
-            label='Название теста',
-            max_length=30,
-            required=True
-        )
-	Time = forms.IntegerField\
-		(
-			label="Время на прохождение",
-			min_value=0,
-			initial=0,
-			help_text="(мин)",
-			required=True
-		)
-	Variants = forms.IntegerField\
-    	(
-    		label = "Необходимое количество вариантов",
-			min_value=0,
-			initial=0,
-			required=True
-    	)
-	ConnectDataBase = forms.ModelChoiceField\
-		(
-			label="База данных",
-			queryset=ConnectDataBase.objects.all(),
-			empty_label='Выбрать...',
-			required=True
-		)
-	HardCheck = forms.BooleanField\
-		(
-			widget=forms.CheckboxInput(attrs={'class':'hardcheck','style':'display: yes;'}),
-			label = "Учитывать порядок столбцов",
-			required = False,
-                        initial=True
-		)
-	def __init__(self,*args,**kwargs):
-		super(TestForm,self).__init__(*args,**kwargs)
-		self.fields['HardCheck'].widget.attrs['style']='display: inline;'
->>>>>>> 2ff2d84c50e75f65e059c92bd34fb9240c62428a
 
 class TestPersonForm(forms.Form):
 	Test = forms.ModelChoiceField\
