@@ -100,6 +100,9 @@ class ConnectDataBase(models.Model):
     def get_connection_string(self):
         return self.ConnectionString
 
+    def get_connection_Type(self):
+        return self.Type
+
 
 class Test(models.Model):
     Name = models.CharField(max_length=30)
@@ -176,7 +179,7 @@ class Answers(models.Model):
     TestTask = models.ForeignKey('TestTask')
     TestPerson = models.ForeignKey('TestPerson', default=None)
     Answer = models.TextField(max_length=30000)
-    RightCheck = models.BooleanField()
+    RightCheck = models.BooleanField(blank=True)
 
     def get_answer(self):
         return self.Answer

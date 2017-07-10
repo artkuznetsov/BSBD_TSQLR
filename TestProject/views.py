@@ -24,6 +24,8 @@ import base64
 import hashlib
 from django.db.models import Q
 import psycopg2
+from .CreateShema import CreateShema
+from .CheckAnswer import *
 
 def get_news(user):
     news_array = []
@@ -96,31 +98,8 @@ def some_test(request, testid, var):
             for i in data:
                 # ... или получении схемы БД
                 if data[i] == 'GetDBSchema':
-                    if database_type.Name == 'MySQL':
-                        host = re.search(r'\w*SERVER=\w*', connectStr).group(0)[7:]
-                        user = re.search(r'\w*UID=\w*', connectStr).group(0)[4:]
-                        password = re.search(r'\w*PWD=\w*', connectStr).group(0)[4:]
-                        database = re.search(r'\w*DATABASE=\w*', connectStr).group(0)[9:]
-                        render_er('mysql+pymysql://' + user + ':' + password + '@' + host + '/' + database + '','' + host + '->' + database + '.png')
-                        response = base64.b64encode(open(host + '->' + database + '.png',"rb").read())
-                        return JsonResponse({'status':'ok', 'image':str(response)},safe=True)
-                    if database_type.Name == 'PostgreSQL':
-                        #lines = [line.rstrip('\n') for line in open('/etc/odbc.ini')]
-                        #dsn_name = re.search(r'\w*DSN=\w*', connectStr).group(0)[4:]
-                        #print('DSN_NAME IS ' + dsn_name)
-                        Connect = psycopg2.connect(connectStr)
-                        print(Connect)
-                        host = re.search(r'\w*host=\w*',connectStr).group(0)[5:]
-                        print(host)
-                        user = re.search(r'\w*user=\w*',connectStr).group(0)[5:]
-                        print(user)
-                        database = re.search(r'\w*dbname=\w*',connectStr).group(0)[7:]
-                        print(database)
-                        password = re.search(r'\w*password=\w*',connectStr).group(0)[9:]
-                        print(password)
-                        render_er('postgresql+psycopg2://' + str(user) + ':' + str(password) + '@' + str(host) + '/' + str(database) + '','' + str(host) + '->' + str(database) + '.png')    
-                        response = base64.b64encode(open(host + '->' + database + '.png', "rb").read())
-                        return JsonResponse({'status': 'ok', 'image': str(response)}, safe=True)
+                    
+                    return JsonResponse({'status': 'ok', 'image': str(CreateShema (database_type.Name, connectStr))}, safe=True)
 
             Connect = 1
             try:
@@ -145,7 +124,8 @@ def some_test(request, testid, var):
                                                  TestTask=TestTask.objects.get(Task=Task.objects.get(id=taskid),
                                                                                Test=test, 
                                                                                Variant=var),
-                                                 Answer=data[i])
+                                                 Answer=data[i],
+                                                 RightCheck= False)
                 curs = Connect.cursor()
                 table = []
                 try:
@@ -188,184 +168,27 @@ def some_test(request, testid, var):
             Connect = 1
             with_exception = False
             db_type = ConnectDataBase.objects.get(NameConnection=connectdb.ConnectDataBase).Type
-            if db_type.Name == 'MySQL':
-                print('try to connect via PYDOBC')
+            if db_type.Name != 'PostgreSQL':
+
                 Connect = pyodbc.connect(connectStr.ConnectionString)
-                print('Connect = ')
-                print(Connect)
+
                 ConnectShadow = pyodbc.connect(connectStr.ShadowConnectionString)
-                print('ConnectShadow = ')
-                print(ConnectShadow)
-            if db_type.Name == 'PostgreSQL':
-                print('try to connect via PSYCOPG2')
+
+            else:
+
                 Connect = psycopg2.connect(connectStr.ConnectionString)
-                print('Connect = ')
-                print(Connect)
+
                 ConnectShadow = psycopg2.connect(connectStr.ShadowConnectionString)
-                print('ConnectShadow = ')
-                print(ConnectShadow)
+
             answ = 0
             weight = 0
             if test.HardCheck == 1:
-                print('HardCheck = True OLD PROCESS')
-                for i in data:
-                    temp = i.split(" ")[1]
-                    if temp == "Test":
-                        continue
-                    else:
-                        try:
-                            ans = Answers.objects.get(TestPerson=personForTest,
-                                                  TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test,
-                                                                                Variant=var))
-                            ans.Answer = data[i]
-                            ans.RightCheck = False
-                            ans.save()
-                        except Exception as e:
-                            print(e)
-                            ans = Answers.objects.create(TestPerson=personForTest,
-                                                     TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp),
-                                                                                   Test=test, Variant=var),
-                                                     Answer=data[i], RightCheck = False)
-                        try:
-                            print('data = ')
-                            print(data)
-                            curs = Connect.cursor()
-                            print('curs = ')
-                            print(curs)
-                            print('data[i] = ')
-                            print(data[i])
-                            curs.execute(data[i])
-                            l = [row for row in curs]
-                            print('l = ')
-                            print(l)
-                            curs = Connect.cursor()
-                            curs.execute(str(task.get(id=int(temp)).WTask))
-                            l1 = [row for row in curs]
-                            print('l1= ')
-                            print(l1)
-                            Shadowcurs = ConnectShadow.cursor()
-                            Shadowcurs.execute(data[i])
-                            sl = [row for row in Shadowcurs]
-                            print('sl = ')
-                            print(sl)
-                            Shadowcurs = ConnectShadow.cursor()
-                            Shadowcurs.execute(str(task.get(id=int(temp)).WTask))
-                            sl1 = [row for row in Shadowcurs]
-                            print('sl1 = ')
-                            print (sl1)
-                            if l1 == l and sl1 == sl:
-                                print('l1 == l and sl1 == sl')
-                                answ += task.get(id=temp).Weight
-                                print('answ = ')
-                                print(answ)
-                                answer_right = Answers.objects.get(TestPerson=personForTest, TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test, Variant=var), Answer=data[i])
-                                print(answer_right)
-                                answer_right.RightCheck = True
-                                print(answer_right)
-                                answer_right.save()
-                                weight += task.get(id=temp).Weight
-                                print('weight = ')
-                                print(weight)
-                            else:
-                                print('ELSE FOR l1 == l and sl1 == sl')
-                                weight += task.get(id=temp).Weight
-                                print('weight = ')
-                                print(weight)
-                        except Exception as e:
-                            print(e)
-                            print('exception!!!!!!')
-                            weight += task.get(id=temp).Weight
-                            with_exception = True
-                            #print('weight = ')
-                            #print(weight)
+                personForTest.Mark = SaveAnswerWithOutHardCheck(personForTest,test,var, data,Connect,ConnectShadow,task, answ, weight)
+                            
             else:
-                print('Hardcheck = false')
-                for i in data:
-                    temp = i.split(" ")[1]
-                    if temp == "Test":
-                        continue
-                    else:
-                        try:
-                            ans = Answers.objects.get(TestPerson = personForTest, TestTask = TestTask.objects.get(Task = Task.objects.get(id=temp), Test = test, Variant = var))
-                            print(ans)
-                            ans.Answer = data[i]
-                            ans.RightCheck = False
-                            print(ans.Answer)
-                            ans.save()
-                            print('this shit has been saved')
-                        except Exception as e:
-                            print(e)
-                            ans = Answers.objects.create(TestPerson = personForTest, TestTask = TestTask.objects.get(Task=Task.objects.get(id=temp),Test=test, Variant=var), Answer=data[i], RightCheck = False)
-                        try:
-                            l=[]
-                            l1=[]
-                            sl=[]
-                            sl1=[]
-
-                            curs = Connect.cursor()
-                            curs.execute(data[i])
-                            l = [row for row in curs]
-                            column_name = [row[0] for row in curs.description]
-                            print('column_name')
-                            print(column_name)
-                            curs1 = Connect.cursor()
-                            print('curs1')
-                            print(curs1)
-                            curs1.execute(str(task.get(id=int(temp)).WTask))
-                            print('curs1.execute(WTask)')
-                            print(curs1.execute(str(task.get(id=int(temp)).WTask)))
-                            l1 = [row for row in curs1]
-                            column_name_w = [row[0] for row in curs1.description]
-                            print('column_name_w')
-                            print(column_name_w)
-                            Shadowcurs = Connect.cursor()
-                            Shadowcurs.execute(data[i])
-                            sl = [row for row in Shadowcurs]
-                            column_name_shadow = [row[0] for row in Shadowcurs.description]
-                            print('column_name_shadow')
-                            print(column_name_shadow)
-                            Shadowcurs1 = Connect.cursor()
-                            Shadowcurs1.execute(str(task.get(id=int(temp)).WTask))
-                            sl1 = [row for row in Shadowcurs1]
-                            column_name_w_shadow = [row[0] for row in Shadowcurs1.description]
-                            print('column_name_w_shadow')
-                            print(column_name_w_shadow)
-
-                            dic_check_student_light_table = {}
-                            dic_check_student_shadow_table = {}
-                            dic_check_teacher_light_table = {}
-                            dic_check_teacher_shadow_table = {}
-
-                            for j in range(len(column_name)):
-                                dic_check_student_light_table[column_name[j]] = [row[j] for row in l]
-
-                            for j in range(len(column_name_shadow)):
-                                dic_check_student_shadow_table[column_name_shadow[j]] = [row[j] for row in sl]
-
-                            for j in range(len(column_name_w)):
-                                dic_check_teacher_light_table[column_name_w[j]] = [row[j] for row in l1]
-
-                            for j in range(len(column_name_w_shadow)):
-                                dic_check_teacher_shadow_table[column_name_w_shadow[j]] = [row[j] for row in sl1]
-
-                            if dic_check_student_shadow_table == dic_check_teacher_shadow_table and dic_check_student_shadow_table == dic_check_teacher_shadow_table:
-                                answ += task.get(id=temp).Weight
-                                right_check = Answers.objects.get(TestPerson=personForTest, TestTask = TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test, Variant=var), Answer=data[i])
-                                right_check.RightCheck = True
-                                right_check.save()
-
-                                weight += task.get(id=temp).Weight
-                            else:
-                                weight += task.get(id=temp).Weight
-                        except Exception as e:
-                            print('Im here!!!')
-                            print(e)
-                            weight += task.get(id=temp).Weight
-
-
-            personForTest.Mark = round(float(100 * answ / weight))
-            #print('personForTest.Mark = ')
-            #print(personForTest.Mark)
+                personForTest.Mark = CheckAnswerWithHardCheck(personForTest,test,var, data,Connect,ConnectShadow,task, answ, weight)
+                
+            
             personForTest.save()
             return JsonResponse({'status': 'ok', 'except': with_exception}, charset="utf-8", safe=True)
 
@@ -481,71 +304,6 @@ def TestsUser(request):
                   {
                       "completed_tests": with_mark, "uncompleted_tests": without_mark
                   })
-
-
-'''
-def AddUsers(request):
-    """Создание группы и пользоваетлей, которые входят в неё"""
-    if request.user.is_superuser:
-
-        if request.method == ["POST"]:
-            print('y')
-            Groups = request.POST['Group']
-            if Groups != "":
-                if len(GP.objects.filter(NameGP = Groups))  == 0:
-                    print('1')
-                    group = GP(NameGP=Groups)
-                    group.save()
-                    users = request.POST['users']
-                    if users != '':
-                        print('2')
-                        users = users.split('\n')
-                        count = 0
-                        for i in users:
-                            user = i.split(' ')
-                            person = MyUser.objects.create_user(
-                                username=Groups +"-"+ str(count),
-                                email=None,
-                                password='Qwerty123' + str(count),
-                                last_name=user[0],
-                                first_name=user[1],
-                                GP=group
-                            )
-                            count += 1
-                            person.save()
-                        return redirect("/admin")
-                    else:
-                        return redirect("/admin")
-                else:
-                    print('3')
-                    users = request.POST['users']
-                    if users != '':
-                        users = users.split('\n')
-                        count = max(MyUser.objects.filter(GP = Groups))+1
-                        print(count)
-                        for i in users:
-                            user = i.split(' ')
-                            person = MyUser.objects.create_user(
-                                username=Groups +"-"+ str(count),
-                                email=None,
-                                password='Qwerty123' + str(count),
-                                last_name=user[0],
-                                first_name=user[1],
-                                GP=group
-                            )
-                            count+=1
-                            person.save()
-                        return redirect("/admin")
-                    else:
-                        print('haha')
-                        return redirect("/admin")
-            else:
-                return redirect("/admin")
-        else:
-            return render(request, "admin/generate_users.html")
-    else:
-        return redirect("/404")
-'''
 
 
 def AddUsers(request):
@@ -702,249 +460,6 @@ def Add_TestPerson(request):
             return render(request, 'admin/Add_TestPerson.html', {'form': form})
     else:
         return redirect("/404")
-
-
-def GoTest(request, testid, var):
-    if request.is_ajax():
-        # Проверка студентом написанного запроса
-        data = json.loads(request.read().decode("utf-8"))
-        if len(data) == 1:
-            # Здесь нужно обрабатывать запросы о проверке ...
-            test = Test.objects.get(id=int(testid))
-            personForTest = TestPerson.objects.get(Person=request.user.id, Test=test, Variant=int(var))
-            connectdb = TestConnectDataBase.objects.get(Test=test)
-            connectStr = ConnectDataBase.objects.get(NameConnection=connectdb.ConnectDataBase).ConnectionString
-            for i in data:
-                # ... или получении схемы БД
-                if data[i] == 'GetDBSchema':
-                    host = re.search(r'\w*SERVER=\w*', connectStr).group(0)[7:]
-                    user = re.search(r'\w*UID=\w*', connectStr).group(0)[4:]
-                    password = re.search(r'\w*PWD=\w*', connectStr).group(0)[4:]
-                    database = re.search(r'\w*DATABASE=\w*', connectStr).group(0)[9:]
-
-                    render_er('mysql+pymysql://' + user + ':' + password + '@' + host + '/' + database + '',
-                              '' + host + '->' + database + '.png')
-
-                    response = base64.b64encode(open(host + '->' + database + '.png', "rb").read())
-
-                    return JsonResponse({'status': 'ok', 'image': str(response)}, safe=True)
-            Connect = pyodbc.connect(connectStr)
-            taskid = 0
-            for i in data:
-                taskid = int(i)
-                try:
-                    ans = Answers.objects.get(TestPerson=personForTest,
-                                              TestTask=TestTask.objects.get(Task=Task.objects.get(id=taskid),
-                                                                            Test=test))
-                    ans.Answer = data[i]
-                    ans.save()
-                except:
-                    ans = Answers.objects.create(TestPerson=personForTest,
-                                                 TestTask=TestTask.objects.get(Task=Task.objects.get(id=taskid),
-                                                                               Test=test),
-                                                 Answer=data[i])
-                curs = Connect.cursor()
-                table = []
-                try:
-                    curs.execute(data[i])
-                    l = [row for row in curs]
-                    col = [column[0] for column in curs.description]
-                    table.append(col)
-                    a = []
-                    for i in l:
-                        for j in i:
-                            a.append(j)
-                        table.append(a)
-                        a = []
-                except Exception as exception:
-                    result = re.search(r']\w[^(]*', str(exception)).group(0)[1::1]
-                    dbname = re.search(r'\'\w*\.', result)
-                    if dbname is not None:
-                        result = result.replace(str(dbname.group(0)[1::1]), "")
-                    if re.match(r'^You have an error in your SQL syntax', result) is not None:
-                        fail = re.search(r'\'\w*[^\']*', result).group(0)
-                        result = "<p>В вашем SQL запросе были найдены ошибки! </p><p>Проверьте правильность написания слов <div id=\"fail_text\">" + fail + '\'</div></p>'
-                    # table.append(error)
-                    return JsonResponse({'status': 'error', 'error': result}, charset="utf-8", safe=True)
-            return JsonResponse({'status': 'ok', 'table': table, 'task': taskid}, charset="utf-8", safe=True)
-        else:
-
-            # Проверка ответов студента и их сохранение в базу, после нажатия на кнопку завершения
-            test = Test.objects.get(id=int(testid))
-            task = Task.objects.all()
-            personForTest = TestPerson.objects.get(Person=request.user.id, Test=test, Variant=int(var))
-            connectdb = TestConnectDataBase.objects.get(Test=test)
-            connectStr = ConnectDataBase.objects.get(NameConnection=connectdb.ConnectDataBase)
-            Connect = pyodbc.connect(connectStr.ConnectionString)
-            ConnectShadow = pyodbc.connect(connectStr.ShadowConnectionString)
-            answ = 0
-            weight = 0
-            if test.HardCheck == True:
-                for i in data:
-                    temp = i.split(" ")[1]
-                    try:
-                        ans = Answers.objects.get(TestPerson=personForTest,
-                                                TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test))
-                        ans.Answer = data[i]
-                        ans.save()
-                    except Exception as e:
-                        print(e)
-                        ans = Answers.objects.create(TestPerson=personForTest,
-                                                    TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp),
-                                                                                Test=test),
-                                                    Answer=data[i])
-                    try:
-                        curs = Connect.cursor()
-                        curs.execute(data[i])
-                        l = [row for row in curs]
-                        curs = Connect.cursor()
-                        curs.execute(str(task.get(id=int(temp)).WTask))
-                        l1 = [row for row in curs]
-                        Shadowcurs = ConnectShadow.cursor()
-                        Shadowcurs.execute(data[i])
-                        sl = [row for row in Shadowcurs]
-                        Shadowcurs = ConnectShadow.cursor()
-                        Shadowcurs.execute(str(task.get(id=int(temp)).WTask))
-                        sl1 = [row for row in Shadowcurs]
-                        if l1 == l and sl1 == sl:
-                            answ += task.get(id=temp).Weight
-                            weight += task.get(id=temp).Weight
-                        else:
-                            weight += task.get(id=temp).Weight
-                    except Exception as e:
-                        print(e)
-                        weight += task.get(id=temp).Weight
-          
-                personForTest.Mark = round(float(100 * answ / weight))
-                personForTest.save()
-                return JsonResponse({'status': 'ok'}, charset="utf-8", safe=True)
-            else:
-                #HardCheck is True!!!
-                for i in data:
-                    temp = i.split(" ")[1]
-                    try:
-                        ans = Answers.objects.get(TestPerson=personForTest, TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test))
-                        ans.Answer = data[i]
-                        ans.save()
-                    except Exception as e:
-                        print(e)
-                        ans = Answers.objects.create(TestPerson = personForTest, TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp),Test=test),Answer=data[i])
-
-                    try:
-                        l=[]
-                        l1=[]
-                        sl=[]
-                        sl1=[]
-                        curs= Connect.cursor()
-                        curs.execute(data[i])
-                        l = [row for row in curs]
-                        column_name = [row[0] for row in curs.description]
-                        curs = Connect.cursor()
-                        curs.execute(str(task.get(id=int(temp)).WTask))
-                        l1=[row for row in curs]
-                        column_name_w = [row[0] for row in curs.description]
-                        Shadowcurs = ConnectShadow.cursor()
-                        Shadowcurs.execute(data[i])
-                        sl=[row for row in Shadowcurs]
-                        column_name_shadow = [row[0] for row in Shadowcurs.description]
-                        Shadowcurs = ConnectShadow.cursor()
-                        Shadowcurs.execute(str(task.get(id=int(temp)).WTask))
-                        sl1=[row for row in Shadowcurs]
-                        column_name_w_shadow = [row[0] for row in Shadowcurs.description]
-
-                        dic_check_student_light_table = {}
-                        dic_check_student_shadow_table={}
-                        dic_check_teacher_light_table={}
-                        dic_check_teacher_shadow_table={}
-
-                        for j in range(len(column_name)):
-                            dic_check_student_light_table[column_name[j]] = [row[j] for row in l]
-
-                        for j in range(len(column_name_shadow)):
-                            dic_check_student_shadow_table[column_name_shadow[j]] = [row[j] for row in sl]
-
-                        for j in range(len(column_name_w)):
-                            dic_check_teacher_light_table[column_name_w[j]] = [row[j] for row in l1]
-
-                        for j in range(len(column_name_shadow)):
-                            dic_check_teacher_shadow_table[column_name_w_shadow[j]] = [row[j] for row in sl1]
-
-
-                        if dic_check_student_light_table == dic_check_teacher_light_table and dic_check_student_shadow_table == dic_check_teacher_shadow_table:
-                            answ += task.get(id=temp).Weight
-                            weight += task.get(id=temp).Weight
-                        else:
-                            weight += task.get(id=temp).Weight
-                    except Exception as e:
-                        print(e)
-                        weight += task.get(id=temp).Weight
-                personForTest.Mark = round(float(100*answ/weight))
-                personForTest.save()
-                return JsonResponse({'status':'ok'}, charset="utf-8", safe=True)
-
-    else:
-        # Формирование страниц для теста
-        # Определение теста, студента, который проходит тест
-        tests = Test.objects.get(id=int(testid))
-        task = Task.objects.all()
-        connectdb = TestConnectDataBase.objects.get(Test=tests)
-        connectStr = ConnectDataBase.objects.get(NameConnection=connectdb.ConnectDataBase)
-        Connect = pyodbc.connect(connectStr.ConnectionString)
-        personForTest = TestPerson.objects.get(Person=request.user.id, Test=tests, Variant=int(var))
-        test = TestTask.objects.filter(Test=tests, Variant=int(var))
-        CheckAnswer = False
-        # Проверка наличия ответов на этот тест
-        for q in test:
-            if len(Answers.objects.filter(TestPerson=personForTest, TestTask=q)) == 0:
-                CheckAnswer = False
-            else:
-                CheckAnswer = True
-                continue
-                # Запуск таймера
-        tz = timezone('Asia/Omsk')
-        if personForTest.Mark == None and tests.DateActivate <= datetime.now(tz):
-            if (personForTest.StartTest == None):
-                time = datetime.now(tz)
-                personForTest.StartTest = time
-                personForTest.save()
-            else:
-                time = personForTest.StartTest
-            # Если ответов нет, то отдаётся страница с пустыми полями для заполнения
-
-
-            table = []
-
-            finalMonster = {}
-            for i in test:
-                curs = Connect.cursor()
-                curs.execute(i.get_task().WTask)
-                l = [row for row in curs]
-                col = [column[0] for column in curs.description]
-                table.append(col)
-                a = []
-                for j in l:
-                    for k in j:
-                        a.append(str(k))
-                    table.append(a)
-                    a = []
-
-                finalMonster[i.get_task().get_id()] = table
-
-                table = []
-            if CheckAnswer == False:
-                return render(request, "TestProject/test.html", {"GTest": test, "time": time, 'Monster': finalMonster})
-            else:
-                answers = {}
-                for w in test:
-                    answers[w.get_task().get_id()] = Answers.objects.get(TestPerson=personForTest,
-                                                                         TestTask=w).get_answer()
-                return render(request, "TestProject/test.html",
-                              {"GTest": test,
-                               "time": time,
-                               'Monster': finalMonster,
-                               "answers": answers})
-        else:
-            return redirect("/404")
 
 
 def TakeAnswer(request):
@@ -1133,29 +648,14 @@ def Trainer(request):
                 isEquals = 'True'
             return JsonResponse({'status': 'ok', 'table': table, 'task': task.id, 'isEquals': isEquals},
                                 charset="utf-8", safe=True)
+        #Отрисовака Схемы БД
         if data['GetDBSchema'] != 'False':
+
             connection_string = Task.objects.get(
                 id=int(data['GetDBSchema'])).get_connectdatabase().get_connection_string()
-            try:
-                host = re.search(r'\w*SERVER=\w*', connection_string).group(0)[7:]
-                user = re.search(r'\w*UID=\w*', connection_string).group(0)[4:]
-                password = re.search(r'\w*PWD=\w*', connection_string).group(0)[4:]
-                database = re.search(r'\w*DATABASE=\w*', connection_string).group(0)[9:]
+            ConnectionType = Task.objects.get(id=int(data['GetDBSchema'])).get_connectdatabase().get_connection_Type().Name
 
-                render_er('mysql+pymysql://' + user + ':' + password + '@' + host + '/' + database + '',
-                          '' + host + '->' + database + '.png')
-            except:
-                host = re.search(r'\w*host=\w*', connection_string).group(0)[5:]
-                user = re.search(r'\w*user=\w*', connection_string).group(0)[5:]
-                password = re.search(r'\w*password=\w*', connection_string).group(0)[9:]
-                database = re.search(r'\w*dbname=\w*', connection_string).group(0)[7:]
-
-                render_er('postgresql+psycopg2://' + user + ':' + password + '@' + host + '/' + database + '',
-                          '' + host + '->' + database + '.png')
-
-            response = base64.b64encode(open(host + '->' + database + '.png', "rb").read())
-
-            return JsonResponse({'status': 'ok', 'image': str(response)}, safe=True)
+            return JsonResponse({'status': 'ok', 'image': str(CreateShema(ConnectionType, connection_string))}, safe=True)
 
     categories = Category.objects.all()
     return render(request, 'TestProject/trainer-2.html', {'categories': categories})

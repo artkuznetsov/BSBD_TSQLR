@@ -8,7 +8,6 @@ BIRTH_YEAR_CHOICES = ('1980', '1981', '1982')
 
 
 class TestForm(forms.Form):
-<<<<<<< HEAD
     Name = forms.CharField\
     (
         label='Название теста',
