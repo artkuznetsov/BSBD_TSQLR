@@ -183,10 +183,11 @@ def some_test(request, testid, var):
             answ = 0
             weight = 0
             if test.HardCheck == 1:
-                personForTest.Mark = SaveAnswerWithOutHardCheck(personForTest,test,var, data,Connect,ConnectShadow,task, answ, weight)
+            	personForTest.Mark = CheckAnswerWithHardCheck(personForTest,test,var, data,Connect,ConnectShadow,task, answ, weight,test.HardCheck)
+                
                             
             else:
-                personForTest.Mark = CheckAnswerWithHardCheck(personForTest,test,var, data,Connect,ConnectShadow,task, answ, weight)
+                personForTest.Mark = SaveAnswerWithOutHardCheck(personForTest,test,var, data,Connect,ConnectShadow,task, answ, weight,test.HardCheck)
                 
             
             personForTest.save()

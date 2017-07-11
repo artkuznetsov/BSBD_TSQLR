@@ -22,6 +22,24 @@ import psycopg2
 from .CreateShema import CreateShema
 from .CheckAnswer import *
 
+
+
+def ExecuteAnswer(Connect, Answer,HardCheck):
+    if HardCheck == 0:
+        curs = Connect.cursor()                            
+        curs.execute(Answer)
+        l = [row for row in curs]
+        curs.close()
+        return l
+    else:
+        curs = Connect.cursor()
+        curs.execute(Answer)
+        l = [row for row in curs]
+        column_name = [row[0] for row in curs.description]
+        curs.close()
+        return l,column_name
+
+
 #personForTest - объект хранит подписку на тест конкретного пользователя на вариант теста (PersonTest)
 #test - объект хранит данные о тесте (Test)
 #var - вариант теста (int)
@@ -31,7 +49,7 @@ from .CheckAnswer import *
 #task - объект хранит данные о вопросе (Task)
 #answ - баллы, полученные за правильные ответы
 #weight - максимальное количество баллов за тест
-def SaveAnswerWithOutHardCheck(personForTest,test,var, UserAnswer,Connect,ConnectShadow,task, answ, weight):
+def SaveAnswerWithOutHardCheck(personForTest,test,var, UserAnswer,Connect,ConnectShadow,task, answ, weight, HardCheck):
     for i in UserAnswer:
         temp = i.split(" ")[1]
         if temp == "Test":
@@ -50,25 +68,19 @@ def SaveAnswerWithOutHardCheck(personForTest,test,var, UserAnswer,Connect,Connec
                                                                                        Test=test, Variant=var),
                                                          Answer=UserAnswer[i], RightCheck = False)
             try:
-                               
-                curs = Connect.cursor()
+                #Ответ студента в открытую БД               
+                OpenBDStudent = ExecuteAnswer(Connect, UserAnswer[i],HardCheck)
                                 
-                curs.execute(UserAnswer[i])
-                l = [row for row in curs]
+                #Правильный запрос в открытую БД
+                OpenBDTeacher = ExecuteAnswer(Connect,str(task.get(id=int(temp)).WTask),HardCheck)
                                 
-                curs = Connect.cursor()
-                curs.execute(str(task.get(id=int(temp)).WTask))
-                l1 = [row for row in curs]
+                #Ответ студента в теневую БД
+                ShadowBDStudent = ExecuteAnswer(ConnectShadow,UserAnswer[i],HardCheck)
                                 
-                Shadowcurs = ConnectShadow.cursor()
-                Shadowcurs.execute(UserAnswer[i])
-                sl = [row for row in Shadowcurs]
+                #Правильный запрос в теневую БД
+                ShadowBDTeacher = ExecuteAnswer(ConnectShadow,str(task.get(id=int(temp)).WTask),HardCheck)
                                 
-                Shadowcurs = ConnectShadow.cursor()
-                Shadowcurs.execute(str(task.get(id=int(temp)).WTask))
-                sl1 = [row for row in Shadowcurs]
-                                
-                if l1 == l and sl1 == sl:
+                if OpenBDTeacher == OpenBDStudent and ShadowBDTeacher == ShadowBDStudent:
                                     
                     answ += task.get(id=temp).Weight
                                     
@@ -99,7 +111,7 @@ def SaveAnswerWithOutHardCheck(personForTest,test,var, UserAnswer,Connect,Connec
 #task - объект хранит данные о вопросе (Task)
 #answ - баллы, полученные за правильные ответы
 #weight - максимальное количество баллов за тест
-def CheckAnswerWithHardCheck(personForTest,test,var, UserAnswer,Connect,ConnectShadow,task, answ, weight):
+def CheckAnswerWithHardCheck(personForTest,test,var, UserAnswer,Connect,ConnectShadow,task, answ, weight, HardCheck):
     for i in UserAnswer:
         temp = i.split(" ")[1]
         if temp == "Test":
@@ -117,50 +129,34 @@ def CheckAnswerWithHardCheck(personForTest,test,var, UserAnswer,Connect,ConnectS
                             
                 ans = Answers.objects.create(TestPerson = personForTest, TestTask = TestTask.objects.get(Task=Task.objects.get(id=temp),Test=test, Variant=var), Answer=UserAnswer[i], RightCheck = False)
             try:
-                l=[]
-                l1=[]
-                sl=[]
-                sl1=[]
 
-                curs = Connect.cursor()
-                curs.execute(UserAnswer[i])
-                l = [row for row in curs]
-                column_name = [row[0] for row in curs.description]
-                           
-                curs1 = Connect.cursor()
-                            
-                curs1.execute(str(task.get(id=int(temp)).WTask))
-                            
-                l1 = [row for row in curs1]
-                column_name_w = [row[0] for row in curs1.description]
-                            
-                Shadowcurs = Connect.cursor()
-                Shadowcurs.execute(UserAnswer[i])
-                sl = [row for row in Shadowcurs]
-                column_name_shadow = [row[0] for row in Shadowcurs.description]
-                            
-                Shadowcurs1 = Connect.cursor()
-                Shadowcurs1.execute(str(task.get(id=int(temp)).WTask))
-                sl1 = [row for row in Shadowcurs1]
-                column_name_w_shadow = [row[0] for row in Shadowcurs1.description]
-                            
+                OpenBDStudent,ColumnNameOpBDSt = ExecuteAnswer(Connect,UserAnswer[i],HardCheck)
+
+                
+                OpenBDTeacher,ColumnNameOpBDTech = ExecuteAnswer(Connect,str(task.get(id=int(temp)).WTask),HardCheck)
+
+                
+                ShadowBDStudent,ColumnNameShBDSt= ExecuteAnswer(ConnectShadow,UserAnswer[i],HardCheck)
+
+                
+                ShadowBDTeacher,ColumnNameShBDTech = ExecuteAnswer(ConnectShadow,str(task.get(id=int(temp)).WTask),HardCheck)            
 
                 dic_check_student_light_table = {}
                 dic_check_student_shadow_table = {}
                 dic_check_teacher_light_table = {}
                 dic_check_teacher_shadow_table = {}
 
-                for j in range(len(column_name)):
-                    dic_check_student_light_table[column_name[j]] = [row[j] for row in l]
+                for j in range(len(ColumnNameOpBDSt)):
+                    dic_check_student_light_table[ColumnNameOpBDSt[j]] = [row[j] for row in OpenBDStudent]
 
-                for j in range(len(column_name_shadow)):
-                    dic_check_student_shadow_table[column_name_shadow[j]] = [row[j] for row in sl]
+                for j in range(len(ColumnNameShBDSt)):
+                    dic_check_student_shadow_table[ColumnNameShBDSt[j]] = [row[j] for row in ShadowBDStudent]
 
-                for j in range(len(column_name_w)):
-                    dic_check_teacher_light_table[column_name_w[j]] = [row[j] for row in l1]
+                for j in range(len(ColumnNameOpBDTech)):
+                    dic_check_teacher_light_table[ColumnNameOpBDTech[j]] = [row[j] for row in OpenBDTeacher]
 
-                for j in range(len(column_name_w_shadow)):
-                    dic_check_teacher_shadow_table[column_name_w_shadow[j]] = [row[j] for row in sl1]
+                for j in range(len(ColumnNameShBDTech)):
+                    dic_check_teacher_shadow_table[ColumnNameShBDTech[j]] = [row[j] for row in ShadowBDTeacher]
 
                 if dic_check_student_shadow_table == dic_check_teacher_shadow_table and dic_check_student_shadow_table == dic_check_teacher_shadow_table:
                     answ += task.get(id=temp).Weight
