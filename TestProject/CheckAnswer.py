@@ -23,7 +23,10 @@ from .CreateShema import CreateShema
 from .CheckAnswer import *
 
 
-
+#Создание курсора и выполнение SQL-запроса
+#Connect - Объект, через который устанавливается соединение с БД
+#Answer - ответ пользователя (str)
+#HardCheck - Значение, которое определяет какой тип проверки использовать
 def ExecuteAnswer(Connect, Answer,HardCheck):
     if HardCheck == 0:
         curs = Connect.cursor()                            

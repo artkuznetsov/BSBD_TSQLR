@@ -606,7 +606,7 @@ def Trainer(request):
                 Connect = psycopg2.connect(task.ConnectDataBase.ConnectionString)
             except:
                 Connect = pyodbc.connect(task.ConnectDataBase.ConnectionString)
-            curs = Connect.cursor()
+            
             table = []
             l = []
             l2 = []
@@ -614,12 +614,11 @@ def Trainer(request):
             try:
                 dic_1 = {}
                 dic_2 = {}
-                curs.execute(data['user_query'])
-                l = [row for row in curs]
-                col = [column[0] for column in curs.description]
-                curs.execute(str(task.WTask))
-                l2 = [row for row in curs]
-                col2=[column[0] for column in curs.description]
+                
+                
+                l,col = ExecuteAnswer(Connect, data['user_query'],1)
+                
+                l2,col2 = ExecuteAnswer(Connect, str(task.WTask),1)
 
                 for j in range(len(col)):
                     dic_1[col[j]] = [row[j] for row in l]
