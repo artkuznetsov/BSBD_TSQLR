@@ -3,24 +3,11 @@ from wsgiref.util import FileWrapper
 from TestApp import settings
 from .forms import *
 from .models import models
-from django.http import *
-from django.shortcuts import *
-from django.http import FileResponse
 # from django.contrib.auth.models import User, Group
-import random, json
-from django.contrib.auth.decorators import login_required
-import re
 import pyodbc
-from datetime import *
-from pytz import timezone
-import eralchemy
-from eralchemy import render_er
-import base64
-import hashlib
-from django.db.models import Q
-import psycopg2
-from .CreateShema import CreateShema
-from .CheckAnswer import *
+
+
+
 
 
 #Создание курсора и выполнение SQL-запроса

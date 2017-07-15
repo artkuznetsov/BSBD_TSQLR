@@ -656,9 +656,13 @@ def Trainer(request):
             ConnectionType = Task.objects.get(id=int(data['GetDBSchema'])).get_connectdatabase().get_connection_Type().Name
 
             return JsonResponse({'status': 'ok', 'image': str(CreateShema(ConnectionType, connection_string))}, safe=True)
-
+    CategoryWithTask = []
     categories = Category.objects.all()
-    return render(request, 'TestProject/trainer-2.html', {'categories': categories})
+    for i in categories:
+    	if Task.objects.filter(Category=i, Vision=True).count() != 0:
+            CategoryWithTask.append(i) 
+
+    return render(request, 'TestProject/trainer-2.html', {'categories': CategoryWithTask})
 
 
 def ShowUsers(request):
