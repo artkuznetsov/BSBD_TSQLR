@@ -40,23 +40,24 @@ def ExecuteAnswer(Connect, Answer,HardCheck):
 #answ - баллы, полученные за правильные ответы
 #weight - максимальное количество баллов за тест
 def SaveAnswerWithOutHardCheck(personForTest,test,var, UserAnswer,Connect,ConnectShadow,task, answ, weight, HardCheck):
+    print(len(UserAnswer))
     for i in UserAnswer:
         temp = i.split(" ")[1]
+        print(temp)
         if temp == "Test":
             continue
         else:
             try:
-                ans = Answers.objects.get(TestPerson=personForTest,
-                                         TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test,Variant=var))
+                ans = Answers.objects.get(TestPerson = personForTest, TestTask = TestTask.objects.get(Task = Task.objects.get(id=temp), Test = test, Variant = var))
+                            
                 ans.Answer = UserAnswer[i]
                 ans.RightCheck = False
+                ans.Weight = task.get(id=int(temp)).Weight            
                 ans.save()
+                            
             except Exception as e:
-                print(e)
-                ans = Answers.objects.create(TestPerson=personForTest,
-                                            TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp),
-                                                                                       Test=test, Variant=var),
-                                                         Answer=UserAnswer[i], RightCheck = False)
+                            
+                ans = Answers.objects.create(TestPerson = personForTest, TestTask = TestTask.objects.get(Task=Task.objects.get(id=temp),Test=test, Variant=var), Answer=UserAnswer[i], RightCheck = False,Weight = task.get(id=int(temp)).Weight)
             try:
                 #Ответ студента в открытую БД               
                 OpenBDStudent = ExecuteAnswer(Connect, UserAnswer[i],HardCheck)
@@ -69,27 +70,31 @@ def SaveAnswerWithOutHardCheck(personForTest,test,var, UserAnswer,Connect,Connec
                                 
                 #Правильный запрос в теневую БД
                 ShadowBDTeacher = ExecuteAnswer(ConnectShadow,str(task.get(id=int(temp)).WTask),HardCheck)
+                print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
                                 
                 if OpenBDTeacher == OpenBDStudent and ShadowBDTeacher == ShadowBDStudent:
                                     
                     answ += task.get(id=temp).Weight
                                     
-                    answer_right = Answers.objects.get(TestPerson=personForTest, TestTask=TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test, Variant=var), Answer=UserAnswer[i])
+                    answer_right = Answers.objects.get(TestPerson=personForTest, TestTask = TestTask.objects.get(Task=Task.objects.get(id=temp), Test=test, Variant=var), Answer=UserAnswer[i])
                                     
                     answer_right.RightCheck = True
                                     
                     answer_right.save()
                     weight += task.get(id=temp).Weight
+                    print('##################################################################')
                                     
                 else:
                                     
                     weight += task.get(id=temp).Weight
+                    print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
                                     
             except Exception as e:
                                
                 weight += task.get(id=temp).Weight
                 with_exception = True
-        return round(float(100 * answ / weight))
+                print('***********************************')
+    return round(float(100 * answ / weight))
 
 
 #personForTest - объект хранит подписку на тест конкретного пользователя на вариант теста (PersonTest)
@@ -112,12 +117,12 @@ def CheckAnswerWithHardCheck(personForTest,test,var, UserAnswer,Connect,ConnectS
                             
                 ans.Answer = UserAnswer[i]
                 ans.RightCheck = False
-                            
+                ans.Weight = task.get(id=int(temp)).Weight            
                 ans.save()
                             
             except Exception as e:
                             
-                ans = Answers.objects.create(TestPerson = personForTest, TestTask = TestTask.objects.get(Task=Task.objects.get(id=temp),Test=test, Variant=var), Answer=UserAnswer[i], RightCheck = False)
+                ans = Answers.objects.create(TestPerson = personForTest, TestTask = TestTask.objects.get(Task=Task.objects.get(id=temp),Test=test, Variant=var), Answer=UserAnswer[i], RightCheck = False,Weight = task.get(id=int(temp)).Weight)
             try:
 
                 OpenBDStudent,ColumnNameOpBDSt = ExecuteAnswer(Connect,UserAnswer[i],HardCheck)

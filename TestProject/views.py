@@ -118,6 +118,7 @@ def some_test(request, testid, var):
                                                                             Variant=var))
                     ans.Answer = data[i]
                     ans.RightCheck = False
+                    
                     ans.save()
                 except:
                     ans = Answers.objects.create(TestPerson=personForTest,
@@ -510,8 +511,10 @@ def TakeAnswer(request):
                                         tmp.append("Да")
                                     else:
                                         tmp.append(right_check)
-                                #print(tmp)
+                                tmp.append(str(Answers.objects.get(TestTask=i, TestPerson=tp).Weight))
                                 answers.append(tmp)
+                                
+                            print(answers)    
                             return JsonResponse({'status': 'ok', "answers": answers}, charset="utf-8", safe=True)
         else:
             form = AnswerForm()

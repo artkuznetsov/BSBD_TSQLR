@@ -180,6 +180,6 @@ class Answers(models.Model):
     TestPerson = models.ForeignKey('TestPerson', default=None)
     Answer = models.TextField(max_length=30000)
     RightCheck = models.BooleanField(blank=True)
-
+    Weight = models.IntegerField(blank=True, null=True)
     def get_answer(self):
         return self.Answer
