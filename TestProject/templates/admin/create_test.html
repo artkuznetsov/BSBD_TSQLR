@@ -26,6 +26,11 @@
                     Дата и время активации:<input class="vDateField" id="id_DateActivate_0" name="DateActivate_0" size="10" type="text" required readonly/><input class="vTimeField" id="id_DateActivate_1" name="DateActivate_1" size="8" type="text" required readonly/>
                 </form>
             </div>
+            <div class="form-row field-DateActivate">
+                <form method="post">
+                    Дата и время завершения теста:<input class="vDateField" id="id_DateEndTest_0" name="DateEndTest_0" size="10" type="text" required readonly/><input class="vTimeField" id="id_DateEndTest_1" name="DateEndTest_1" size="8" type="text" required readonly/>
+                </form>
+            </div>
             {{ form.as_p }}
         <input onclick="getCategories()" value="Показать категории" type="button"><p></p>
             <table id="categories table" border="0" style="text-align: center">
@@ -114,13 +119,15 @@
                         var TestName = document.getElementById('id_Name');
                         var DateActivate = document.getElementById('id_DateActivate_0').value;
                         var TimeActivate = document.getElementById('id_DateActivate_1').value;
+                        var DateEnd = document.getElementById('id_DateEndTest_0').value;
+                        var TimeEndTest = document.getElementById('id_DateEndTest_1').value;
                         var Time = document.getElementById('id_Time');
                         var Variants = document.getElementById('id_Variants');
                         var ConnectDateBase = document.getElementById('select2-id_ConnectDataBase-container').title;
                         var HardCheck = document.getElementById('id_HardCheck');
                         var ShowSUBDError = document.getElementById('id_ShowSUBDError');
                         var all_fields_is_not_null = 0;
-                        if(TestName === "" || DateActivate==="" || TimeActivate==="" || Time.value===0 || Variants.value===0 || ConnectDateBase==="Выбрать...") {
+                        if(TestName === "" || DateActivate==="" || DateEnd==="" || TimeEndTest==="" || TimeActivate==="" || Time.value===0 || Variants.value===0 || ConnectDateBase==="Выбрать...") {
                             all_fields_is_not_null = 1;
                             swal('Что-то пошло не так','Вы пропустили одно или несколько полей','error');
 {#                            alert('Вы пропустили одно или несколько полей');#}
@@ -134,6 +141,7 @@
                             $("#warning").hide();
                             var dict = {};
                             var datetime = DateActivate.split('.');
+                            var datetimeEnd = DateEnd.split('.');
                             for (var i = 0; i < inputs.length; i++) {
                                 dict['TestName'] = TestName.value;
                                 dict['DateActivate'] = datetime[2]+'-'+datetime[1]+'-'+datetime[0]+' '+TimeActivate;
@@ -141,6 +149,7 @@
                                 dict['Variants'] = Variants.value;
                                 dict['ConnectDataBase'] = ConnectDateBase;
                                 dict['categoryID ' + inputs[i].id] = inputs[i].value;
+                                dict['DateEndTest'] = datetimeEnd[2]+'-'+datetimeEnd[1]+'-'+datetimeEnd[0]+' '+TimeEndTest;
                                 if (HardCheck.checked)
                                 {
                                     dict['HardCheck'] = true;

@@ -66,7 +66,7 @@ def tests(request):
             if sub.get_mark() != None:
                 with_mark.append(sub)
             else:
-                if sub.Test.DateActivate <= datetime.now(tz):
+                if sub.Test.DateActivate <= datetime.now(tz) and sub.Test.DateEndTest >= datetime.now(tz):
                     without_mark.append(sub)
 
         return render(request, "TestProject/base-2.html",
@@ -221,7 +221,7 @@ def some_test(request, testid, var):
                 continue
                 # Запуск таймера
         tz = timezone('Asia/Omsk')
-        if personForTest.Mark == None and tests.DateActivate <= datetime.now(tz):
+        if personForTest.Mark == None and tests.DateActivate <= datetime.now(tz) and tests.DateEndTest >= datetime.now(tz):
             if (personForTest.StartTest == None):
                 time = datetime.now(tz)
                 personForTest.StartTest = time
@@ -300,7 +300,7 @@ def TestsUser(request):
         if sub.get_mark() != None:
             with_mark.append(sub)
         else:
-            if sub.Test.DateActivate <= datetime.now(tz):
+            if sub.Test.DateActivate <= datetime.now(tz) and sub.Test.DateEndTest >= datetime.now(tz):
                 without_mark.append(sub)
     return render(request, "TestProject/base-2.html",
                   {
@@ -381,7 +381,8 @@ def CreateTest(request):
                     DateActivate=data['DateActivate'],
                     Time=data['Time'],
                     HardCheck=data['HardCheck'],
-                    ShowSUBDError=data['ErrorCheck']
+                    ShowSUBDError=data['ErrorCheck'],
+                    DateEndTest = data['DateEndTest']
                 )
                 test.save()
 

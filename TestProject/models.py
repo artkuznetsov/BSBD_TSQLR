@@ -107,6 +107,7 @@ class ConnectDataBase(models.Model):
 class Test(models.Model):
     Name = models.CharField(max_length=30)
     DateActivate = models.DateTimeField()
+    DateEndTest = models.DateTimeField()
     Time = models.IntegerField()
     Task = models.ManyToManyField('Task', through='TestTask')
     TestPerson = models.ManyToManyField('MyUser', through='TestPerson')
