@@ -232,24 +232,27 @@ def some_test(request, testid, var):
 
 
             table = []
-
             finalMonster = {}
-            for i in test:
-                curs = Connect.cursor()
-                curs.execute(i.get_task().WTask)
-                l = [row for row in curs]
-                col = [column[0] for column in curs.description]
-                table.append(col)
-                a = []
-                for j in l:
-                    for k in j:
-                        a.append(str(k))
-                    table.append(a)
+            if test.ShowAnswerTeacher == 1:
+                
+                for i in test:
+                    curs = Connect.cursor()
+                    curs.execute(i.get_task().WTask)
+                    l = [row for row in curs]
+                    col = [column[0] for column in curs.description]
+                    table.append(col)
                     a = []
+                    for j in l:
+                        for k in j:
+                            a.append(str(k))
+                        table.append(a)
+                        a = []
 
-                finalMonster[i.get_task().get_id()] = table
+                    finalMonster[i.get_task().get_id()] = table
 
-                table = []
+                    table = []
+            else:
+                finalMonster = False
             if CheckAnswer == False:
                 return render(request, "TestProject/tests.html", {"GTest": test, "time": time, 'Monster': finalMonster})
             else:
@@ -382,7 +385,8 @@ def CreateTest(request):
                     Time=data['Time'],
                     HardCheck=data['HardCheck'],
                     ShowSUBDError=data['ErrorCheck'],
-                    DateEndTest = data['DateEndTest']
+                    DateEndTest = data['DateEndTest'],
+                    ShowAnswerTeacher = data['ShowAnswerTeacher']
                 )
                 test.save()
 

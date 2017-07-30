@@ -3,9 +3,10 @@ from django.utils import timezone
 from tinymce.models import HTMLField
 from datetime import *
 from pytz import timezone
-
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
-
+import pyodbc
+import psycopg2
 
 class MyUser(AbstractUser):
     GP = models.ForeignKey('GP', blank=True, null=True)
@@ -102,6 +103,19 @@ class ConnectDataBase(models.Model):
 
     def get_connection_Type(self):
         return self.Type
+    def save(self, *args, **kwargs):
+        
+        try:
+            if self.Type.Name != 'PostgreSQL':
+                Connect = pyodbc.connect(self.ConnectionString)
+                ShadowConnect = pyodbc.connect(self.ShadowConnectionString)
+            else:
+                Connect = psycopg2.connect(self.ConnectionString)
+                ShadowConnect = psycopg2.connect(self.ShadowConnectionString)
+            super(ConnectDataBase, self).save(*args,**kwargs)
+        
+        except:
+            return ('Ошибка при подключении к БД')
 
 
 class Test(models.Model):
@@ -113,6 +127,7 @@ class Test(models.Model):
     TestPerson = models.ManyToManyField('MyUser', through='TestPerson')
     HardCheck = models.BooleanField()
     ShowSUBDError = models.BooleanField()
+    ShowAnswerTeacher = models.BooleanField()
 
     def __str__(self):
         return self.Name

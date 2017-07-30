@@ -50,10 +50,18 @@ class TestForm(forms.Form):
             required = False,
             initial = True
     )
+    ShowAnswerTeacher = forms.BooleanField\
+    (
+        widget=forms.CheckboxInput(attrs={'class':'showanswerteacher', 'style':'display: inline'}),
+            label = "Показывать ответ преподавателя",
+            required = False,
+            initial = True
+    )
     def __init__(self,*args,**kwargs):
         super(TestForm,self).__init__(*args,**kwargs)
         self.fields['HardCheck'].widget.attrs['style']='display: inline;'
         self.fields['ShowSUBDError'].widget.attrs['style']='display: inline;'
+        self.fields['ShowAnswerTeacher'].widget.attrs['style']='display: inline;' 
 
 
 class TestPersonForm(forms.Form):
