@@ -26,7 +26,7 @@
 .task_area{
   position: relative;
   width: 100%;
-  height: 75%;
+  height: 100%;
   /*background-color: #354052;*/
 }
 
@@ -42,7 +42,7 @@
   left: 250px;
   top: 60px;
   width: 88%;
-  height: 91%;
+  height: 90%;
   /*background-color: #ECF2F6;!*Зеленый*!*/
 }
 .first_col{
@@ -56,7 +56,7 @@
 
 .second_col{
   position: relative;
-  width: 46%;
+  width: 45%;
   height: 100%;
   /*background-color: #ECF2F6;!*Оранжевый*!*/
   float: left;
@@ -135,7 +135,10 @@
 .scrolling-table {
   position: relative;
   width: 100%;
-  height: 100%;
+  overflow: scroll;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: auto;
 }
 
 .scrolling-table tr td {
@@ -147,10 +150,12 @@
 .scrolling-table tbody {
     display: block;
     position: relative;
-    height: 79%;
-    width: 100%;
-    overflow: hidden;
+    overflow: scroll;
     overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 86vh;
+    width: 100%;
+
 }
 
 .scrolling-table tr {
@@ -177,7 +182,7 @@
 
 #take_answer{
   position: relative;
-  width: 34%;
+  width: 70%;
   height: 100%;
   float: left;
   border: solid 1px #222222;
@@ -186,7 +191,7 @@
 
 #markAsDone{
   position: relative;
-  width: 33%;
+  width: 25%;
   height: 100%;
   float: left;
   border: solid 1px #222222;
@@ -194,7 +199,7 @@
 
 #markasflag{
   position: relative;
-  width: 33%;
+  width: 30%;
   height: 100%;
   float: left;
   border: solid 1px #222222;
@@ -234,5 +239,57 @@
   width: 100%;
   height: 50px;
   background-color: #c4ecc5;
+}
 
+
+#data_table {
+  width: 50%;
+  overflow: scroll;
+  overflow-y: auto;
+  overflow-x: visible;
+  height: 20px;
+}
+
+#data_table tr td {
+    width: 1px;
+    padding: 2px 5px;
+    text-align: center;
+}
+
+#data_table tbody {
+    display: block;
+    position: relative;
+    overflow: scroll;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 40vh;
+    width: 100%;
+
+}
+
+#data_table tr {
+    display: table;
+    width:  100%;
+    table-layout: fixed;
+  overflow: scroll;
+  overflow-x: visible;
+  overflow-y: hidden;
+}
+
+.data_table {
+  position: inherit;
+}
+
+.data_table td {
+    /*border: solid 1px;*/
+}
+.data_table th{
+}
+
+.second_row {
+    width: 100%;
+    height: 50%;
+    overflow: scroll;
+  overflow-x: auto;
+  overflow-y: auto;
 }

@@ -11,9 +11,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
-import pymysql
 
-pymysql.install_as_MySQLdb()
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -24,7 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'dx!$ska&+anps@+=%^mel1-7*5-g3*i@oo_-p3yg*qf9i4+^bg'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -76,12 +74,12 @@ WSGI_APPLICATION = 'TestApp.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'testbsbd2',
-        'USER': 'root',
-        'PASSWORD': 'Qwerty123',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'testbsbd',
+        'USER': 'debug',
+        'PASSWORD': 'debug',
+        'HOST': 'db1',
+        'PORT': '5432',
     }
 }
 

@@ -1,0 +1,22 @@
+pytz==2018.5  # https://github.com/stub42/pytz
+python-slugify==1.2.5  # https://github.com/un33k/python-slugify
+Pillow==5.2.0  # https://github.com/python-pillow/Pillow
+argon2-cffi==18.3.0  # https://github.com/hynek/argon2_cffi
+pymemcache == 1.4.3
+
+# Django
+# ------------------------------------------------------------------------------
+django  # pyup: < 2.1  # https://www.djangoproject.com/
+django-environ==0.4.5  # https://github.com/joke2k/django-environ
+django-model-utils==3.1.2  # https://github.com/jazzband/django-model-utils
+
+coreapi==2.3.3  # https://github.com/core-api/python-client
+
+psycopg2-binary
+gunicorn==19.8.1  # https://github.com/benoitc/gunicorn
+
+sqlalchemy
+eralchemy
+django-tinymce
+pyodbc
+FeedParser

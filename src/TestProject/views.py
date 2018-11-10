@@ -1043,13 +1043,13 @@ def Trainer(request):
         if data['start_test'] == "True":
             tasks = []
             for i in data['checked_categories']:
-                subtasks = Task.objects.filter(Category=Category.objects.get(id=i), Vision=True)
+                subtasks = Task.objects.select_related('ConnectDataBase').filter(Category=Category.objects.get(id=i), Vision=True)
                 if (subtasks.count() != 0):
                     for task in subtasks:
                         di = {}
                         table = []
                         try:
-                            Connect = psycopg2.connect(task.get_connectdatabase().ConnectionString)
+                            Connect = psycopg2.connect(task.ConnectDataBase.ConnectionString)
                         except:
                             Connect = pyodbc.connect(task.get_connectdatabase().ConnectionString)
                         #Connect = pyodbc.connect(task.get_connectdatabase().ConnectionString)
@@ -1077,7 +1077,7 @@ def Trainer(request):
 
             return JsonResponse({'status': 'ok', 'tasks': tasks}, charset="utf-8", safe=True)
         if data['check_task'] == "True":
-            task = Task.objects.get(id=int(data['id']))
+            task = Task.objects.select_related('ConnectDataBase').get(id=int(data['id']))
             Connect = 1
             try:
                 Connect = psycopg2.connect(task.ConnectDataBase.ConnectionString)

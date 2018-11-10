@@ -1,0 +1,6 @@
+#!/bin/sh
+
+
+
+python /src/manage.py migrate
+/usr/local/bin/gunicorn TestApp.wsgi --reload --timeout 3000 -b 0.0.0.0:8890 --chdir=/src
