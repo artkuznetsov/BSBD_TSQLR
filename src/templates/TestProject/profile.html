@@ -1,0 +1,71 @@
+{% extends 'TestProject/base.html' %}
+{% load staticfiles %}
+{% block title %}Личный кабинет{% endblock %}
+{% block content %}
+    <head>
+        <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    </head>
+    <body>
+        <form>
+        {% csrf_token %}
+        <div>
+           <div class="main-content">
+        <article>
+        <header>
+            <h1 title="Username">Приветствую,{{ user }}</h1>
+            <img src={% static 'images/line.jpg' %}>
+        </header>
+                <div class="UserNotHaveTests">
+                    <script>
+                        var a = "{{ uncompleted_tests }}";
+                        if(a == "[]")
+                            document.write("<h2>Сейчас нет тестов, которые вы можете пройти</h2>");
+                    </script>
+
+                </div>
+                {% for test in uncompleted_tests %}
+                    <h2>Вам доступен тест</h2>
+                    <img src={% static 'images/pencil.jpg' %}>
+                    <h3>{{ test.get_test }}</h3>
+                    <h8 class="test_time">Длительность теста: {{ test.get_test.get_time }} минут</h8>
+                    <p></p>
+                    <a href="../../testid={{ test.get_test.get_id}}&var={{ test.get_variant }}" class="btnStartTest">Начать</a>
+                    <div class="an"></div>
+                {% endfor %}
+
+            </article>
+            </div>
+
+
+    <aside class="sidebar">
+        <div>
+            <h2>История</h2>
+                {% block history_table %}
+                    <table class="simple-little-table" cellspacing='0'>
+                        <tr>
+                            <th>Название теста</th>
+                            <th>Оценка</th>
+                            <th>Дата</th>
+                        </tr>
+                        <!-- Table Header -->
+                        {% for test in completed_tests %}
+                            <tr>
+                                <td><a href="../../404">{{ test.get_test }}</a></td>
+                                <td>{{ test.get_mark }}</td>
+                                <td>{{ test.get_start_test_without_time }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endblock %}
+        </div>
+    </aside>
+</div>
+</form>
+</body>
+    <a href="{% url 'auth_logout' %}" class="btnExit">ВЫХОД</a>
+    {% if user.is_superuser %}
+        <br><br><br><a href="/admin/">Войти в панель администратора</a></br></br></br>
+    {% endif %}
+{#    <h1><a href="{% url 'auth_logout' %}">выйти</a>.<br/><br/></h1>#}
+{#    <input type="button" class="knopka01" value="ВЫХОД" >#}
+{% endblock %}

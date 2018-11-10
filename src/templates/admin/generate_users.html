@@ -1,0 +1,19 @@
+{% extends "admin/base.html" %}
+{% block title %} Генерация пользователей {% endblock %}
+{#{% block content_title %}Генерация пользователей{% endblock %}#}
+
+{% block content %}
+        {% block object-tools %}{% endblock %}
+
+        <form name = "add_user" method = "POST" >
+            {% csrf_token %}
+            <i>Группа</i><br>
+            <input type = "text" name = "Group" value = "{{ Group }}" size = 55><br>
+            <i>Студенты</i><br>
+            <p><textarea name = "users"></textarea> </p>
+
+            <br><a href="../admin"><input type="submit" value="Зарегистрировать"></a>
+            <input type="reset" value="Очистить">
+        </form>
+{% endblock %}
+    

@@ -1,0 +1,188 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+{% block title %} Ответы студентов {% endblock %}
+{% load static %}
+
+{% block content %}
+    <script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
+    <script>
+        window.onload = function () {
+            $("#main_table").hide();
+        };
+        var request = {};
+        request['GetTests'] = "True";
+        Tests = {};
+        Students = {};
+        Variant = 0;
+        Answers = [];
+
+        $.ajax({
+            beforeSend : function(jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(request),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+
+                if(data['status']=='ok'){
+                    $("#select_students").attr("disabled",true);
+                    $("#select_variant").attr("disabled",true);
+                    $("#select_test").append( $('<option value="0">-----</option>'));
+                    for(var i = 0;i<data['tests'].length;i++)
+                    {
+
+{#                        $("#select_test").append( $("<option value=\""+(i+1)+"\">"+data['tests'][i]+"</option>"));#}
+                        Tests[data['tests'][i]]= i;
+                    }
+                    $.each(Tests, function(key, value) {
+                        $('select#select_test').append($(new Option(key, value)));
+                    });
+{#                    alert('Ваши ответы были отправлены. Спасибо!');#}
+                    console.log(data['tests']);
+                }
+{#                    window.location = '/accounts/profile/';}#}
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    </script>
+    <script>
+    function getStudents() {
+        var test = $("#select_test :selected").text();
+
+        var request = {};
+        request['GetStudents'] = "True";
+        request['Test'] = test;
+        request['GetTests'] = "False";
+
+        $.ajax({
+            beforeSend: function (jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(request),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+
+                if (data['status'] == 'ok') {
+                    $("#select_students").attr("disabled", false);
+                    $("#select_variant").attr("disabled", true);
+                    $("#select_students").empty();
+                    $("#select_variant").empty();
+                    $("#select_students").append($('<option value="0">-----</option>'));
+                    Students = data['students'];
+                    $.each(data['students'], function (key, value) {
+                        $('select#select_students').append($(new Option(key, value)));
+                    });
+                }
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    }
+    </script>
+    <script>
+        function getVariants() {
+            var student = $("#select_students :selected").text();
+            var test = $("#select_test :selected").text();
+            $("#select_variant").empty();
+            var request = {};
+            request['GetStudents'] = "False";
+            request['GetTests'] = "False";
+            request['GetVariants'] = "True";
+            request['Test'] = test;
+            request['Student'] = student;
+
+            $.ajax({
+            beforeSend: function (jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(request),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+
+                if (data['status'] == 'ok') {
+                    $("#select_students").attr("disabled", false);
+                    $("#select_variant").attr("disabled", false);
+{#                    $("#select_variant").append($('<option value="0">Выбрать</option>'));#}
+                    Students = data['variants'];
+                    $.each(data['variants'], function (key, value) {
+                        $('select#select_variant').append($(new Option(key, value)));
+                    });
+{#                    alert('Ваши ответы были отправлены. Спасибо!');#}
+{#                    console.log(data['tests']);#}
+                }
+                {#                    window.location = '/accounts/profile/';}#}
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+
+        }
+    </script>
+    <script>
+    function showAnswers() {
+        $("#main_table").show();
+        var student = $("#select_students :selected").text();
+        var test = $("#select_test :selected").text();
+        var variant = $("#select_variant :selected").text();
+        var request = {};
+        request['GetAnswers'] = "True";
+        request['GetStudents'] = "False";
+        request['GetTests'] = "False";
+        request['GetVariants'] = "False";
+        request['Test'] = test;
+        request['Student'] = student;
+        request['Variant'] = variant;
+        $.ajax({
+            beforeSend : function(jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(request),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+
+                if(data['status']=='ok'){
+{#                    alert("ok!");#}
+                    Answers = data['answers'];
+                    $("#tbody_table").empty();
+                    var table = document.getElementById("tbody_table");
+                    for(var i=0;i<Answers.length;i++)
+                    {
+                        table.innerHTML += "<tr><td>"+Answers[i][0]+"</td><td>"+Answers[i][2]+"</td><td style='text-align: center;'>"+Answers[i][3]+"</td></tr>"
+                    }
+                }
+{#                    window.location = '/accounts/profile/';}#}
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    }
+    </script>
+    <h3>Название теста:<select id="select_test" type="text" onchange="getStudents()"></select>
+    Студент:<select id="select_students" onchange="getVariants()"></select>
+    Вариант:<select id="select_variant" type="number" size="2" min="1" style="width: 80px" onchange="showAnswers()"></select></h3>
+
+    <table id="main_table" style="position: inherit;width: 100%; table-layout: fixed; word-wrap:break-word;">
+        <tr style="text-align: center;">
+            <td id="TaskText" style=""><b>Задание</b></td>
+            <td id="Answer"><b>Ответ</b></td>
+            <td id="RightCheck"><b style="text-align: center;">Выполнено верно</b></td>
+        </tr>
+    <tbody id="tbody_table">
+
+    </tbody>
+
+            </table>
+{% endblock %}

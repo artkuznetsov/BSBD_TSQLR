@@ -1,0 +1,200 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+{% block title %} Результаты тестирования {% endblock %}
+{% load static %}
+
+{% block content %}
+    <script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
+
+    <script>
+        Students = {};
+        CurrentStudent = "";
+        CurrentTest = "";
+        CurrentMark = "";
+        Groups = {};
+        Tests = {};
+        Marsk = {};
+        Variants = {};
+        var request = {};
+        request['GetGroups'] = "True";
+
+        $.ajax({
+            beforeSend : function(jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(request),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+
+                if(data['status']=='ok'){
+                    $("#select_users").attr("disabled",true);
+                    $("#select_test").attr("disabled",true);
+                    $("#select_mark").attr("disabled",true);
+                    $("#select_variant").attr("disabled",true);
+                    $("#select_group").append( $('<option value="0">-----</option>'));
+                    for(var i = 0;i<data['groups'].length;i++)
+                    {
+{#                        alert('fsdfds');#}
+                        Groups[data['groups'][i]]= i;
+                    }
+                    $.each(Groups, function(key, value) {
+                        $('select#select_group').append($(new Option(key, value)));
+                    });
+                }
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+
+    function fillTable(Group,Student,Test,Mark,Variant) {
+        console.log('STUDENT = ' + Student);
+        if(Student == "") Student = "False";
+        if(Test == "") Test = "False";
+        if(Mark == "") Mark = "False";
+        if(Variant == "") Variant = "False";
+        Student = Student || false;
+        Test = Test || false;
+        Mark = Mark || false;
+        Variant = Variant || false;
+        Group = Group || false;
+        var request = {};
+        request['GetResult'] = "True";
+        request['GetGroups'] = "False";
+        request['GetUsers'] = "False";
+        if(Group!=false)request['Group'] = Group;else request['Group'] = "False";
+        if(Student!=false)request['Student'] = Student;else request['Student'] = "False";
+        console.log('request[Student] = ');
+        console.log(request['Student']);
+        if(Test!=false)request['Test'] = Test;else request['Test'] = "False";
+        if(Mark!=false)request['Mark'] = Mark;else request['Mark'] = "False";
+        if(Variant!=false)request['Variant'] = Variant;else request['Variant'] = "False";
+        $.ajax({
+            beforeSend : function(jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(request),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+
+                if(data['status']=='ok'){
+                    var result = data['result'];
+                    $("#body_table").empty();
+{#                    $("#select_users").append( $('<option value="0">-----</option>'));#}
+                    for(var i = 0;i<(data['result'].length);i++)
+                    {
+                        document.getElementById("body_table").innerHTML+="<tr><td>"+result[i]['Group']+"</td><td>"+result[i]['Person']+"</td><td>"+result[i]['Test']+"</td><td>"+result[i]['Mark']+"</td><td>"+result[i]['StartTest']+"</td><td>"+result[i]['Variant']+"</td></tr>"
+                    }
+
+                    for(var i =0;i<data['result'].length;i++)
+                    {
+                        Students[data['result'][i]['Person']] = i;
+                        Tests[data['result'][i]['Test']] = i;
+                        Marsk[data['result'][i]['Mark']] = i;
+                        Variants[data['result'][i]['Variant']] = i;
+                    }
+
+                    $("#select_users").empty();
+
+                    $("#select_users").attr("disabled",false);
+                    $("#select_test").attr("disabled",false);
+                    $("#select_mark").attr("disabled",false);
+                    $("#select_variant").attr("disabled",false);
+
+                    $("#select_users").append( $('<option value="0">-----</option>'));
+                    console.log('Students=');
+                    console.log(Students);
+                    $.each(Students, function(key, value) {
+                        $('select#select_users').append($(new Option(key, value)));
+                    });
+                    Students={};
+
+                    $("#select_test").empty();
+
+
+                    $("#select_test").append( $('<option value="0">-----</option>'));
+                    $.each(Tests, function(key, value) {
+                        $('select#select_test').append($(new Option(key, value)));
+                    });
+                    Tests={};
+
+                    $("#select_mark").empty();
+
+
+                    $("#select_mark").append( $('<option value="0">-----</option>'));
+                    $.each(Marsk, function(key, value) {
+                        $('select#select_mark').append($(new Option(key, value)));
+                    });
+                    Marsk={};
+
+                    $("#select_variant").empty();
+
+
+                    $("#select_variant").append( $('<option value="0">-----</option>'));
+                    $.each(Variants, function(key, value) {
+                        $('select#select_variant').append($(new Option(key, value)));
+                    });
+                    Variants={};
+
+                }
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+
+    }
+    function getStudents() {
+        fillTable($("#select_group :selected").text());
+    }
+    function getTests() {
+        var student = $("#select_users :selected").text();
+        CurrentStudent = student;
+{#        console.log('sssssssstuuuuuuudeeeeeeeeentttttt' + student);#}
+        fillTable($("#select_group :selected").text(),student);
+    }
+    function getMarks() {
+        var test = $("#select_test :selected").text();
+        CurrentTest = test;
+        console.log('TEST =');
+        console.log(test);
+        fillTable($("#select_group :selected").text(),CurrentStudent,test);
+    }
+    function getVariants() {
+        var mark = $("#select_mark :selected").text();
+        CurrentMark = mark;
+        var test =  CurrentTest;
+        fillTable($("#select_group :selected").text(),CurrentStudent,test,mark);
+    }
+    function getResult() {
+        var variant = $("#select_variant :selected").text();
+        fillTable($("#select_group :selected").text(),CurrentStudent,CurrentTest,CurrentMark,variant);
+    }
+    function resetFilters() {
+        window.location = window.location.href;
+    }
+    </script>
+    <h2>Результаты тестирования</h2>
+    <input type="button" value="Сбросить фильтры" onclick="resetFilters()">
+    <h3>Группа:<select id="select_group" type="text" onchange="getStudents()"></select>
+        Пользователь:<select id="select_users" type="text" onchange="getTests()"></select>
+        Тест:<select id="select_test" onchange="getMarks()"></select>
+        Оценка:<select id="select_mark" type="number" size="2" min="1" style="width: 80px" onchange="getVariants()"></select>
+        Вариант:<select id="select_variant" type="number" size="2" min="1" style="width: 80px" onchange="getResult()"></select></h3>
+    <table id="main_table" style="position: inherit; text-align: center; width: 100%; overflow: scroll; top: 0px;left: 0px;">
+        <thead style="">
+            <td>Группа</td>
+            <td>Пользователь</td>
+            <td>Тест</td>
+            <td>Оценка</td>
+            <td>Дата прохождения теста</td>
+            <td>Вариант</td>
+        </thead>
+        <tbody style="text-align: center" id="body_table">
+        </tbody>
+    </table>
+{% endblock %}

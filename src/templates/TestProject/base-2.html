@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ru-RU" >
+    <head>
+
+    <title>{% block title %}Тестирование SQL запросов{% endblock %}</title>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    {% load staticfiles %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
+    <link rel="stylesheet" type="text/css" href="/static/jet/css/vendor.css?v=1.0.5" />
+    <link rel="stylesheet" type="text/css" href="/static/jet/css/icons/style.css?v=1.0.5" />
+    <link rel="stylesheet" type="text/css" href="/static/jet/css/themes/default/base.css?v=1.0.5" class="base-stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/static/jet/css/themes/default/select2.theme.css?v=1.0.5" class="select2-stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/static/jet/css/themes/default/jquery-ui.theme.css?v=1.0.5" class="jquery-ui-stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/dashboard.css" />
+    <script src="{% static 'js/base.js' %}"></script>
+    <script src="{% static 'js/core.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
+
+    <script src="{% static 'js/sweetalert2.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}">
+    <script type="text/javascript" charset="utf-8">
+        var DATE_FORMAT = "%d.%m.%Y";
+        var TIME_FORMAT = "%H:%M:%S";
+        var DATETIME_FORMAT = "%d.%m.%Y %H:%M:%S";
+    </script>
+    <script type="text/javascript" src="/jet/jsi18n/"></script>
+    <script src="/static/jet/js/build/bundle.min.js?v=1.0.5"></script>
+    <script src="/static/jet/js/i18n/jquery-ui/datepicker-ru.js?v=1.0.5"></script>
+    <script src="/static/jet/js/i18n/jquery-ui-timepicker/jquery.ui.timepicker-ru.js?v=1.0.5"></script>
+    <script src="/static/jet/js/i18n/select2/ru.js?v=1.0.5"></script>
+        <script src="{% static 'js/Chart.bundle.js' %}"></script>
+        <script src="{% static 'js/Chart.js' %}"></script>
+
+    <meta name="robots" content="NONE,NOARCHIVE" />
+</head>
+{% block body %}
+    <body class=" dashboard jet" data-admin-utc-offset="21600">
+
+<!-- Container -->
+        <div id="container">
+
+
+    <!-- Header -->
+            <div id="header">
+                <div id="branding">
+                    <h1 id="site-name"><a href="/">Testing of the SQL requests</a></h1>
+                </div>
+                <div id="user-tools">Добро пожаловать,
+
+                {% if user.is_authenticated %}
+                    <strong>{{ user.username | escape}}</strong>.
+                    <a href="#" onclick="changePassword('{{ csrf_token }}')">Сменить пароль</a>
+                    <a href="/accounts/logout/">Выйти</a>
+                {% else %}
+                    <strong>Гость</strong>
+                    <a href="/accounts/login/">Войти</a>
+                {% endif %}
+                </div>
+            </div>
+    <!-- END Header -->
+    <!-- Content -->
+        {% block content %}
+            <div id="content" class="colM">
+                <div class="dashboard-container columns_2 cf">
+                    <div class="dashboard-column-wrapper">
+                        <div class="dashboard-column first">
+{#                Новости#}
+                            <div class="dashboard-item-header ui-sortable-handle">
+                                <span class="dashboard-item-header-title">
+                                    Новости о курсе
+                                </span>
+                                <div class="cf"></div>
+                            </div>
+                            <div style="height: auto;" class="dashboard-item-content">
+                                <ul style="overflow: scroll; overflow-x: hidden; overflow-y: auto; max-height: 150px;">
+                                {% for new in news reversed %}
+                                    <li>
+                                        <span class="float-right dim">{{ new.get_date }}</span>
+                                        <a href="newid={{ new.id }}" target="_blank" class="nowrap">
+                                            <span class="icon-open-external">
+                                                {{ new }}
+                                            </span>
+                                        </a>
+                                    </li>
+                                    {% empty %}
+                                    <h1 style="text-align: center;">Скоро тут появятся новости о курсе</h1>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                            {#                            ДОСТУПНЫЕ ТЕСТЫ#}
+                            <div class="dashboard-item-header ui-sortable-handle">
+
+                                <span class="dashboard-item-header-title">
+                                    ДОСТУПНЫЕ ТЕСТЫ
+                                </span>
+                                <div class="cf"></div>
+                            </div>
+                            <div style="height: auto;" class="dashboard-item-content contrast">
+                            <div class="padding center">
+                            <div class="UserNotHaveTests">
+
+                            </div>
+                                    {% for test in uncompleted_tests %}
+                                        <p><img src={% static 'images/exam_64px_flaticon_white.png' %}>
+
+                                            <ul class="inline bordered">
+                                                    <li>
+                                                        <div class="big">{{ test.get_test|truncatechars:"30" }}</div>
+                                                        <div class="dim">Название</div>
+                                                    </li>
+
+                                                    <li>
+                                                        <div class="big">{{ test.get_test.get_time }} минут(ы)</div>
+                                                        <div class="dim">Длительность</div>
+                                                    </li>
+
+
+                                            </ul>
+                                        </p>
+                                        <a href=../../testid={{ test.get_test.get_id}}&var={{ test.get_variant }}><button style="position: relative; width: 100%;" class="button" type="submit" title="Начать тест"  id="btnStartTest">Начать</button></a>
+                                        {% empty %}
+                                            <h2>Сейчас нет тестов, которые вы можете пройти</h2>
+                                    {% endfor %}
+                            </div>
+                        </div>
+{#                  ГРАФИК#}
+
+                        <div class="dashboard-item-header ui-sortable-handle">
+
+                            <span class="dashboard-item-header-title">
+                                    График успеваемости
+                            </span>
+                            <div class="cf"></div>
+                        </div>
+
+                        <div class="dashboard-item-content contrast" style="height: auto; overflow-x: auto;">
+
+
+                        <div class="padding center">
+
+                            <canvas style="width: 100%;" id="chart_8"></canvas>
+                            <script>
+                                var labels = [];
+                                var data = [];
+                                {% for test in completed_tests %}
+                                    labels.push('{{ test.get_start_test_dm}}');
+                                    data.push({{ test.get_mark_for_graphics }});
+                                {% endfor %}
+                                var LineChart = {
+                                    labels: labels,
+                                    datasets: [{
+                                        fillColor: "rgba(99, 154, 245, 0.25)",
+                                        strokeColor: "rgb(99, 154, 245)",
+                                        pointColor: "rgb(255, 255, 255)",
+                                        pointHighlightFill: "rgb(99, 154, 245)",
+                                        scaleGridLineColor: "rgba(0, 0, 0, 0.1)",
+                                        scaleLineColor: "rgba(0, 0, 0, 0.1)",
+                                        scaleFontColor: "rgb(255, 255, 255)",
+                                        data: data
+                                    }]
+                                };
+                                var myLineChart = new Chart(document.getElementById("chart_8").getContext("2d")).Line(LineChart, {scaleFontColor : "#ffff"});
+                            </script>
+                        </div>
+
+                    </div>
+
+
+                        </div>
+                    </div>
+                    <div class="dashboard-column-wrapper">
+                        <div class="dashboard-column">
+                {#                ОТВЕТЫ#}
+                            <div class="dashboard-item collapsible " data-module-id="2">
+                                <div class="dashboard-item-header">
+                                    <span class="dashboard-item-header-title">Ответы</span>
+                                    <div class="cf"></div>
+                                </div>
+                                <div class="dashboard-item-content" id="delete me" style=" position: relative; max-height: 550px; overflow-x: hidden; ">
+
+                                    <table id="table_completed_tests">
+
+                                        <thead>
+                                            <tr>
+                                                <th>Тест</th>
+                                                <th>Выполнено</th>
+                                                <th>Дата и время</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody style="overflow: scroll; overflow-x: hidden; overflow-y: auto; max-height: 10px;">
+                                        {% for test in completed_tests %}
+
+                                                <tr>
+                                                    <th>{{ test.get_test }}</th>
+                                                    <td>{{ test.get_mark }}%</td>
+                                                    <td>{{ test.get_start_test_without_time }}</td>
+                                                </tr>
+                                                {% empty %}
+                                                <script type="text/javascript">
+                                                    document.getElementById('delete me').innerHTML="";
+
+                                                </script>
+                                                    <div style="" class="dashboard-item-content contrast">
+                                                        <div class="padding center">
+                                                            <h2>Вы не прошли еще ни одного теста</h2>
+                                                        </div>
+                                                    </div>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-column-wrapper">
+                        <div class="dashboard-column">
+                        </div>
+                    </div>
+                </div>
+                <br class="clear" />
+            </div>
+        {% endblock content %}
+    <!-- END Content -->
+            <div id="footer"></div>
+            <div class="related-popup-container scrollable">
+                <a href="#" class="related-popup-back">
+                    <span class="related-popup-back-icon icon-arrow-left"></span>
+                    <span class="related-popup-back-label">назад</span>
+                </a>
+                <span class="icon-refresh loading-indicator"></span>
+            </div>
+            <div class="sidebar-header-wrapper sidebar-dependent">
+                <div class="sidebar-header sidebar-dependent">
+                    <a href="#" class="sidebar-header-menu sidebar-toggle">
+                        <span class="sidebar-header-menu-icon icon-menu"></span>
+                        <span class="sidebar-header-menu-icon icon-cross"></span>
+                    </a>
+                </div>
+            </div>
+            <div class="sidebar sidebar-dependent">
+                <div class="sidebar-wrapper scrollable">
+                    <div class="sidebar-section">
+                        {% if user.is_superuser %}
+                        <a href="/admin/" class="sidebar-link icon">
+                            <span class="sidebar-link-label">
+                                <span class="sidebar-link-icon icon-data"></span>
+                                Панель администратора
+                                {% else %}
+                                    <a href=".." class="sidebar-link icon" onclick="openTrainer()">
+                                    <span class="sidebar-link-label">
+                                        <span class="sidebar-link-icon icon-data"></span>
+                                        Открыть тренажер
+                                {% endif %}
+                            </span>
+                        </a>
+                        <a href="/" class="sidebar-link icon">
+                            <span class="sidebar-link-label">
+                                <span class="sidebar-link-icon icon-open-external"></span>
+                                Открыть сайт
+                            </span>
+                        </a>
+                    </div>
+                    <div class="sidebar-section last">
+
+                    </div>
+                </div>
+
+        </div>
+
+
+
+
+</div>
+<!-- END Container -->
+
+</body>
+{% endblock body %}
+</html>
+
+<script>
+    function openTrainer() {
+        var new_tab = window.open("/trainer/");
+{#        new_tab.document.title = "Обзор схемы БД";#}
+    }
+</script>

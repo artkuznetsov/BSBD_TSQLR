@@ -1,0 +1,404 @@
+{% load staticfiles %}
+<script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/test.css' %}">
+<script src="{% static 'js/sweet-alert.min.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'css/sweet-alert.css' %}" />
+<script type="text/javascript" src="{% static 'js/shortcut.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/cookie.js' %}"></script>
+<script>
+
+    //language=JQuery-CSS
+    $('#previous_task').hide();
+
+    {% load tz %}
+    {{ value|localtime }}
+
+    var intervalID = window.setInterval(function () {
+        if (Step !== 1) {
+            //language=JQuery-CSS
+            $("#previous_task").show();
+        } else {
+            //language=JQuery-CSS
+            $('#previous_task').hide();
+        }
+        var user_start = new Date("{{ time | date:"c" }}").getTime();
+        var TestTime = 0;
+        {% for test in GTest %}
+            TestTime = {{ test.get_test.get_time }};
+        {% endfor %}
+        TestTime = TestTime * 60000;
+        var now = new Date().getTime();
+        var new_new = new Date(user_start + TestTime - now);
+        if (new_new.getTime() < 0) {
+            clearInterval(intervalID);
+            endTest();
+            swal({
+                    title: "Упс!",
+                    text: "Время прохождения теста истекло.",
+                    type: "error",
+                    showCancelButton: false,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Ok",
+                    closeOnConfirm: false
+                },
+                function () {
+                    window.location = '/';
+                });
+        }
+        var clock = document.getElementById('clock');
+        clock.innerHTML = "<b>До завершения теста осталось: </b>" + new_new.getMinutes() + ":" + new_new.getSeconds();
+    }, 1000);
+</script>
+
+<script lang="JavaScript">
+function clearUserTable() {
+    document.getElementById("user_table").innerHTML = "";
+}
+function fillUserTextarea(task) {
+    document.getElementById("user_query").value = Answers['taskID '+task['id']];
+}
+function endTest() {
+    var saved_cookies = document.cookie;
+    var split_saved_cookies = saved_cookies.split(";");
+    for(var i=0;i<split_saved_cookies.length;i++){
+        split_saved_cookies[i] = split_saved_cookies[i].substring(0,split_saved_cookies[i].indexOf('='));
+        if(split_saved_cookies[i]!=='csrftoken')
+        deleteCookie(split_saved_cookies[i]);
+    }
+        $.ajax({
+            beforeSend: function (jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(Answers),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+                if (data['status'] === 'ok') {
+                }
+
+            },
+            error: function (data) {
+                console.log(data.body);
+            }
+        });
+}
+function rememberAnswer(task_id) {
+    if(Step === 0){
+    window.onload = function () {
+          var user_query = document.getElementById("user_query").value;
+    };
+    }else{
+        Answers['taskID '+ task_id] = document.getElementById("user_query").value;
+    }
+}
+CurrentTask = 0;
+CurrentTaskID = 0;
+Step=0;
+Answers = {};
+
+    // Hotkeys for text area
+    shortcut.add("Alt+Enter", function() {
+        FillUserTable();
+    });
+GTest = [];
+    {% for test in GTest %}
+        var task = {};
+        task['id']={{ test.get_task.get_id }};
+        task['name']='{{ test.get_task.get_name }}';
+        task['text']='{{ test.get_task.get_tasktext }}';
+        GTest.push(task);
+        Answers['taskID '+ {{ test.get_task.get_id }}] = "";
+        if(getCookie('task '+{{ test.get_task.get_id }}))
+            Answers['taskID '+{{ test.get_task.get_id }}]=getCookie('task '+ {{ test.get_task.get_id }});
+        else
+            Answers['taskID '+ {{ test.get_task.get_id }}] = "";
+    {% endfor %}
+var task = GTest[0];
+CurrentTaskID = task['id'];
+console.log(GTest);
+getTask(0,0);
+function FillTaskArea(task) {
+    console.log('iam in the FillTaskArea()');
+    var task_area = document.getElementById("teacher");
+         console.log(task_area);
+         task_area.value = null;
+         task_area.value +="Задание:\r\n";
+         task_area.value +=task['text'];
+}
+function FillTeacherTable(task) {
+    var data = {{ Monster | safe }};
+    var table = data[task['id']];
+    var columns = table[0];
+         console.log(table);
+    var rows = table.length;
+    var new_table = "<thead id=\"teacher_table_head\"><tr id=\"teacher_table_head_tr\"></tr></thead><tbody id=\"teacher_table_tbody\"></tbody>";;
+    document.getElementById("teacher_table").innerHTML = "";
+    document.getElementById("teacher_table").innerHTML = new_table;
+
+    for(var i=0;i<columns.length;i++)
+    {
+        document.getElementById("teacher_table_head_tr").innerHTML += "<td><b>"+columns[i]+"<b></td>";
+    }
+    for(var j=1;j<table.length;j++)
+    {
+        document.getElementById("teacher_table_tbody").innerHTML += "<tr id=\"teacher_table_tr_"+j+"\"></tr>";
+        for(var k=0;k<table[j].length;k++)
+        {
+            document.getElementById("teacher_table_tr_"+j+"").innerHTML += "<td><i>"+table[j][k]+"<i></td>";
+        }
+    }
+}
+function getTask(task_number,flag) {
+
+    console.log('task_number = '+task_number);
+    console.log(' BEFORE:: task[id] =' + CurrentTaskID);
+    console.log('task_number = '+task_number);
+    console.log('Step = ' + Step);
+    rememberAnswer(CurrentTaskID);
+    try {
+        var button_test = document.getElementById("next_task");
+        if (button_test.value === "Завершить тест" && flag === 2){
+            swal({
+              title: "Вы уверены, что хотите завершить тест?",
+              text: "У вас не будет возможности пройти его заново.",
+              type: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#DD6B55",
+              confirmButtonText: "Да, завершить.",
+                cancelButtonText: "Отмена",
+              closeOnConfirm: false
+            },
+            function(){
+                endTest();
+                swal({
+                  title: "Спасибо!",
+                  text: "Ваши ответы отправлены.",
+                  type: "success",
+                  showCancelButton: false,
+                  confirmButtonColor: "#DD6B55",
+                  confirmButtonText: "Ok",
+                  closeOnConfirm: false},
+                function(){
+                    window.location = '/';
+                });
+            }
+            );
+        }else
+        if(button_test.value === "Завершить тест" && flag === 1)
+            button_test.value  = "Следующее задание";
+    }catch(e){}
+
+if(task_number!==GTest.length) {
+    CurrentTask = task_number;
+    var task;
+    task = GTest[task_number];
+    console.log('task = ' + task);
+    CurrentTaskID = task['id'];
+    console.log(' AFTER:: task[id] =' + task['id']);
+
+    if (Step === 0) {
+        window.onload = function () {
+            console.log('h111111');
+            FillTaskArea(task);
+            //fill teacher_table from Monster
+            FillTeacherTable(task);
+            fillUserTextarea(task);
+            clearUserTable();
+            if (flag === 2 || flag === 0) {
+                document.getElementById("step").innerHTML = "Текущий вопрос: <b>" + (Step + 1) + "/" + GTest.length + "<b>";
+                Step = Step + 1;
+            } else if (flag === 1) {
+                document.getElementById("step").innerHTML = "Текущий вопрос: <b>" + (Step - 1) + "/" + GTest.length + "<b>";
+                Step = Step - 1;
+            }
+            document.getElementById('user_query').onkeypress = function (e) {
+                e = e || event;
+                var user_textarea = document.getElementById('user_query');
+                var chr = getChar(e);
+                if(chr) {
+                    if (getCookie('task ' + CurrentTaskID)) {
+                        //Если такая кука есть
+                        deleteCookie('task ' + CurrentTaskID);
+                    }
+                    var cookie_data = new Date();
+                    var expire = cookie_data.toLocaleDateString('Omsk')+' '+cookie_data.getHours()+1+':'+cookie_data.getMinutes()+':'+cookie_data.getSeconds();
+
+                    setCookie('task ' + CurrentTaskID, user_textarea.value + chr,'expires='+expire);
+                    Answers['taskID '+CurrentTaskID] = user_textarea.value + chr;
+                }
+            };
+        };
+    } else {
+        FillTaskArea(task);
+        FillTeacherTable(task);
+        fillUserTextarea(task);
+        clearUserTable();
+        if (flag === 2 || flag === 0) {
+            document.getElementById("step").innerHTML = "Текущий вопрос: <b>" + (Step + 1) + "/" + GTest.length + "<b>";
+            Step = Step + 1;
+        } else if (flag === 1) {
+            document.getElementById("step").innerHTML = "Текущий вопрос: <b>" + (Step - 1) + "/" + GTest.length + "<b>";
+            Step = Step - 1;
+        }
+    }
+
+    console.log('GTest.lengt = ' + GTest.length);
+    if (Step === GTest.length) {
+        var right_button = document.getElementById("next_task").value = "Завершить тест";
+        console.log(right_button)
+    }
+}
+
+
+}
+function FillUserTable() {
+    var user_query = document.getElementById("user_query").value;
+    var request = {};
+    request[CurrentTaskID] = user_query;
+    console.log(user_query);
+
+    $.ajax({
+            beforeSend : function(jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(request),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+
+                if(data['status']==='ok'){
+                    var new_table = "<thead id=\"user_table_thead\"><tr id=\"user_table_thead_tr\"></tr></thead><tbody id=\"user_table_tbody\"></tbody>";;
+                    document.getElementById("user_table").innerHTML = "";
+                    document.getElementById("user_table").innerHTML = new_table;
+                    var table = data['table'];
+                    var columns = data['table'][0];
+                        console.log(table);
+
+                    var rows = table.length;
+                    for(var i=0;i<columns.length;i++)
+                     {
+                         document.getElementById("user_table_thead_tr").innerHTML += "<td><b>"+columns[i]+"<b></td>";
+                     }
+                     for(var j=1;j<table.length;j++)
+                     {
+                         document.getElementById("user_table_tbody").innerHTML += "<tr id=\"user_table_tr_"+j+"\"></tr>";
+                         for(var k=0;k<table[j].length;k++)
+                         {
+                             document.getElementById("user_table_tr_"+j+"").innerHTML += "<td><i>"+table[j][k]+"<i></td>";
+                         }
+                     }
+                }
+                else if (data['status'] === 'error')
+                {
+                    var error_text = data['error'];
+                    document.getElementById("user_table").innerHTML = "";
+                    document.getElementById("user_table").innerHTML = "<h2 id=\"error_text\">"+error_text+"</h2>";
+                }
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+}
+function getDBSchema() {
+    var request = {};
+    request[CurrentTaskID] = "GetDBSchema";
+
+    $.ajax({
+            beforeSend : function(jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(request),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+              var raw = data['image'];
+
+              var image = new Image();
+              image.src = "data:image/jpg;base64," + raw.substring(2,raw.length-1);
+
+              var new_tab = window.open("");
+
+              new_tab.document.write(image.outerHTML);
+              new_tab.document.title = "Обзор схемы БД";
+            },
+            error: function (data) {}
+        });
+}
+function getChar(event) {
+    if (event.which === null) {
+    if (event.keyCode < 32) return null;
+        return String.fromCharCode(event.keyCode)
+    }
+
+    if (event.which !== 0 && event.charCode !== 0) {
+        if (event.which < 32) return null;
+            return String.fromCharCode(event.which)
+    }
+    return null;
+}
+</script>
+
+<html>
+<head>
+<title>SQL тестирование</title>
+<table id="table1" style='position: absolute; top: 0px; left:0px; width:100%; height:100%' border="2">
+  <tr class="header_tr" style="position: relative; height: 10%;">
+    <td id="shadow_td">
+      <table id="table2" style=' position: absolute; top: 0px; left:0px; width:100%; height:100%' border="0">
+        <tr style="position: relative; height: 100%;" id="header">
+          <td id="clock_td" width=33%>
+            <div id="clock"></div>
+          </td>
+          <td id="step" width=33%></td>
+          <td width=33%>
+            <table class="buttons" style='width:100%; height:100%' border="0">
+              <tr height = 100%>
+                <td>
+                  <input onclick="getTask(CurrentTask-1,1)" style="display: none" id="previous_task" type="button"  value="Предыдущее задание" class="button_task">
+                </td>
+                <td width="50%">
+                  <input onclick="getTask(CurrentTask+1,2)" id="next_task" type="button" value="Следующее задание" class="button_task">
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr class="tr_1" height=40%>
+    <td id='left_top' class="task_area">
+      <textarea class="teacher_textarea" id="teacher" spellcheck="false" readonly></textarea>
+        <button class="btn_view_database_schema" onclick="getDBSchema()">Обзор схемы Базы Данных</button>
+    </td>
+    <td id='right_top' class="user_area">
+      <textarea id="user_query" class="input_user_query" spellcheck="false" placeholder="Введите ваш запрос и нажмите Alt+Enter для его выполнения..." required autofocus></textarea>
+    </td>
+  </tr>
+  <tr class="tr_2" height=50%>
+    <td id='left_bottom' width=50% class="td_2">
+      <table class="scrolling-table" id="teacher_table">
+        <thead id="teacher_table_head">
+          <tr id="teacher_table_head_tr"></tr>
+        </thead>
+        <tbody id="teacher_table_tbody"></tbody>
+      </table>
+    </td>
+    <td id='right_bottom' width=50%>
+      <table class="scrolling-table" id="user_table">
+        <thead id="user_table_thead">
+          <tr id="user_table_thead_tr"></tr>
+
+        </thead>
+        <tbody id="user_table_tbody">
+        </tbody>
+      </table>
+    </td>
+  </tr>
+</table>
+</head>
+</html>

@@ -1,0 +1,221 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+{% block title %} Создать тест {% endblock %}
+{% load static %}
+
+{% block content %}
+    <script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/core.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/jquery.init.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/admin/RelatedObjectLookups.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/actions.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/urlify.js'%}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/prepopulate.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/vendor/xregexp/xregexp.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/calendar.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/admin/DateTimeShortcuts.js' %}"></script>
+    <script src="{% static 'js/sweetalert2.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}">
+        <h2>Создать новый тест</h2>
+        <p><h3 id="warning" style="color: #ba2121; display: none">Вы не указали одно или несколько полей!</h3></p>
+        <form method="POST" >
+            {% csrf_token %}
+            <div class="form-row field-DateActivate">
+                <form method="post">
+                    Дата и время активации:<input class="vDateField" id="id_DateActivate_0" name="DateActivate_0" size="10" type="text" required readonly/><input class="vTimeField" id="id_DateActivate_1" name="DateActivate_1" size="8" type="text" required readonly/>
+                </form>
+            </div>
+            {{ form.as_p }}
+        <input onclick="getCategories()" value="Показать категории" type="button"><p></p>
+            <table id="categories table" border="0" style="text-align: center">
+                <thead>
+                    <th>Для отображения количества заданий выберите Базу Данных </th>
+                </thead>
+            </table>
+                <br><input id="save_button" type="button" onclick="save()" value="Создать">
+                <script>
+		    document.getElementById('id_HardCheck').display = True;
+                    document.getElementById('id_Time').onkeypress = function (e) {
+                        e = e || event;
+
+                                    if (e.ctrlKey || e.altKey || e.metaKey) {
+                                        return;
+                                    }
+
+                                    var chr = getChar(e);
+
+                                    if (chr === null) {
+                                        return;
+                                    }
+
+                                    if (chr < '0' || chr > '9') {
+                                        return false;
+                                    }
+                    };
+                    document.getElementById('id_Variants').onkeypress=function (e) {
+                      e = e || event;
+
+                                    if (e.ctrlKey || e.altKey || e.metaKey) {
+                                        return;
+                                    }
+
+                                    var chr = getChar(e);
+
+                                    if (chr === null) {
+                                        return;
+                                    }
+
+                                    if (chr < '0' || chr > '9') {
+                                        return false;
+                                    }
+                    };
+
+                    function getCategories() {
+                        var DB = document.getElementById("select2-id_ConnectDataBase-container").title;
+                        var dic = {};
+                        dic['ConnectDataBase'] = DB;
+                        dic["check"] = 'True';
+
+                        $.ajax({
+                            beforeSend : function(jqXHR) {
+                                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+                            },
+                            url: window.location.href,
+                            data: dic,
+                            type: 'POST',
+
+                            success: function (data) {
+                                if(data['status']==='ok') {
+                                    var categories = data['categories'];
+
+                                    var categories_table = document.getElementById("categories table");
+                                    categories_table.innerHTML = "<thead><th>Категория</th><th>Количество вопросов</th> <th>Требуемое количество вопросов</th></thead>";
+                                    for (var i = 0; i < categories.length; i++)
+                                        categories_table.innerHTML += "<tr><td class=\"category_name\">" + categories[i][1] + "</td><td><div class=\"count_questions\">" + categories[i][2] + "</div></td><td classname=\"selected_questions\"><input onkeypress=\"validateKey('input_count_tasks')\" class=\"input_count_tasks\" id=\"" + categories[i][0] + "\" type=\"number\" size=\"5\" value=\"0\" max=\"" + categories[i][2] + "\" min=\"0\"></td></tr>";
+                                }
+                            },
+                            error: function (data) {}
+                        });
+                    }
+                    function save() {
+                        var inputs = document.getElementsByClassName('input_count_tasks');
+                        var task_count=0;
+                        for(var i=0;i<inputs.length;i++) {
+                            if (inputs[i].value === "") {
+                                inputs[i].value = 0;
+                            }
+                            task_count+=parseInt(inputs[i].value);
+                        }
+                        if(task_count<1) {
+                            swal('Что-то пошло не так','Вы не указали необходимо количество заданий. Пожалуйста, повторите попытку','error');
+                            return false;
+                        }
+                        var TestName = document.getElementById('id_Name');
+                        var DateActivate = document.getElementById('id_DateActivate_0').value;
+                        var TimeActivate = document.getElementById('id_DateActivate_1').value;
+                        var Time = document.getElementById('id_Time');
+                        var Variants = document.getElementById('id_Variants');
+                        var ConnectDateBase = document.getElementById('select2-id_ConnectDataBase-container').title;
+                        var HardCheck = document.getElementById('id_HardCheck');
+                        var all_fields_is_not_null = 0;
+                        if(TestName === "" || DateActivate==="" || TimeActivate==="" || Time.value===0 || Variants.value===0 || ConnectDateBase==="Выбрать...") {
+                            all_fields_is_not_null = 1;
+                            swal('Что-то пошло не так','Вы пропустили одно или несколько полей','error');
+{#                            alert('Вы пропустили одно или несколько полей');#}
+                            return false;
+                        }
+
+                        if(all_fields_is_not_null===1) {
+                            $("#warning").show();
+                        }
+                        else {
+                            $("#warning").hide();
+                            var dict = {};
+                            var datetime = DateActivate.split('.');
+                            for (var i = 0; i < inputs.length; i++) {
+                                dict['TestName'] = TestName.value;
+                                dict['DateActivate'] = datetime[2]+'-'+datetime[1]+'-'+datetime[0]+' '+TimeActivate;
+                                dict['Time'] = Time.value;
+                                dict['Variants'] = Variants.value;
+                                dict['ConnectDataBase'] = ConnectDateBase;
+                                dict['categoryID ' + inputs[i].id] = inputs[i].value;
+                                if (HardCheck.checked)
+                                {
+                                    dict['HardCheck'] = true;
+                                }
+                                else{
+                                    dict['HardCheck'] = false;
+                                }
+                            }
+                            $.ajax({
+                                beforeSend: function (jqXHR) {
+                                    jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+                                },
+                                accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                                url: window.location.href,
+                                data: JSON.stringify(dict),
+                                type: 'POST',
+                                dataType: 'json',
+                                contentType: 'application/json',
+                                success: function (data) {
+                                    if (data['status'] === 'ok') {
+                                        swal(
+                                            'Отлично!',
+                                            'Тест создан успешно',
+                                            'success'
+                                        ).then(function () {
+                                            window.location = '/admin';
+
+                                        });
+                                    }
+                                    if (data['status'] === 'err') {
+                                        swal('Что-то пошло не так','Скорее всего, вы не верно заполнили поля. Повторите попытку снова','error');
+                                    }
+                                    if (data['status'] === 'error') {
+                                        swal('Что-то пошло не так','Количество требуемых заданий превышает количество доступных! Повторите попытку снова','error');
+                                    }
+                                },
+                                error: function (data) {
+{#                                    alert(data.responseText)#}
+                                }
+                            });
+                        }
+                    }
+                    function validateKey(type){
+                            var inputs = document.getElementsByClassName(type);
+                            for (var i = 0; i < inputs.length; i++) {
+                                inputs[i].onkeypress = function (e) {
+                                    e = e || event;
+
+                                    if (e.ctrlKey || e.altKey || e.metaKey) {
+                                        return;
+                                    }
+
+                                    var chr = getChar(e);
+
+                                    if (chr === null) {
+                                        return;
+                                    }
+
+                                    if (chr < '0' || chr > '9') {
+                                        return false;
+                                    }
+                                };
+                            }
+                    }
+                    function getChar(event) {
+                        if (event.which === null) {
+                            if (event.keyCode < 32) return null;
+                            return String.fromCharCode(event.keyCode)
+                        }
+
+                        if (event.which !== 0 && event.charCode !== 0) {
+                            if (event.which < 32) return null;
+                                return String.fromCharCode(event.which)
+                        }
+                        return null;
+                    }
+                </script>
+        </form>
+{% endblock %}

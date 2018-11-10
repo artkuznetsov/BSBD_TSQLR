@@ -1,0 +1,26 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+{% block title %} Создать тест {% endblock %}
+{% load static %}
+
+{% block content %}
+    <script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
+    <script>
+    function getAnswers() {
+        var test = document.getElementById("select2-id_Test-container").title;
+        console.log(test)
+    }
+    </script>
+    <h2>Просмотр ответов</h2>
+    <form method="POST" >
+            {% csrf_token %}
+            {{ form.as_p }}
+        <input onclick="getAnswers()" value="Показать категории" type="button"><p></p>
+    </form>
+    <table id="main_table">
+                <tr>
+                        <td id="TaskText"><b>Задание</b></td>
+                        <td id="Answer"><b>Ответ</b></td>
+                </tr>
+            </table>
+{% endblock %}

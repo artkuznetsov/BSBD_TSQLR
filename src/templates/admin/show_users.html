@@ -1,0 +1,81 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+{% block title %} Студенты {% endblock %}
+{% load static %}
+{% block content %}
+    <script>
+    function resetPassword(userid) {
+        var request = {};
+        request['resetPassword'] = "True";
+        request['user_id'] = userid;
+
+        $.ajax({
+            beforeSend: function (jqXHR) {
+                jqXHR.setRequestHeader("x-csrftoken", '{{ csrf_token }}');
+            },
+            url: window.location.href,
+            data: JSON.stringify(request),
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+                if (data['status'] === 'ok') {
+                    swal(
+                      'Отлично!',
+                      'Пароль был изменен.',
+                      'success'
+                    );
+{#                    window.location = window.location.href;#}
+
+                }
+
+            },
+            error: function (data) {
+                console.log(data.body);
+            }
+        });
+    }
+    </script>
+<head>
+    <script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <script src="{% static 'js/livesearch.js' %}"></script>
+    <script src="{% static 'js/demo.js' %}"></script>
+    <script src="{% static 'js/sweetalert2.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}">
+    <style>
+         body { background-color:#fafafa;}
+         </style>
+</head>
+	<body>
+		<section class="content">
+			<div class="container">
+            <h1>Введите название группы, студента или его логин</h1>
+				<div class="input-group">
+					<span class="input-group-addon"><i class="fa fa-search"></i></span>
+					<input style="width: 95%" class="form-control" id="livesearch" placeholder="Find a user" type="text" />
+                    <p></p>
+				</div>
+				<table class="table" id="users" style="width: 97%; ">
+					<tr>
+						<th class="hidden-xs">Группа</th>
+						<th class="hidden-xs">Логин</th>
+                        <th class="hidden-xs">Фамилия</th>
+						<th class="hidden-xs">Имя</th>
+                        <th class="hidden-xs">Сброс пароля</th>
+					</tr>
+                    <tbody id="tbody_table">
+                        <script>
+                            {% for stud in students_list %}
+                                var a = {{ stud | safe}};
+                                console.log(a);
+                                    document.write("<tr id=\""+a[0]+"\"><td>"+a[1]+"</td><td>"+a[2]+"</td><td>"+a[3]+"</td><td>"+a[4]+"</td><td><input type=\"button\" value=\"Сбросить\" id=\""+a[0]+"\" onclick=resetPassword("+a[0]+")></td></tr>");
+                            {% endfor %}
+                        </script>
+                </tbody>
+				</table>
+			</div><!-- /.container -->
+		</section>
+	</body>
+
+{% endblock %}
+

@@ -1,0 +1,18 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+{% block title %} Назначить тест {% endblock %}
+{#{% block content_title %}Привязать студентов к тесту{% endblock %}#}
+
+{% block content %}
+    {% if user.is_superuser %}
+        <h2>Добавить студентов на тест</h2>
+        <form method="POST">{% csrf_token %}
+            {{ form.as_p }}
+            <br><input href="../admin" type="submit" class="save btn btn-default" value="Сохранить">
+             </form>
+    {% else %}
+        <h2 align="center" class="permissions">Вы не имеете достаточно прав для создания теста</h2>
+        <a href="../home">Вернуться на сайт</a>
+    {% endif %}
+{% endblock %}
+		
