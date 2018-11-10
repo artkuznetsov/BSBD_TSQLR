@@ -2,7 +2,7 @@
 Web application for check of knowledges at testing SQL requests
 
 Setting Up App in Docker
-^^^^^^^^^^^^^^^^^^^^^
+
 
 * Build Docker
 
